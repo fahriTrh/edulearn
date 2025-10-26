@@ -32,7 +32,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
 });
 
 
-Route::middleware(['auth', 'instructor'])->group(function() {
+Route::middleware(['auth', 'instructor'])->group(function () {
     Route::get('/dashboard-dosen', [DashboardInstructorController::class, 'index']);
     Route::get('/kelas-saya', [DashboardInstructorController::class, 'kelasSaya']);
     Route::post('/tambah-kelas', [DashboardInstructorController::class, 'tambahKelas']);
@@ -40,4 +40,15 @@ Route::middleware(['auth', 'instructor'])->group(function() {
     Route::delete('/delete-kelas/{id}', [DashboardInstructorController::class, 'deleteKelas']);
 
     Route::get('/kelas-saya/detail-kelas/{id}', [DashboardInstructorController::class, 'detailKelas']);
+});
+
+
+Route::middleware(['auth', 'student'])->group(function () {
+    Route::view('/dashboard-mahasiswa', 'mahasiswa.dashboard-mahasiswa')->name('mahasiswa.dashboard');
+    Route::view('/forum', 'mahasiswa.forum')->name('mahasiswa.forum');
+    Route::view('/jadwal', 'mahasiswa.jadwal')->name('mahasiswa.jadwal');
+    Route::view('/kursus', 'mahasiswa.kursus')->name('mahasiswa.kursus');
+    Route::view('/nilai', 'mahasiswa.nilai')->name('mahasiswa.nilai');
+    Route::view('/sertifikat', 'mahasiswa.sertifikat')->name('mahasiswa.sertifikat');
+    Route::view('/tugas', 'mahasiswa.tugas')->name('mahasiswa.tugas');
 });
