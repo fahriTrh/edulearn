@@ -38,6 +38,7 @@ Route::middleware(['auth', 'instructor'])->group(function() {
     Route::post('/tambah-kelas', [DashboardInstructorController::class, 'tambahKelas']);
     Route::post('/update-kelas', [DashboardInstructorController::class, 'updateKelas']);
     Route::delete('/delete-kelas/{id}', [DashboardInstructorController::class, 'deleteKelas']);
-
+    
     Route::get('/kelas-saya/detail-kelas/{id}', [DashboardInstructorController::class, 'detailKelas']);
+    Route::post('/tambah-materi', [DashboardInstructorController::class, 'tambahMateri']);
 });

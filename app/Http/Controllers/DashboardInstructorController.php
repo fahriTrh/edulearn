@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ClassModel;
+use App\Models\Material;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -207,20 +208,115 @@ class DashboardInstructorController extends Controller
 
     public function detailKelas($id)
     {
-        // Cari kelas berdasarkan ID
+        // Cari kelas berdasarkan ID beserta relasi
         $class = ClassModel::with(['students', 'assignments', 'materials'])->find($id);
 
-        // Jika kelas tidak ditemukan, redirect ke /kelas/saya
         if (!$class) {
             return redirect('/kelas/saya')->with('error', 'Kelas tidak ditemukan.');
         }
 
-        // Ambil data untuk tampilan
+        // Ambil data materials dan ubah formatnya agar siap dilempar ke FE
+        $materials = $class->materials->map(function ($item) {
+            if ($item->type === 'link') {
+                return [
+                    'id' => $item->id,
+                    'title' => $item->title,
+                    'type' => $item->type,
+                    'link' => $item->file_url,
+                    'fileUrl' => null,
+                    'uploadDate' => $item->created_at->format('Y-m-d'),
+                    'downloads' => 0,
+                    'description' => $item->description ?? '' // tambahkan deskripsi
+                ];
+            } else {
+                return [
+                    'id' => $item->id,
+                    'title' => $item->title,
+                    'type' => $item->type,
+                    'fileUrl' => asset($item->file_path),
+                    'link' => null,
+                    'uploadDate' => $item->created_at->format('Y-m-d'),
+                    'downloads' => 0,
+                    'description' => $item->description ?? '' // tambahkan deskripsi
+                ];
+            }
+        });
+
+        // dd($materials);
+
         $title = $class->title;
         $sub_title = $class->description ?? '';
         $instructor_name = Auth::user()->name;
 
-        // Kirim data ke view
-        return view('dosen.detail-kelas-saya', compact('title', 'sub_title', 'instructor_name', 'class'));
+        // dd($materials);
+
+        return view('dosen.detail-kelas-saya', compact('title', 'sub_title', 'instructor_name', 'class', 'materials'));
+    }
+
+
+    public function tambahMateri(Request $request)
+    {
+        try {
+            // Validasi dasar
+            $request->validate([
+                'class_id' => 'required|exists:classes,id',
+                'title' => 'required|string|max:255',
+                'type' => 'required|in:pdf,document,link,video',
+                'description' => 'nullable|string',
+                'file' => 'nullable|file|mimes:pdf,doc,docx|max:5120', // hanya untuk pdf/document
+                'link' => 'nullable|url', // hanya untuk tipe link/video eksternal
+            ]);
+
+            // Validasi kondisional
+            if (in_array($request->type, ['pdf', 'document']) && !$request->hasFile('file')) {
+                return back()->withErrors(['file' => 'File materi wajib diunggah untuk tipe PDF/Document.']);
+            }
+
+            if ($request->type === 'link' && empty($request->link)) {
+                return back()->withErrors(['link' => 'URL materi wajib diisi untuk tipe Link/Video.']);
+            }
+
+            $material = new Material();
+            $material->class_id = $request->class_id;
+            $material->created_by = Auth::id();
+            $material->title = $request->title;
+            $material->description = $request->description;
+            $material->type = $request->type;
+
+            // Simpan file jika ada
+            if ($request->hasFile('file')) {
+                $file = $request->file('file');
+
+                // Ambil info sebelum dipindahkan
+                $originalName = $file->getClientOriginalName();
+                $sizeKB = round($file->getSize() / 1024); // KB
+                $filename = time() . '_' . $originalName;
+
+                // Pindahkan file ke folder public/materials
+                $file->move(public_path('materials'), $filename);
+
+                // Simpan info di database
+                $material->file_path = 'materials/' . $filename;
+                $material->file_name = $originalName;
+                $material->file_size = $sizeKB;
+            }
+
+
+            // Simpan link untuk tipe link/video
+            if ($request->type === 'link') {
+                $material->file_url = $request->link;
+            }
+
+            $material->save();
+
+            return redirect()->back()->with('success', 'Materi berhasil ditambahkan!');
+        } catch (\Exception $e) {
+            Log::error('Gagal menambahkan materi: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'request' => $request->all()
+            ]);
+
+            return back()->with('error', 'Terjadi kesalahan saat menambahkan materi. Silakan cek log.');
+        }
     }
 }

@@ -336,6 +336,10 @@
         background: rgba(255, 82, 82, 0.1);
     }
 
+    .item-icon.document {
+        background: rgba(255, 177, 66, 0.1);
+    }
+
     .item-icon.video {
         background: rgba(255, 177, 66, 0.1);
     }
@@ -476,6 +480,13 @@
         min-height: 120px;
     }
 
+    .form-group small {
+        display: block;
+        margin-top: 0.5rem;
+        color: #666;
+        font-size: 0.85rem;
+    }
+
     .submit-btn {
         width: 100%;
         padding: 0.8rem;
@@ -486,6 +497,10 @@
         cursor: pointer;
         font-weight: 600;
         font-size: 1rem;
+    }
+
+    .submit-btn:hover {
+        opacity: 0.9;
     }
 
     .empty-state {
@@ -613,56 +628,14 @@
                 <div class="stat-value">{{ $class->students->count() }}</div>
                 <div class="stat-label">Mahasiswa Aktif</div>
             </div>
-            <!-- <div class="stat-card">
-                <div class="stat-icon">📊</div>
-                <div class="stat-value">85%</div>
-                <div class="stat-label">Rata-rata Nilai</div>
-            </div> -->
         </div>
 
         <div class="content-card">
             <div class="card-header">
                 <div class="card-title">Aktivitas Terkini</div>
             </div>
-            <div class="card-body">
-                <div style="display: flex; flex-direction: column; gap: 1rem;">
-                    <div
-                        style="padding: 1rem; background: #f5f7fa; border-radius: 8px; display: flex; align-items: center; gap: 1rem;">
-                        <div
-                            style="width: 40px; height: 40px; background: rgba(102, 126, 234, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                            📝</div>
-                        <div style="flex: 1;">
-                            <div style="font-weight: 600; margin-bottom: 0.2rem;">5 mahasiswa mengumpulkan
-                                tugas</div>
-                            <div style="font-size: 0.85rem; color: #666;">Project Website E-Commerce • 2 jam
-                                yang lalu</div>
-                        </div>
-                    </div>
-                    <div
-                        style="padding: 1rem; background: #f5f7fa; border-radius: 8px; display: flex; align-items: center; gap: 1rem;">
-                        <div
-                            style="width: 40px; height: 40px; background: rgba(46, 213, 115, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                            💬</div>
-                        <div style="flex: 1;">
-                            <div style="font-weight: 600; margin-bottom: 0.2rem;">12 diskusi baru di forum
-                            </div>
-                            <div style="font-size: 0.85rem; color: #666;">Berbagai topik • 5 jam yang lalu
-                            </div>
-                        </div>
-                    </div>
-                    <div
-                        style="padding: 1rem; background: #f5f7fa; border-radius: 8px; display: flex; align-items: center; gap: 1rem;">
-                        <div
-                            style="width: 40px; height: 40px; background: rgba(255, 165, 2, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                            ⏰</div>
-                        <div style="flex: 1;">
-                            <div style="font-weight: 600; margin-bottom: 0.2rem;">Deadline tugas mendekat
-                            </div>
-                            <div style="font-size: 0.85rem; color: #666;">Project Website E-Commerce • 2
-                                hari lagi</div>
-                        </div>
-                    </div>
-                </div>
+            <div class="card-body" id="recentActivities">
+                <!-- Activities will be rendered here -->
             </div>
         </div>
     </div>
@@ -763,24 +736,88 @@
             <h2>Tambah Materi Baru</h2>
             <button class="close-modal" onclick="closeModal('addMaterialModal')">✕</button>
         </div>
-        <form onsubmit="submitMaterial(event)">
+        <form action="/tambah-materi" method="POST" enctype="multipart/form-data">
+            @csrf
+            <input type="hidden" name="class_id" value="{{ $class->id }}">
+
             <div class="form-group">
                 <label>Judul Materi</label>
-                <input type="text" id="materialTitle" placeholder="e.g., Pengenalan React Hooks" required>
+                <input type="text" name="title" id="materialTitle" placeholder="e.g., Pengenalan React Hooks" required>
             </div>
+
             <div class="form-group">
                 <label>Tipe Materi</label>
-                <select id="materialType" required>
+                <select name="type" id="materialType" required onchange="toggleFileInput(this.value)">
                     <option value="pdf">PDF Document</option>
-                    <option value="video">Video</option>
+                    <option value="document">Word/Other Document</option>
                     <option value="link">Link/URL</option>
                 </select>
             </div>
+
+            <div class="form-group" id="fileInputGroup">
+                <label>Upload File</label>
+                <input type="file" name="file" id="materialFile" accept=".pdf,.doc,.docx">
+            </div>
+
+            <div class="form-group" id="linkInputGroup" style="display: none;">
+                <label>Link / URL</label>
+                <input type="url" name="link" id="materialLink" placeholder="https://contoh.com/materi">
+            </div>
+
             <div class="form-group">
                 <label>Deskripsi</label>
-                <textarea id="materialDesc" placeholder="Deskripsi materi..."></textarea>
+                <textarea name="description" id="materialDesc" placeholder="Deskripsi materi..."></textarea>
             </div>
+
             <button type="submit" class="submit-btn">Tambah Materi</button>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Edit Material -->
+<div class="modal" id="editMaterialModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Edit Materi</h2>
+            <button class="close-modal" onclick="closeModal('editMaterialModal')">✕</button>
+        </div>
+        <form action="/edit-materi" method="POST" enctype="multipart/form-data">
+            @csrf
+            @method('PUT')
+            <input type="hidden" name="material_id" id="editMaterialId">
+            <input type="hidden" name="class_id" value="{{ $class->id }}">
+
+            <div class="form-group">
+                <label>Judul Materi</label>
+                <input type="text" name="title" id="editMaterialTitle" placeholder="e.g., Pengenalan React Hooks" required>
+            </div>
+
+            <div class="form-group">
+                <label>Tipe Materi</label>
+                <select name="type" id="editMaterialType" required onchange="toggleEditFileInput(this.value)">
+                    <option value="pdf">PDF Document</option>
+                    <option value="document">Word/Other Document</option>
+                    <option value="link">Link/URL</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="editFileInputGroup">
+                <label>Upload File Baru (Opsional)</label>
+                <input type="file" name="file" id="editMaterialFile" accept=".pdf,.doc,.docx">
+                <small>Kosongkan jika tidak ingin mengubah file</small>
+            </div>
+
+            <div class="form-group" id="editLinkInputGroup" style="display: none;">
+                <label>Link / URL</label>
+                <input type="url" name="link" id="editMaterialLink" placeholder="https://contoh.com/materi">
+            </div>
+
+            <div class="form-group">
+                <label>Deskripsi</label>
+                <textarea name="description" id="editMaterialDesc" placeholder="Deskripsi materi..."></textarea>
+            </div>
+
+            <button type="submit" class="submit-btn">Update Materi</button>
         </form>
     </div>
 </div>
@@ -839,30 +876,10 @@
     </div>
 </div>
 @endsection
+
 @push('scripts')
 <script>
-    let materials = [{
-            id: 1,
-            title: "Pengenalan React Hooks",
-            type: "pdf",
-            uploadDate: "2024-10-20",
-            downloads: 42
-        },
-        {
-            id: 2,
-            title: "Video Tutorial: useState & useEffect",
-            type: "video",
-            uploadDate: "2024-10-18",
-            downloads: 38
-        },
-        {
-            id: 3,
-            title: "Dokumentasi React Official",
-            type: "link",
-            uploadDate: "2024-10-15",
-            downloads: 35
-        }
-    ];
+    materials = @json($materials)
 
     let assignments = [{
             id: 1,
@@ -932,45 +949,206 @@
         if (tabName === 'students') renderStudents();
     }
 
+    function toggleFileInput(type) {
+        const fileGroup = document.getElementById('fileInputGroup');
+        const linkGroup = document.getElementById('linkInputGroup');
+        const fileInput = document.getElementById('materialFile');
+
+        if (type === 'link') {
+            fileGroup.style.display = 'none';
+            linkGroup.style.display = 'block';
+            fileInput.value = '';
+        } else {
+            fileGroup.style.display = 'block';
+            linkGroup.style.display = 'none';
+            fileInput.value = '';
+
+            if (type === 'pdf') {
+                fileInput.accept = '.pdf';
+            } else if (type === 'document') {
+                fileInput.accept = '.doc,.docx,.odt';
+            }
+        }
+    }
+
+    function toggleEditFileInput(type) {
+        const fileGroup = document.getElementById('editFileInputGroup');
+        const linkGroup = document.getElementById('editLinkInputGroup');
+        const fileInput = document.getElementById('editMaterialFile');
+
+        if (type === 'link') {
+            fileGroup.style.display = 'none';
+            linkGroup.style.display = 'block';
+            fileInput.value = '';
+        } else {
+            fileGroup.style.display = 'block';
+            linkGroup.style.display = 'none';
+            fileInput.value = '';
+
+            if (type === 'pdf') {
+                fileInput.accept = '.pdf';
+            } else if (type === 'document') {
+                fileInput.accept = '.doc,.docx,.odt';
+            }
+        }
+    }
+
+    function renderRecentActivities() {
+        const container = document.getElementById('recentActivities');
+
+        // Gabungkan materials dan assignments dengan tipe
+        const activities = [
+            ...materials.map(m => ({
+                type: 'material',
+                title: m.title,
+                date: m.created_at || m.uploadDate,
+                icon: '📚',
+                bgColor: 'rgba(102, 126, 234, 0.1)',
+                data: m
+            })),
+            ...assignments.map(a => ({
+                type: 'assignment',
+                title: a.title,
+                date: a.created_at || a.deadline,
+                icon: '✍️',
+                bgColor: 'rgba(255, 177, 66, 0.1)',
+                data: a
+            }))
+        ];
+
+        // Sort berdasarkan tanggal (terbaru dulu)
+        activities.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        // Ambil 5 aktivitas terbaru
+        const recentActivities = activities.slice(0, 5);
+
+        if (recentActivities.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">📋</div>
+                    <h3>Belum Ada Aktivitas</h3>
+                    <p>Aktivitas akan muncul setelah Anda menambahkan materi atau tugas</p>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = `
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                ${recentActivities.map(activity => {
+                    const timeAgo = getTimeAgo(activity.date);
+                    const typeLabel = activity.type === 'material' ? 'Materi ditambahkan' : 'Tugas dibuat';
+                    
+                    return `
+                        <div style="padding: 1rem; background: #f5f7fa; border-radius: 8px; display: flex; align-items: center; gap: 1rem;">
+                            <div style="width: 40px; height: 40px; background: ${activity.bgColor}; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                ${activity.icon}
+                            </div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600; margin-bottom: 0.2rem;">${typeLabel}: ${activity.title}</div>
+                                <div style="font-size: 0.85rem; color: #666;">${timeAgo}</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        `;
+    }
+
+    function getTimeAgo(dateString) {
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffInSeconds = Math.floor((now - date) / 1000);
+
+        if (diffInSeconds < 60) {
+            return 'Baru saja';
+        } else if (diffInSeconds < 3600) {
+            const minutes = Math.floor(diffInSeconds / 60);
+            return `${minutes} menit yang lalu`;
+        } else if (diffInSeconds < 86400) {
+            const hours = Math.floor(diffInSeconds / 3600);
+            return `${hours} jam yang lalu`;
+        } else if (diffInSeconds < 2592000) {
+            const days = Math.floor(diffInSeconds / 86400);
+            return `${days} hari yang lalu`;
+        } else {
+            const months = Math.floor(diffInSeconds / 2592000);
+            return `${months} bulan yang lalu`;
+        }
+    }
+
     function renderMaterials() {
         const container = document.getElementById('materialsList');
         if (materials.length === 0) {
             container.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-icon">📚</div>
-                        <h3>Belum Ada Materi</h3>
-                        <p>Tambahkan materi pertama untuk kelas ini</p>
-                    </div>
-                `;
+            <div class="empty-state">
+                <div class="empty-icon">📚</div>
+                <h3>Belum Ada Materi</h3>
+                <p>Tambahkan materi pertama untuk kelas ini</p>
+            </div>
+        `;
             return;
         }
 
         const typeIcons = {
             pdf: '📄',
+            document: '📄',
             video: '🎥',
             link: '🔗'
         };
 
         container.innerHTML = materials.map(material => `
-                <div class="material-item" onclick="viewMaterial(${material.id})">
-                    <div style="display: flex; align-items: center; flex: 1;">
-                        <div class="item-icon ${material.type}">
-                            ${typeIcons[material.type]}
-                        </div>
-                        <div class="item-content">
-                            <div class="item-title">${material.title}</div>
-                            <div class="item-meta">
-                                Diunggah: ${material.uploadDate} • ${material.downloads} downloads
-                            </div>
-                        </div>
+        <div class="material-item" onclick="handleMaterialClick(${material.id})">
+            <div style="display: flex; align-items: center; flex: 1;">
+                <div class="item-icon ${material.type}">
+                    ${typeIcons[material.type]}
+                </div>
+                <div class="item-content">
+                    <div class="item-title">${material.title}</div>
+                    <div class="item-meta">
+                        Diunggah: ${material.uploadDate}
                     </div>
-                    <div class="item-actions">
-                        <button class="btn-icon" onclick="editMaterial(${material.id}, event)" title="Edit">✏️</button>
-                        <button class="btn-icon" onclick="downloadMaterial(${material.id}, event)" title="Download">📥</button>
-                        <button class="btn-icon" onclick="deleteMaterial(${material.id}, event)" title="Hapus">🗑️</button>
+                    <div style="font-size: 14px; margin-top: 5px;" class="item-description">
+                        ${material.description || '-'}
                     </div>
                 </div>
-            `).join('');
+            </div>
+            <div class="item-actions">
+                <button class="btn-icon" onclick="editMaterial(${material.id}, event)" title="Edit">✏️</button>
+                <button class="btn-icon" onclick="downloadMaterial(${material.id}, event)" title="Download">📥</button>
+                <button class="btn-icon" onclick="deleteMaterial(${material.id}, event)" title="Hapus">🗑️</button>
+            </div>
+        </div>
+    `).join('');
+    }
+
+    function handleMaterialClick(id) {
+        const material = materials.find(m => m.id === id);
+        if (!material) return;
+
+        if (material.type === 'link') {
+            if (material.link) {
+                window.open(material.link, '_blank');
+            } else {
+                alert('Link tidak tersedia untuk materi ini.');
+            }
+        } else {
+            if (material.fileUrl) {
+                const a = document.createElement('a');
+                a.href = material.fileUrl;
+                a.download = material.title;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            } else {
+                alert('File tidak tersedia untuk materi ini.');
+            }
+        }
+    }
+
+    function downloadMaterial(id, event) {
+        event.stopPropagation();
+        handleMaterialClick(id);
     }
 
     function renderAssignments() {
@@ -1056,13 +1234,25 @@
     function editMaterial(id, event) {
         event.stopPropagation();
         const material = materials.find(m => m.id === id);
-        showNotification(`Mengedit materi: ${material.title}`, 'info');
-    }
 
-    function downloadMaterial(id, event) {
-        event.stopPropagation();
-        const material = materials.find(m => m.id === id);
-        showNotification(`Mengunduh materi: ${material.title}`, 'success');
+        if (!material) return;
+
+        // Isi form dengan data materi yang dipilih
+        document.getElementById('editMaterialId').value = material.id;
+        document.getElementById('editMaterialTitle').value = material.title;
+        document.getElementById('editMaterialType').value = material.type;
+        document.getElementById('editMaterialDesc').value = material.description || '';
+
+        // Jika tipe link, tampilkan link
+        if (material.type === 'link') {
+            document.getElementById('editMaterialLink').value = material.link || '';
+            toggleEditFileInput('link');
+        } else {
+            toggleEditFileInput(material.type);
+        }
+
+        // Buka modal
+        document.getElementById('editMaterialModal').classList.add('active');
     }
 
     function deleteMaterial(id, event) {
@@ -1216,7 +1406,7 @@
     }
 
     function goBack() {
-        showNotification('Kembali ke halaman Kelas Saya...', 'info');
+        window.history.back();
     }
 
     function showNotification(message, type) {
@@ -1263,5 +1453,6 @@
     renderMaterials();
     renderAssignments();
     renderStudents();
+    renderRecentActivities();
 </script>
 @endpush
