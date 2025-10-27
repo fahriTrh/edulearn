@@ -41,7 +41,7 @@ class LoginController extends Controller
         return match ($user->role) {
             'admin' => redirect('/dashboard-admin'),
             'instructor' => redirect('/dashboard-dosen'),
-            'student' => redirect('/'),
+            'student' => redirect('/dashboard-mahasiswa'),
             default => redirect('/login'),
         };
     }
