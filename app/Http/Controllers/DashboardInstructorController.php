@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\ClassModel;
 use App\Models\Material;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 
@@ -242,15 +244,26 @@ class DashboardInstructorController extends Controller
             }
         });
 
-        // dd($materials);
+        $mahasiswa = DB::table('class_user')
+            ->join('users', 'class_user.user_id', '=', 'users.id')
+            ->where('class_user.class_id', $id)
+            ->where('users.role', 'student')
+            ->select(
+                'users.id',
+                'users.nim',
+                'users.name',
+                'users.email',
+                'class_user.class_id'
+            )
+            ->get();
+
+
 
         $title = $class->title;
         $sub_title = $class->description ?? '';
         $instructor_name = Auth::user()->name;
 
-        // dd($materials);
-
-        return view('dosen.detail-kelas-saya', compact('title', 'sub_title', 'instructor_name', 'class', 'materials'));
+        return view('dosen.detail-kelas-saya', compact('title', 'sub_title', 'instructor_name', 'class', 'materials', 'mahasiswa'));
     }
 
 
@@ -317,6 +330,168 @@ class DashboardInstructorController extends Controller
             ]);
 
             return back()->with('error', 'Terjadi kesalahan saat menambahkan materi. Silakan cek log.');
+        }
+    }
+
+    public function updateMateri(Request $request)
+    {
+        try {
+            // Validasi input
+            $request->validate([
+                'material_id' => 'required|exists:materials,id',
+                'title' => 'required|string|max:255',
+                'description' => 'nullable|string',
+                'type' => 'required|in:pdf,document,link',
+                'file' => 'nullable|file|max:20480', // max 20MB
+                'link' => 'nullable|url',
+            ]);
+
+            // Cari materi berdasarkan id dari request
+            $material = Material::findOrFail($request->material_id);
+
+            // Update data umum
+            $material->title = $request->title;
+            $material->description = $request->description;
+            $material->type = $request->type;
+
+            // === Jika tipe-nya link ===
+            if ($request->type === 'link') {
+                $material->file_path = null;
+                $material->file_name = null;
+                $material->file_size = null;
+                $material->file_url = $request->link;
+            }
+
+            // === Jika upload file baru ===
+            if ($request->hasFile('file')) {
+                // Hapus file lama jika ada
+                if ($material->file_path && file_exists(public_path($material->file_path))) {
+                    unlink(public_path($material->file_path));
+                }
+
+                $file = $request->file('file');
+                $fileName = time() . '_' . $file->getClientOriginalName();
+                $filePath = 'uploads/materials/' . $fileName;
+
+                // Simpan file ke public/
+                $file->move(public_path('uploads/materials'), $fileName);
+
+                // Update data file
+                $material->file_path = $filePath;
+                $material->file_url = null;
+                $material->file_name = $file->getClientOriginalName();
+                $material->file_size = round(filesize(public_path($filePath)) / 1024); // KB
+            }
+
+            $material->save();
+
+            return back()->with('success', 'Materi berhasil diperbarui.');
+        } catch (\Exception $e) {
+            // Log jika gagal
+            Log::error('Gagal update materi: ' . $e->getMessage());
+            return back()->with('error', 'Gagal memperbarui materi: ' . $e->getMessage());
+        }
+    }
+
+    public function deleteMateri($id)
+    {
+        try {
+            // Cari materi berdasarkan ID
+            $material = Material::findOrFail($id);
+
+            // Jika materi punya file dan ada di public folder, hapus file-nya
+            if ($material->file_path && file_exists(public_path($material->file_path))) {
+                unlink(public_path($material->file_path));
+            }
+
+            // Hapus dari database
+            $material->delete();
+
+            // Redirect dengan pesan sukses
+            return redirect()->back()->with('success', 'Materi berhasil dihapus.');
+        } catch (\Exception $e) {
+            // Log error untuk debugging
+            Log::error('Gagal menghapus materi: ' . $e->getMessage());
+
+            // Redirect dengan pesan error
+            return redirect()->back()->with('error', 'Gagal menghapus materi: ' . $e->getMessage());
+        }
+    }
+
+    public function tambahMahasiswaKelas(Request $request)
+    {
+        $request->validate([
+            'identifier' => 'required|string',
+            'class_id' => 'required|exists:classes,id',
+        ]);
+
+        try {
+            // Cari mahasiswa berdasarkan NIM atau Email
+            $student = User::where('nim', $request->identifier)
+                ->orWhere('email', $request->identifier)
+                ->first();
+
+            if (!$student) {
+                return redirect()->back()->with('error', 'Mahasiswa tidak ditemukan.');
+            }
+
+            $class = ClassModel::findOrFail($request->class_id);
+
+            // Cek apakah sudah terdaftar di kelas ini
+            $alreadyExists = $class->students()
+                ->where('user_id', $student->id)
+                ->exists();
+
+            if ($alreadyExists) {
+                return redirect()->back()->with('warning', 'Mahasiswa sudah terdaftar di kelas ini.');
+            }
+
+            // Tambahkan ke tabel pivot
+            $class->students()->attach($student->id);
+
+            return redirect()->back()->with('success', 'Mahasiswa berhasil ditambahkan ke kelas.');
+        } catch (\Exception $e) {
+            Log::error('Gagal menambahkan mahasiswa: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat menambahkan mahasiswa.');
+        }
+    }
+
+    public function hapusMahasiswaKelas(Request $request)
+    {
+        try {
+            $request->validate([
+                'class_id' => 'required|integer',
+                'user_id'  => 'required|integer',
+            ]);
+
+            $deleted = DB::table('class_user')
+                ->where('class_id', $request->class_id)
+                ->where('user_id', $request->user_id)
+                ->delete();
+
+            if ($deleted) {
+                return response()->json([
+                    'status'  => 'success',
+                    'message' => 'Student removed successfully',
+                ]);
+            }
+
+            return response()->json([
+                'status'  => 'warning',
+                'message' => 'No matching record found',
+            ], 404);
+        } catch (\Exception $e) {
+            // catat error ke file log Laravel
+            Log::error('Gagal menghapus mahasiswa dari kelas', [
+                'class_id' => $request->class_id ?? null,
+                'user_id'  => $request->user_id ?? null,
+                'error'    => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Terjadi kesalahan saat menghapus mahasiswa dari kelas.',
+            ], 500);
         }
     }
 }

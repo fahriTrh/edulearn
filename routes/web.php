@@ -41,6 +41,11 @@ Route::middleware(['auth', 'instructor'])->group(function () {
     
     Route::get('/kelas-saya/detail-kelas/{id}', [DashboardInstructorController::class, 'detailKelas']);
     Route::post('/tambah-materi', [DashboardInstructorController::class, 'tambahMateri']);
+    Route::put('/update-materi', [DashboardInstructorController::class, 'updateMateri']);
+    Route::delete('/delete-materi/{id}', [DashboardInstructorController::class, 'deleteMateri']);
+
+    Route::post('/tambah-mahasiswa-kelas', [DashboardInstructorController::class, 'tambahMahasiswaKelas']);
+    Route::delete('/hapus-mahasiswa-kelas', [DashboardInstructorController::class, 'hapusMahasiswaKelas']);
 });
 
 Route::middleware(['auth', 'student'])->group(function () {

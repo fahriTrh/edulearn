@@ -682,12 +682,12 @@
 
             return `
                 <div class="class-card" data-id="${cls.id}">
-                    <div class="class-header ${cls.color} ${headerClass}" style="${headerStyle}">
+                    <a href="/kelas-saya/detail-kelas/${cls.id}" class="class-header ${cls.color} ${headerClass}" style="${headerStyle}">
                         ${!cls.coverImage ? cls.icon : ''}
                         <span class="class-status status-${cls.status}">
                             ${cls.status === 'active' ? '● Aktif' : '○ Tidak Aktif'}
                         </span>
-                    </div>
+                    </a>
                     <div class="class-body">
                         <div class="class-code">${cls.code}</div>
                         <div class="class-title">${cls.name}</div>
@@ -732,9 +732,9 @@
 
             return `
             <div class="class-list-item" data-id="${cls.id}">
-                <div class="list-icon ${cls.color}" style="${iconBackground}">
+                <a href="/kelas-saya/detail-kelas/${cls.id}" class="list-icon ${cls.color}" style="${iconBackground}">
                     ${!hasCover ? cls.icon : ""}
-                </div>
+                </a>
                 <div class="list-content">
                     <div style="display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.5rem;">
                         <div class="class-code">${cls.code}</div>

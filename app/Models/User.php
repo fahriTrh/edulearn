@@ -52,4 +52,9 @@ class User extends Authenticatable
     {
         return $this->hasOne(Instructor::class);
     }
+
+    public function classes()
+    {
+        return $this->belongsToMany(ClassModel::class, 'class_user', 'user_id', 'class_id');
+    }
 }

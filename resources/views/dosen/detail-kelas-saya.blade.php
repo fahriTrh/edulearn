@@ -583,7 +583,7 @@
                 </div>
             </div>
         </div>
-        <div class="header-actions">
+        <!-- <div class="header-actions">
             <button class="btn-header primary" onclick="openShareModal()">
                 <span>📤</span>
                 <span>Bagikan</span>
@@ -596,7 +596,7 @@
                 <span>⚙️</span>
                 <span>Pengaturan</span>
             </button>
-        </div>
+        </div> -->
     </div>
 </div>
 
@@ -607,7 +607,7 @@
         <div class="tab" onclick="switchTab('assignments')">✍️ Tugas</div>
         <div class="tab" onclick="switchTab('students')">👥 Mahasiswa</div>
         <div class="tab" onclick="switchTab('grades')">📈 Nilai</div>
-        <div class="tab" onclick="switchTab('announcements')">📢 Pengumuman</div>
+        <!-- <div class="tab" onclick="switchTab('announcements')">📢 Pengumuman</div> -->
     </div>
 
     <!-- Tab Overview -->
@@ -781,7 +781,7 @@
             <h2>Edit Materi</h2>
             <button class="close-modal" onclick="closeModal('editMaterialModal')">✕</button>
         </div>
-        <form action="/edit-materi" method="POST" enctype="multipart/form-data">
+        <form action="/update-materi" method="POST" enctype="multipart/form-data">
             @csrf
             @method('PUT')
             <input type="hidden" name="material_id" id="editMaterialId">
@@ -858,23 +858,23 @@
             <h2>Tambah Mahasiswa</h2>
             <button class="close-modal" onclick="closeModal('addStudentModal')">✕</button>
         </div>
-        <form onsubmit="submitStudent(event)">
+        <form action="/tambah-mahasiswa-kelas" method="POST">
+            @csrf
             <div class="form-group">
-                <label>NIM</label>
-                <input type="text" id="studentNIM" placeholder="e.g., 11220001" required>
-            </div>
-            <div class="form-group">
-                <label>Nama Lengkap</label>
-                <input type="text" id="studentName" placeholder="e.g., Ahmad Rizki" required>
-            </div>
-            <div class="form-group">
-                <label>Email</label>
-                <input type="email" id="studentEmail" placeholder="e.g., ahmad@email.com" required>
+                <label>NIM/Email</label>
+                <input type="text" name="identifier" id="identifier" required>
+                <input type="hidden" name="class_id" id="class_id" value="{{ $class->id }}" required>
             </div>
             <button type="submit" class="submit-btn">Tambah Mahasiswa</button>
         </form>
     </div>
 </div>
+
+<!-- form hapus -->
+<form id="deleteFormMaterial" action="" method="POST" style="display: none;">
+    @csrf
+    @method('DELETE')
+</form>
 @endsection
 
 @push('scripts')
@@ -907,35 +907,7 @@
         }
     ];
 
-    let students = [{
-            id: 1,
-            nim: "11220001",
-            name: "Ahmad Rizki",
-            email: "ahmad@email.com",
-            attendance: 95
-        },
-        {
-            id: 2,
-            nim: "11220002",
-            name: "Siti Nurhaliza",
-            email: "siti@email.com",
-            attendance: 90
-        },
-        {
-            id: 3,
-            nim: "11220003",
-            name: "Budi Santoso",
-            email: "budi@email.com",
-            attendance: 88
-        },
-        {
-            id: 4,
-            nim: "11220004",
-            name: "Dewi Lestari",
-            email: "dewi@email.com",
-            attendance: 92
-        }
-    ];
+    let students = @json($mahasiswa);
 
     function switchTab(tabName) {
         document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
@@ -1204,7 +1176,7 @@
         }
 
         container.innerHTML = students.map(student => `
-                <div class="student-item" onclick="viewStudent(${student.id})">
+                <div class="student-item">
                     <div style="display: flex; align-items: center; flex: 1;">
                         <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; margin-right: 1rem;">
                             ${student.name.split(' ').map(n => n[0]).join('').substring(0, 2)}
@@ -1212,14 +1184,12 @@
                         <div class="item-content">
                             <div class="item-title">${student.name}</div>
                             <div class="item-meta">
-                                ${student.nim} • ${student.email} • Kehadiran: ${student.attendance}%
+                                ${student.nim} • ${student.email}
                             </div>
                         </div>
                     </div>
                     <div class="item-actions">
-                        <button class="btn-icon" onclick="viewStudentProgress(${student.id}, event)" title="Progress">📊</button>
-                        <button class="btn-icon" onclick="sendMessage(${student.id}, event)" title="Pesan">💬</button>
-                        <button class="btn-icon" onclick="removeStudent(${student.id}, event)" title="Hapus">🗑️</button>
+                        <button class="btn-icon" onclick="removeStudent(${student.id}, ${student.class_id}, event)" title="Hapus">🗑️</button>
                     </div>
                 </div>
             `).join('');
@@ -1261,6 +1231,14 @@
             materials = materials.filter(m => m.id !== id);
             renderMaterials();
             showNotification('Materi berhasil dihapus', 'success');
+
+            const form = document.getElementById('deleteFormMaterial');
+
+            // ubah action-nya ke URL yang sesuai
+            form.action = `/delete-materi/${id}`;
+
+            // kirim form ke server
+            form.submit();
         }
     }
 
@@ -1309,13 +1287,35 @@
         showNotification(`Mengirim pesan ke: ${student.name}`, 'info');
     }
 
-    function removeStudent(id, event) {
+    async function removeStudent(id, class_id, event) {
+        
         event.stopPropagation();
         if (confirm('Yakin ingin mengeluarkan mahasiswa dari kelas ini?')) {
             students = students.filter(s => s.id !== id);
             renderStudents();
+
+            await removeStudentDB(class_id, id)            
             showNotification('Mahasiswa berhasil dikeluarkan', 'success');
         }
+    }
+
+    // hapus mahasiswa kelas dari database
+    async function removeStudentDB(classId, userId) {
+        const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        await fetch('/hapus-mahasiswa-kelas', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': token,
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({
+                class_id: classId,
+                user_id: userId
+            })
+        });
+
+        console.log(`Student ${userId} removed from class ${classId}`);
     }
 
     // Modal Functions
