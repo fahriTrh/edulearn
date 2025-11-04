@@ -822,31 +822,118 @@
     </div>
 </div>
 
-<!-- Modal Add Assignment -->
+<!-- Modal Add Assignment (Updated) -->
 <div class="modal" id="addAssignmentModal">
     <div class="modal-content">
         <div class="modal-header">
             <h2>Buat Tugas Baru</h2>
             <button class="close-modal" onclick="closeModal('addAssignmentModal')">✕</button>
         </div>
-        <form onsubmit="submitAssignment(event)">
+        <form action="/tambah-tugas" method="POST" enctype="multipart/form-data">
+            @csrf
+            <input type="hidden" name="class_id" value="{{ $class->id }}">
+
             <div class="form-group">
                 <label>Judul Tugas</label>
-                <input type="text" id="assignmentTitle" placeholder="e.g., Project Website E-Commerce" required>
+                <input type="text" name="title" id="assignmentTitle" placeholder="e.g., Project Website E-Commerce" required>
             </div>
+
             <div class="form-group">
                 <label>Deskripsi</label>
-                <textarea id="assignmentDesc" placeholder="Deskripsi tugas..." required></textarea>
+                <textarea name="description" id="assignmentDesc" placeholder="Deskripsi tugas..." required></textarea>
             </div>
+
+            <div class="form-group">
+                <label>Tipe Instruksi</label>
+                <select name="instruction_type" id="assignmentInstructionType" required onchange="toggleAssignmentInput(this.value)">
+                    <option value="file">Upload File Instruksi</option>
+                    <option value="text">Deskripsi Teks Saja</option>
+                    <option value="link">Link/URL</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="assignmentFileInputGroup">
+                <label>Upload File Instruksi (Opsional)</label>
+                <input type="file" name="instruction_file" id="assignmentFile" accept=".pdf,.doc,.docx,.ppt,.pptx">
+                <small>Format: PDF, Word, PowerPoint (Max 10MB)</small>
+            </div>
+
+            <div class="form-group" id="assignmentLinkInputGroup" style="display: none;">
+                <label>Link / URL Instruksi</label>
+                <input type="url" name="instruction_link" id="assignmentLink" placeholder="https://contoh.com/instruksi-tugas">
+            </div>
+
             <div class="form-group">
                 <label>Deadline</label>
-                <input type="datetime-local" id="assignmentDeadline" required>
+                <input type="datetime-local" name="deadline" id="assignmentDeadline" required>
             </div>
+
             <div class="form-group">
                 <label>Bobot Nilai (%)</label>
-                <input type="number" id="assignmentWeight" min="0" max="100" placeholder="20" required>
+                <input type="number" name="weight" id="assignmentWeight" min="0" max="100" placeholder="20" required>
+                <small>Total bobot semua tugas harus 100%</small>
             </div>
+
             <button type="submit" class="submit-btn">Buat Tugas</button>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Edit Assignment (New) -->
+<div class="modal" id="editAssignmentModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Edit Tugas</h2>
+            <button class="close-modal" onclick="closeModal('editAssignmentModal')">✕</button>
+        </div>
+        <form action="/update-tugas" method="POST" enctype="multipart/form-data">
+            @csrf
+            @method('PUT')
+            <input type="hidden" name="assignment_id" id="editAssignmentId">
+            <input type="hidden" name="class_id" value="{{ $class->id }}">
+
+            <div class="form-group">
+                <label>Judul Tugas</label>
+                <input type="text" name="title" id="editAssignmentTitle" placeholder="e.g., Project Website E-Commerce" required>
+            </div>
+
+            <div class="form-group">
+                <label>Deskripsi</label>
+                <textarea name="description" id="editAssignmentDesc" placeholder="Deskripsi tugas..." required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Tipe Instruksi</label>
+                <select name="instruction_type" id="editAssignmentInstructionType" required onchange="toggleEditAssignmentInput(this.value)">
+                    <option value="file">Upload File Instruksi</option>
+                    <option value="text">Deskripsi Teks Saja</option>
+                    <option value="link">Link/URL</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="editAssignmentFileInputGroup">
+                <label>Upload File Instruksi Baru (Opsional)</label>
+                <input type="file" name="instruction_file" id="editAssignmentFile" accept=".pdf,.doc,.docx,.ppt,.pptx">
+                <small>Kosongkan jika tidak ingin mengubah file. Format: PDF, Word, PowerPoint (Max 10MB)</small>
+            </div>
+
+            <div class="form-group" id="editAssignmentLinkInputGroup" style="display: none;">
+                <label>Link / URL Instruksi</label>
+                <input type="url" name="instruction_link" id="editAssignmentLink" placeholder="https://contoh.com/instruksi-tugas">
+            </div>
+
+            <div class="form-group">
+                <label>Deadline</label>
+                <input type="datetime-local" name="deadline" id="editAssignmentDeadline" required>
+            </div>
+
+            <div class="form-group">
+                <label>Bobot Nilai (%)</label>
+                <input type="number" name="weight" id="editAssignmentWeight" min="0" max="100" placeholder="20" required>
+                <small>Total bobot semua tugas harus 100%</small>
+            </div>
+
+            <button type="submit" class="submit-btn">Update Tugas</button>
         </form>
     </div>
 </div>
@@ -881,31 +968,7 @@
 <script>
     materials = @json($materials)
 
-    let assignments = [{
-            id: 1,
-            title: "Project Website E-Commerce",
-            deadline: "2024-10-27",
-            submissions: 12,
-            total: 45,
-            status: "pending"
-        },
-        {
-            id: 2,
-            title: "Quiz React Fundamentals",
-            deadline: "2024-10-25",
-            submissions: 45,
-            total: 45,
-            status: "completed"
-        },
-        {
-            id: 3,
-            title: "Latihan Component State",
-            deadline: "2024-10-30",
-            submissions: 0,
-            total: 45,
-            status: "pending"
-        }
-    ];
+    let assignments = @json($formatted_assignments);
 
     let students = @json($mahasiswa);
 
@@ -1143,7 +1206,7 @@
                         <div style="flex: 1;">
                             <div style="display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.5rem;">
                                 <div class="item-title">${assignment.title}</div>
-                                <span class="badge ${assignment.status}">${assignment.status === 'completed' ? '✓ Selesai' : 'Pending'}</span>
+                                
                             </div>
                             <div class="item-meta">
                                 Deadline: ${assignment.deadline} • ${assignment.submissions}/${assignment.total} mahasiswa mengumpulkan
@@ -1288,13 +1351,13 @@
     }
 
     async function removeStudent(id, class_id, event) {
-        
+
         event.stopPropagation();
         if (confirm('Yakin ingin mengeluarkan mahasiswa dari kelas ini?')) {
             students = students.filter(s => s.id !== id);
             renderStudents();
 
-            await removeStudentDB(class_id, id)            
+            await removeStudentDB(class_id, id)
             showNotification('Mahasiswa berhasil dikeluarkan', 'success');
         }
     }
@@ -1454,5 +1517,80 @@
     renderAssignments();
     renderStudents();
     renderRecentActivities();
+
+
+    // Fungsi untuk toggle input pada form tambah tugas
+    function toggleAssignmentInput(type) {
+        const fileGroup = document.getElementById('assignmentFileInputGroup');
+        const linkGroup = document.getElementById('assignmentLinkInputGroup');
+        const fileInput = document.getElementById('assignmentFile');
+
+        if (type === 'link') {
+            fileGroup.style.display = 'none';
+            linkGroup.style.display = 'block';
+            fileInput.value = '';
+            fileInput.removeAttribute('required');
+        } else if (type === 'text') {
+            fileGroup.style.display = 'none';
+            linkGroup.style.display = 'none';
+            fileInput.value = '';
+            fileInput.removeAttribute('required');
+        } else {
+            fileGroup.style.display = 'block';
+            linkGroup.style.display = 'none';
+            fileInput.value = '';
+        }
+    }
+
+    // Fungsi untuk toggle input pada form edit tugas
+    function toggleEditAssignmentInput(type) {
+        const fileGroup = document.getElementById('editAssignmentFileInputGroup');
+        const linkGroup = document.getElementById('editAssignmentLinkInputGroup');
+        const fileInput = document.getElementById('editAssignmentFile');
+
+        if (type === 'link') {
+            fileGroup.style.display = 'none';
+            linkGroup.style.display = 'block';
+            fileInput.value = '';
+        } else if (type === 'text') {
+            fileGroup.style.display = 'none';
+            linkGroup.style.display = 'none';
+            fileInput.value = '';
+        } else {
+            fileGroup.style.display = 'block';
+            linkGroup.style.display = 'none';
+            fileInput.value = '';
+        }
+    }
+
+    // Update fungsi editAssignment untuk membuka modal edit
+    function editAssignment(id, event) {
+        event.stopPropagation();
+        const assignment = assignments.find(a => a.id === id);
+
+        if (!assignment) return;
+
+        // Isi form dengan data tugas yang dipilih
+        document.getElementById('editAssignmentId').value = assignment.id;
+        document.getElementById('editAssignmentTitle').value = assignment.title;
+        document.getElementById('editAssignmentDesc').value = assignment.description || '';
+        document.getElementById('editAssignmentDeadline').value = assignment.deadline;
+        document.getElementById('editAssignmentWeight').value = assignment.weight || 20;
+
+        // Set tipe instruksi
+        const instructionType = assignment.instruction_type || 'text';
+        document.getElementById('editAssignmentInstructionType').value = instructionType;
+
+        // Jika tipe link, tampilkan link
+        if (instructionType === 'link' && assignment.instruction_link) {
+            document.getElementById('editAssignmentLink').value = assignment.instruction_link;
+        }
+
+        // Toggle input sesuai tipe
+        toggleEditAssignmentInput(instructionType);
+
+        // Buka modal
+        document.getElementById('editAssignmentModal').classList.add('active');
+    }
 </script>
 @endpush

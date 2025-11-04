@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Assignment;
 use App\Models\ClassModel;
 use App\Models\Material;
 use App\Models\User;
@@ -244,6 +245,24 @@ class DashboardInstructorController extends Controller
             }
         });
 
+        // Ambil data assignments berdasarkan kelas
+        $assignments = Assignment::where('class_id', $id)
+            ->withCount('submissions') // kalau ada relasi submissions
+            ->get();
+
+        // Ubah format data agar sesuai kebutuhan JS
+        $formatted_assignments = $assignments->map(function ($item) {
+            $submissions_count = $item->submissions ? $item->submissions->count() : 0; // gunakan relasi count kalau ada
+            return [
+                'id' => $item->id,
+                'title' => $item->title,
+                'deadline' => $item->deadline->format('Y-m-d'),
+                'submissions' => $submissions_count,
+                'total' => $item->class->students()->count(),
+                'status' => $item->status,
+            ];
+        });
+
         $mahasiswa = DB::table('class_user')
             ->join('users', 'class_user.user_id', '=', 'users.id')
             ->where('class_user.class_id', $id)
@@ -263,7 +282,7 @@ class DashboardInstructorController extends Controller
         $sub_title = $class->description ?? '';
         $instructor_name = Auth::user()->name;
 
-        return view('dosen.detail-kelas-saya', compact('title', 'sub_title', 'instructor_name', 'class', 'materials', 'mahasiswa'));
+        return view('dosen.detail-kelas-saya', compact('title', 'sub_title', 'instructor_name', 'class', 'materials', 'mahasiswa', 'formatted_assignments'));
     }
 
 
@@ -493,5 +512,62 @@ class DashboardInstructorController extends Controller
                 'message' => 'Terjadi kesalahan saat menghapus mahasiswa dari kelas.',
             ], 500);
         }
+    }
+
+    public function tambahTugas(Request $request)
+    {
+        // ✅ Validasi input
+        $validated = $request->validate([
+            'class_id' => 'required|exists:classes,id',
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'instruction_type' => 'required|in:file,text,link',
+            'instruction_file' => 'nullable|file|mimes:pdf,doc,docx,ppt,pptx|max:10240', // maks 10MB
+            'instruction_link' => 'nullable|url',
+            'deadline' => 'required|date',
+            'weight' => 'required|integer|min:0|max:100',
+        ]);
+
+        // ✅ Siapkan data dasar
+        $data = [
+            'class_id' => $request->class_id,
+            'created_by' => Auth::id(),
+            'title' => $request->title,
+            'description' => $request->description,
+            'deadline' => $request->deadline,
+            'weight_percentage' => $request->weight,
+            'submission_type' => $request->instruction_type,
+            'status' => 'published',
+        ];
+
+        // ✅ Tangani tipe instruksi
+        if ($request->instruction_type === 'file' && $request->hasFile('instruction_file')) {
+            $file = $request->file('instruction_file');
+
+            // Buat nama unik
+            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+
+            // Pastikan folder ada
+            $destinationPath = public_path('assignments');
+            if (!file_exists($destinationPath)) {
+                mkdir($destinationPath, 0777, true);
+            }
+
+            // Pindahkan file ke public/assignments
+            $file->move($destinationPath, $filename);
+
+            // Simpan path relatif (agar bisa diakses dari browser)
+            $data['instructions'] = 'assignments/' . $filename;
+        } elseif ($request->instruction_type === 'link') {
+            $data['instructions'] = $request->instruction_link;
+        } else {
+            // Kalau hanya deskripsi teks saja
+            $data['instructions'] = $request->description;
+        }
+
+        // ✅ Simpan ke database
+        Assignment::create($data);
+
+        return redirect()->back()->with('success', 'Tugas baru berhasil dibuat!');
     }
 }

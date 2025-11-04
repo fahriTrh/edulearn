@@ -46,6 +46,8 @@ Route::middleware(['auth', 'instructor'])->group(function () {
 
     Route::post('/tambah-mahasiswa-kelas', [DashboardInstructorController::class, 'tambahMahasiswaKelas']);
     Route::delete('/hapus-mahasiswa-kelas', [DashboardInstructorController::class, 'hapusMahasiswaKelas']);
+
+    Route::post('/tambah-tugas', [DashboardInstructorController::class, 'tambahTugas']);
 });
 
 Route::middleware(['auth', 'student'])->group(function () {
