@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Assignment;
+use App\Models\AssignmentSubmission;
 use App\Models\ClassModel;
+use App\Models\ClassUser;
 use App\Models\Material;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -11,19 +13,52 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 
 class DashboardInstructorController extends Controller
 {
     public function index()
     {
         $title = 'Dashboard Instruktur';
-        $sub_title = 'Anda memiliki 5 tugas yang perlu dinilai';
+        $sub_title = '';
         $instructor_name = Auth::user()->name;
+        $instructor_class = ClassModel::where('instructor_id', Auth::user()->instructor->id)
+            ->with(['assignments', 'students', 'materials'])
+            ->get();
+        $total_mahasiswa_all = 0;
+        $all_assignments = collect();
+        $all_materials = collect();
+
+        foreach ($instructor_class as $class) {
+            // Hitung total mahasiswa per class
+            $total_mahasiswa_per_class = ClassUser::where('class_id', $class->id)
+                ->distinct('user_id')
+                ->count('user_id');
+
+            $total_mahasiswa_all += $total_mahasiswa_per_class;
+            $class->total_mahasiswa = $total_mahasiswa_per_class;
+
+            // Cari assignments untuk class ini
+            $assignments = Assignment::where('class_id', $class->id)->get();
+            $class->assignments = $assignments;
+            $all_assignments = $all_assignments->merge($assignments);
+
+            // Cari materials untuk class ini
+            $materials = Material::where('class_id', $class->id)->get();
+            $class->materials = $materials;
+            $all_materials = $all_materials->merge($materials);
+        }
+
 
         return view('dosen.dashboard-dosen', [
             'title' => $title,
             'instructor_name' => $instructor_name,
-            'sub_title' => $sub_title,
+            'sub_title' => "Anda memiliki " . count($all_assignments) . " tugas",
+            'instructor_class' => $instructor_class,
+            'total_mahasiswa' => $total_mahasiswa_all,
+            'assignments' => $all_assignments,
+            'materials' => $all_materials
         ]);
     }
 
@@ -253,13 +288,40 @@ class DashboardInstructorController extends Controller
         // Ubah format data agar sesuai kebutuhan JS
         $formatted_assignments = $assignments->map(function ($item) {
             $submissions_count = $item->submissions ? $item->submissions->count() : 0; // gunakan relasi count kalau ada
+
+            // Format submissions data
+            $formatted_submissions = $item->submissions->map(function ($submission) {
+                return [
+                    'id' => $submission->id,
+                    'student_name' => $submission->user->name,
+                    'student_nim' => $submission->user->nim,
+                    'student_id' => $submission->user_id,
+                    'submitted_at' => \Carbon\Carbon::parse($submission->submitted_at)->format('d M Y H:i'),
+                    'is_late' => $submission->is_late,
+                    'submission_type' => $submission->file_path ? 'file' : 'text',
+                    'file_url' => $submission->file_path ? asset($submission->file_path) : null,
+                    'file_name' => $submission->file_name,
+                    'submission_text' => $submission->submission_text,
+                    'submission_link' => $submission->submission_link,
+                    'grade' => $submission->score,
+                    'feedback' => $submission->feedback,
+                    'status' => $submission->status,
+                    'assignment_id' => $submission->assignment_id
+                ];
+            });
+
             return [
                 'id' => $item->id,
                 'title' => $item->title,
-                'deadline' => $item->deadline->format('Y-m-d'),
+                'deadline' => \Carbon\Carbon::parse($item->deadline)->format('d M Y H:i'),
+                'deadline_raw' => \Carbon\Carbon::parse($item->deadline)->format('Y-m-d\TH:i'),
+                'weight' => $item->weight_percentage,
+                'description' => $item->description,
                 'submissions' => $submissions_count,
                 'total' => $item->class->students()->count(),
                 'status' => $item->status,
+                'instruction_type' => $item->submission_type,
+                'submissions_data' => $formatted_submissions
             ];
         });
 
@@ -569,5 +631,79 @@ class DashboardInstructorController extends Controller
         Assignment::create($data);
 
         return redirect()->back()->with('success', 'Tugas baru berhasil dibuat!');
+    }
+
+    public function updateNilaiTugas(Request $request, $id)
+    {
+        $submission = AssignmentSubmission::findOrFail($id);
+        $submission->score = $request->input('grade');
+        $submission->graded_at = now();
+        $submission->graded_by = Auth::user()->id;
+        $submission->save();
+
+        return redirect()->back()->with('success', 'Grade saved!');
+    }
+
+    public function ubahPassword()
+    {
+        $title = 'Ubah Password';
+        $instructor_name = Auth::user()->name;
+
+        return view('dosen.ubah-password', [
+            'title' => $title,
+            'sub_title' => $title,
+            'instructor_name' => $instructor_name
+        ]);
+    }
+
+    public function ubahPasswordStore(Request $request)
+    {
+        // Validasi input
+        $validator = Validator::make($request->all(), [
+            'current_password' => 'required',
+            'new_password' => 'required|min:8|confirmed|different:current_password',
+            'new_password_confirmation' => 'required',
+        ], [
+            'current_password.required' => 'Password saat ini wajib diisi',
+            'new_password.required' => 'Password baru wajib diisi',
+            'new_password.min' => 'Password baru minimal 8 karakter',
+            'new_password.confirmed' => 'Konfirmasi password tidak cocok',
+            'new_password.different' => 'Password baru harus berbeda dengan password lama',
+            'new_password_confirmation.required' => 'Konfirmasi password wajib diisi',
+        ]);
+
+        // Jika validasi gagal
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput()
+                ->with('error', 'Terjadi kesalahan validasi');
+        }
+
+        try {
+            $user = Auth::user();
+
+            // Cek password saat ini
+            if (!Hash::check($request->current_password, $user->password)) {
+                return redirect()->back()
+                    ->withErrors(['current_password' => 'Password saat ini salah'])
+                    ->withInput()
+                    ->with('error', 'Gagal mengubah password');
+            }
+
+            // Update password
+            $user->password = Hash::make($request->new_password);
+            $user->save();
+
+            // Logout dari perangkat lain (optional)
+            // Auth::logoutOtherDevices($request->new_password);
+
+            return redirect()->back()
+                ->with('success', 'Password berhasil diubah!');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan sistem: ' . $e->getMessage())
+                ->withInput();
+        }
     }
 }

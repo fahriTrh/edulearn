@@ -494,10 +494,10 @@
                     </div>
                 </div>
                 <div style="display: flex; align-items: center; gap: 1rem;">
-                    <div
-                        style="width: 40px; height: 40px; background: #f5f7fa; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer;">
-                        🔔</div>
-                    <div class="user-avatar">AD</div>
+                    <div style="width: 40px; height: 40px; background: #f5f7fa; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                        🔔
+                    </div>
+                    <div class="user-avatar" id="adminAvatar" data-name="{{ $admin_name }}">AD</div>
                     <div>
                         <div style="font-weight: 600;">{{ $admin_name }}</div>
                         <div style="font-size: 0.85rem; color: #666;">Administrator</div>
@@ -565,6 +565,30 @@
                     showNotification(`Navigasi ke: ${this.textContent.trim()}`, 'info');
                 }
             });
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const avatarElement = document.getElementById('adminAvatar');
+            const adminName = avatarElement.getAttribute('data-name');
+
+            function generateInitials(name) {
+                if (!name || name.trim() === '') return 'AD';
+
+                const words = name.trim().split(/\s+/);
+                let initials = '';
+
+                if (words.length >= 2) {
+                    initials = words[0].charAt(0) + words[words.length - 1].charAt(0);
+                } else {
+                    initials = name.substring(0, 2);
+                }
+
+                return initials.toUpperCase();
+            }
+
+            avatarElement.textContent = generateInitials(adminName);
         });
     </script>
     @stack('scripts')

@@ -467,6 +467,11 @@
                     style="text-decoration: none; color: inherit;">
                     <span>📚</span> Kelas Saya
                 </a>
+                <a href="/ubah-password"
+                    class="menu-item {{ Request::is('ubah-password*') ? 'active' : '' }}"
+                    style="text-decoration: none; color: inherit;">
+                    <span>🔒</span> Ubah Password
+                </a>
                 <a class="menu-item" style="text-decoration: none; color: inherit;"><span>🚪</span> Logout</a>
                 <!-- <div class="menu-item"><span>📝</span> Materi</div>
                 <div class="menu-item"><span>✍️</span> Tugas</div>
@@ -478,7 +483,7 @@
         </aside>
 
         <main class="main-content">
-            @unless (Request::is('kelas-saya/detail-kelas*'))
+            @unless (Request::is('kelas-saya/detail-kelas*') || Request::is('ubah-password'))
             <div class="top-bar">
                 <div>
                     <div class="page-title">Dashboard Instruktur</div>
@@ -486,9 +491,9 @@
                 </div>
                 <div style="display: flex; align-items: center; gap: 1rem;">
                     <div style="width: 40px; height: 40px; background: #f5f7fa; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer;">🔔</div>
-                    <div class="user-avatar">BS</div>
+                    <div class="user-avatar" id="userAvatar">US</div>
                     <div>
-                        <div style="font-weight: 600;">{{$instructor_name}}</div>
+                        <div style="font-weight: 600;">{{ $instructor_name }}</div>
                         <div style="font-size: 0.85rem; color: #666;">Instruktur</div>
                     </div>
                 </div>
@@ -499,10 +504,10 @@
                     <h2 style="margin-bottom: 0.5rem;">Selamat Datang, {{ $instructor_name }}! 👋</h2>
                     <p style="opacity: 0.9;">{{ $sub_title }}</p>
                 </div>
-                <button class="btn-primary" style="background: white; color: #667eea;" onclick="showNotification('Membuka daftar tugas pending...', 'info')">
+                <a href="/kelas-saya" class="btn-primary" style="background: white; color: #667eea; text-decoration: none;" onclick="showNotification('Membuka daftar tugas pending...', 'info')">
                     <span>📋</span>
                     <span>Lihat Tugas</span>
-                </button>
+                </a>
             </div>
             @endunless
 
@@ -531,6 +536,30 @@
                     showNotification(`Navigasi ke: ${this.textContent.trim()}`, 'info');
                 }
             });
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const instructorName = "{{ $instructor_name }}";
+            const avatarElement = document.getElementById('userAvatar');
+
+            function getInitials(name) {
+                if (!name) return 'US';
+
+                const words = name.split(' ');
+                let initials = '';
+
+                if (words.length >= 2) {
+                    // Ambil huruf pertama dari kata pertama dan terakhir
+                    initials = words[0].charAt(0) + words[words.length - 1].charAt(0);
+                } else {
+                    // Ambil 2 huruf pertama dari nama
+                    initials = name.substring(0, 2);
+                }
+
+                return initials.toUpperCase();
+            }
+
+            avatarElement.textContent = getInitials(instructorName);
         });
     </script>
 

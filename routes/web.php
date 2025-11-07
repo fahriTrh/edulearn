@@ -43,11 +43,15 @@ Route::middleware(['auth', 'instructor'])->group(function () {
     Route::post('/tambah-materi', [DashboardInstructorController::class, 'tambahMateri']);
     Route::put('/update-materi', [DashboardInstructorController::class, 'updateMateri']);
     Route::delete('/delete-materi/{id}', [DashboardInstructorController::class, 'deleteMateri']);
-
+    
     Route::post('/tambah-mahasiswa-kelas', [DashboardInstructorController::class, 'tambahMahasiswaKelas']);
     Route::delete('/hapus-mahasiswa-kelas', [DashboardInstructorController::class, 'hapusMahasiswaKelas']);
-
+    
     Route::post('/tambah-tugas', [DashboardInstructorController::class, 'tambahTugas']);
+    Route::post('/submissions/{id}/grade', [DashboardInstructorController::class, 'updateNilaiTugas']);
+
+    Route::get('/ubah-password', [DashboardInstructorController::class, 'ubahPassword']);
+    Route::post('/ubah-password', [DashboardInstructorController::class, 'ubahPasswordStore']);
 });
 
 Route::middleware(['auth', 'student'])->group(function () {

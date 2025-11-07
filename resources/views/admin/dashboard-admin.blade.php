@@ -5,35 +5,35 @@
     <div class="stat-card">
         <div class="stat-icon blue">👥</div>
         <div class="stat-info">
-            <h3>2,547</h3>
+            <h3>{{ $total_mahasiswa }}</h3>
             <p>Total Mahasiswa</p>
-            <div class="stat-change positive">↑ +12% bulan ini</div>
+            <!-- <div class="stat-change positive">↑ +12% bulan ini</div> -->
         </div>
     </div>
     <div class="stat-card">
         <div class="stat-icon green">📚</div>
         <div class="stat-info">
-            <h3>156</h3>
+            <h3>{{ $total_class }}</h3>
             <p>Total Kursus</p>
-            <div class="stat-change positive">↑ +8 kursus baru</div>
+            <!-- <div class="stat-change positive">↑ +8 kursus baru</div> -->
         </div>
     </div>
     <div class="stat-card">
         <div class="stat-icon orange">👨‍🏫</div>
         <div class="stat-info">
-            <h3>48</h3>
+            <h3>{{ $total_instructor }}</h3>
             <p>Instruktur Aktif</p>
-            <div class="stat-change positive">↑ +3 instruktur</div>
+            <!-- <div class="stat-change positive">↑ +3 instruktur</div> -->
         </div>
     </div>
-    <div class="stat-card">
+    <!-- <div class="stat-card">
         <div class="stat-icon purple">🏆</div>
         <div class="stat-info">
             <h3>1,283</h3>
             <p>Sertifikat Diterbitkan</p>
             <div class="stat-change positive">↑ +156 bulan ini</div>
         </div>
-    </div>
+    </div> -->
 </div>
 
 <div class="card" style="margin-bottom: 2rem;">
@@ -41,29 +41,31 @@
         <div class="card-title">Quick Actions</div>
     </div>
     <div class="quick-actions">
-        <button class="quick-action-btn"
+        <!-- <button class="quick-action-btn"
             onclick="showNotification('Membuka form tambah kursus...', 'info')">
             <div class="quick-action-icon">➕</div>
             <div>Tambah Kursus</div>
-        </button>
-        <button class="quick-action-btn"
-            onclick="showNotification('Membuka form tambah pengguna...', 'info')">
+        </button> -->
+        <a href="/kelola-mahasiswa" class="quick-action-btn" style="text-decoration: none;">
             <div class="quick-action-icon">👤</div>
-            <div>Tambah Pengguna</div>
-        </button>
-        <button class="quick-action-btn"
-            onclick="showNotification('Membuka daftar tugas pending...', 'info')">
+            <div>Tambah Mahasiswa</div>
+        </a>
+        <a href="/kelola-instruktur" class="quick-action-btn" style="text-decoration: none;">
+            <div class="quick-action-icon">👤</div>
+            <div>Tambah Instruktur/Dosen</div>
+        </a>
+        <!-- <a href="/" class="quick-action-btn">
             <div class="quick-action-icon">✍️</div>
             <div>Review Tugas</div>
-        </button>
-        <button class="quick-action-btn" onclick="showNotification('Membuka laporan...', 'info')">
+        </a>
+        <a class="quick-action-btn">
             <div class="quick-action-icon">📊</div>
             <div>Lihat Laporan</div>
-        </button>
+        </a> -->
     </div>
 </div>
 
-<div class="content-grid">
+<!-- <div class="content-grid">
     <div class="card">
         <div class="card-header">
             <div class="card-title">Statistik Pendaftaran Bulanan</div>
@@ -156,12 +158,11 @@
             </div>
         </div>
     </div>
-</div>
+</div> -->
 
-<div class="card">
+<!-- <div class="card">
     <div class="card-header">
-        <div class="card-title">Kursus Terpopuler</div>
-        <a href="#" class="view-all">Kelola Kursus →</a>
+        <div class="card-title">Kursus Terbaru</div>
     </div>
     <div class="table-container">
         <table>
@@ -170,17 +171,15 @@
                     <th>Nama Kursus</th>
                     <th>Instruktur</th>
                     <th>Peserta</th>
-                    <th>Rating</th>
                     <th>Status</th>
                     <th>Aksi</th>
                 </tr>
             </thead>
             <tbody id="coursesTable">
-                <!-- Table content will be rendered here -->
             </tbody>
         </table>
     </div>
-</div>
+</div> -->
 @endsection
 
 @push('scripts')
@@ -229,7 +228,6 @@
                     <td><strong>${course.name}</strong></td>
                     <td>${course.instructor}</td>
                     <td>${course.students} mahasiswa</td>
-                    <td>⭐ ${course.rating}</td>
                     <td>
                         <span class="status-badge badge-${course.status}">
                             ${course.status === 'active' ? 'Aktif' : 'Pending'}

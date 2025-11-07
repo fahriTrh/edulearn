@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ClassModel;
 use App\Models\Instructor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -18,11 +19,23 @@ class DashboardAdminController extends Controller
         $title = 'Dashboard Admin';
         $sub_title = 'Selamat datang kembali, Admin! ';
         $admin_name = Auth::user()->name;
+        $total_mahasiswa = User::where('role', 'student')
+            ->where('status', 'active')
+            ->count();
+
+        $total_instructor = User::where('role', 'instructor')
+            ->where('status', 'active')
+            ->count();
+
+        $total_class = ClassModel::count();
 
         return view('admin.dashboard-admin', [
             'title' => $title,
             'admin_name' => $admin_name,
-            'sub_title' => $sub_title
+            'sub_title' => $sub_title,
+            'total_mahasiswa' => $total_mahasiswa,
+            'total_instructor' => $total_instructor,
+            'total_class' => $total_class
         ]);
     }
 
