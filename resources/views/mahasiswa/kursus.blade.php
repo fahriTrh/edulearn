@@ -409,7 +409,7 @@
         <aside class="sidebar">
             <div class="logo-section">EduLearn</div>
             <nav class="menu">
-                <div class="menu-item"><span>📊</span> Dashboard</div>
+                <div class="menu-item"><span>📊</span> <a href="/dashboard-mahasiswa">Dashboard</a></div>
                 <div class="menu-item active"><span>📚</span> Kursus Saya</div>
                 <div class="menu-item"><span>📅</span> Jadwal</div>
                 <div class="menu-item"><span>✍️</span> Tugas</div>

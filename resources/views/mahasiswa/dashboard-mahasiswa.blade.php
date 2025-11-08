@@ -438,7 +438,7 @@
                 </div>
                 <div class="menu-item">
                     <span class="menu-icon">📚</span>
-                    <span>Kursus Saya</span>
+                    <a href="/kursus">Kursus Saya</a>
                 </div>
                 <div class="menu-item">
                     <span class="menu-icon">📅</span>

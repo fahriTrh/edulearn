@@ -46,6 +46,13 @@ class MahasiswaSeeder extends Seeder
                 'password' => Hash::make('231234005'),
                 'role' => 'student',
             ],
+            [
+                'name' => 'Mahasiswa',
+                'email' => 'mahasiswa@edulearn.com',
+                'nim' => 'mahasiswa',
+                'password' => Hash::make('mahasiswa'),
+                'role' => 'student',
+            ],
         ];
 
         foreach ($mahasiswas as $m) {

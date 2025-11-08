@@ -21,15 +21,15 @@ class DatabaseSeeder extends Seeder
 
         User::factory()->create([
             'name' => 'Admin Utama',
-            'email' => 'admin@edulearn.com',
-            'password' => Hash::make('admin123!@#'),
+            'email' => 'admin',
+            'password' => Hash::make('admin'),
             'role' => 'admin'
         ]);
 
         User::factory()->create([
             'name' => 'Dr. Sandhika Setiawan',
-            'email' => 'sandhika@edulearn.com',
-            'password' => Hash::make('sandhika@edulearn.com'),
+            'email' => 'dosen',
+            'password' => Hash::make('dosen'),
             'role' => 'instructor'
         ]);
 
