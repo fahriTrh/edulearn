@@ -33,11 +33,23 @@
                     <span class="text-2xl">📚</span>
                     <span class="font-medium">Kelas Saya</span>
                 </a>
+
+                <a href="{{ route('dosen.nilai') }}" 
+                   class="flex items-center gap-4 px-6 py-4 border-l-4 transition-all duration-300 {{ request()->routeIs('dosen.nilai') ? 'bg-white/15 border-white' : 'border-transparent hover:bg-white/10 hover:border-white' }}">
+                    <span class="text-2xl">📊</span>
+                    <span class="font-medium">Nilai</span>
+                </a>
+
+                <a href="{{ route('dosen.jadwal') }}" 
+                   class="flex items-center gap-4 px-6 py-4 border-l-4 transition-all duration-300 {{ request()->routeIs('dosen.jadwal') ? 'bg-white/15 border-white' : 'border-transparent hover:bg-white/10 hover:border-white' }}">
+                    <span class="text-2xl">📅</span>
+                    <span class="font-medium">Kelola Jadwal</span>
+                </a>
         
-                <a href="{{ route('dosen.password') }}" 
-                   class="flex items-center gap-4 px-6 py-4 border-l-4 transition-all duration-300 {{ request()->routeIs('dosen.password') ? 'bg-white/15 border-white' : 'border-transparent hover:bg-white/10 hover:border-white' }}">
-                    <span class="text-2xl">🔒</span>
-                    <span class="font-medium">Ubah Password</span>
+                <a href="{{ route('dosen.profile') }}" 
+                   class="flex items-center gap-4 px-6 py-4 border-l-4 transition-all duration-300 {{ request()->routeIs('dosen.profile') ? 'bg-white/15 border-white' : 'border-transparent hover:bg-white/10 hover:border-white' }}">
+                    <span class="text-2xl">👤</span>
+                    <span class="font-medium">Profile</span>
                 </a>
         
                 <button onclick="handleLogout()" class="w-full flex items-center gap-4 px-6 py-4 border-l-4 border-transparent hover:bg-white/10 hover:border-white transition-all duration-300">
@@ -52,7 +64,7 @@
 
         <!-- Main Content Wrapper -->
         <div class="flex-1 ml-0 lg:ml-64 transition-all duration-300">
-            @unless (request()->routeIs('dosen.kelas.detail') || request()->routeIs('dosen.password'))
+            @unless (request()->routeIs('dosen.kelas.detail') || request()->routeIs('dosen.profile'))
             <!-- Top Bar -->
             <header class="bg-white shadow-sm sticky top-0 z-10">
                 <div class="flex items-center justify-between px-4 py-4 lg:px-8 flex-wrap gap-4">
@@ -118,7 +130,7 @@
 
             <!-- Page Content -->
             <main class="p-4 lg:p-8">
-                @yield('content')
+                {{ $slot }}
             </main>
         </div>
     </div>

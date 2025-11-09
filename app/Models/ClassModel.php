@@ -30,4 +30,9 @@ class ClassModel extends Model
         return $this->belongsToMany(User::class, 'class_user', 'class_id', 'user_id')
             ->where('role', 'student');
     }
+
+    public function schedules()
+    {
+        return $this->hasMany(Schedule::class, 'class_id');
+    }
 }

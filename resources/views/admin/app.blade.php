@@ -90,7 +90,7 @@
             </header>
 
             <main class="p-4 lg:p-8">
-                @yield('content')
+                {{ $slot }}
             </main>
         </div>
     </div>

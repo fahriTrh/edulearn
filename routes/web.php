@@ -1,10 +1,16 @@
 <?php
 
-use App\Http\Controllers\DashboardAdminController;
-use App\Http\Controllers\DashboardInstructorController;
 use App\Http\Controllers\LoginController;
+use App\Livewire\Admin\DashboardAdmin;
+use App\Livewire\Admin\KelolaInstruktur;
+use App\Livewire\Admin\KelolaMahasiswa;
+use App\Livewire\Instructor\DashboardInstructor;
+use App\Livewire\Instructor\DetailKelas;
+use App\Livewire\Instructor\KelolaJadwal;
+use App\Livewire\Instructor\KelasSaya;
+use App\Livewire\Instructor\Nilai;
+use App\Livewire\Instructor\Profile;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () {
     return view('landing.landingpage');
@@ -18,71 +24,49 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout')->midd
 
 Route::middleware(['auth', 'admin'])->group(function () {
     // admin
-    Route::get('/dashboard-admin', [DashboardAdminController::class, 'index']);
+    Route::get('/dashboard-admin', DashboardAdmin::class);
     // kelola mahasiswa
-    Route::get('/kelola-mahasiswa', [DashboardAdminController::class, 'kelolaMahasiswa']);
-    Route::post('/tambah-mahasiswa', [DashboardAdminController::class, 'tambahMahasiswa']);
-    Route::post('/update-mahasiswa', [DashboardAdminController::class, 'updateMahasiswa']);
-    Route::delete('/delete-mahasiswa/{id}', [DashboardAdminController::class, 'deleteMahasiswa']);
+    Route::get('/kelola-mahasiswa', KelolaMahasiswa::class);
     // kelola instruktur
-    Route::get('/kelola-instruktur', [DashboardAdminController::class, 'kelolaInstruktur']);
-    Route::post('/tambah-instruktur', [DashboardAdminController::class, 'tambahInstruktur']);
-    Route::post('/update-instruktur', [DashboardAdminController::class, 'updateInstruktur']);
-    Route::delete('/delete-instruktur/{id}', [DashboardAdminController::class, 'deleteInstruktur']);
+    Route::get('/kelola-instruktur', KelolaInstruktur::class);
 });
 
 
 Route::middleware(['auth', 'instructor'])->group(function () {
     // Dashboard
-    Route::get('/dashboard-dosen', [DashboardInstructorController::class, 'index'])
+    Route::get('/dashboard-dosen', DashboardInstructor::class)
         ->name('dosen.dashboard');
 
     // Kelas
-    Route::get('/kelas-saya', [DashboardInstructorController::class, 'kelasSaya'])
+    Route::get('/kelas-saya', KelasSaya::class)
         ->name('dosen.kelas');
-    Route::post('/tambah-kelas', [DashboardInstructorController::class, 'tambahKelas'])
-        ->name('dosen.kelas.tambah');
-    Route::post('/update-kelas', [DashboardInstructorController::class, 'updateKelas'])
-        ->name('dosen.kelas.update');
-    Route::delete('/delete-kelas/{id}', [DashboardInstructorController::class, 'deleteKelas'])
-        ->name('dosen.kelas.delete');
 
     // Detail kelas & materi
-    Route::get('/kelas-saya/detail-kelas/{id}', [DashboardInstructorController::class, 'detailKelas'])
+    Route::get('/kelas-saya/detail-kelas/{id}', DetailKelas::class)
         ->name('dosen.detail-kelas');
-    Route::post('/tambah-materi', [DashboardInstructorController::class, 'tambahMateri'])
-        ->name('dosen.materi.tambah');
-    Route::put('/update-materi', [DashboardInstructorController::class, 'updateMateri'])
-        ->name('dosen.materi.update');
-    Route::delete('/delete-materi/{id}', [DashboardInstructorController::class, 'deleteMateri'])
-        ->name('dosen.materi.delete');
 
-    // Mahasiswa di kelas
-    Route::post('/tambah-mahasiswa-kelas', [DashboardInstructorController::class, 'tambahMahasiswaKelas'])
-        ->name('dosen.kelas.mahasiswa.tambah');
-    Route::delete('/hapus-mahasiswa-kelas', [DashboardInstructorController::class, 'hapusMahasiswaKelas'])
-        ->name('dosen.kelas.mahasiswa.hapus');
+    // Nilai (unified: Review, Daftar Nilai, Final Grade)
+    Route::get('/dosen-nilai', Nilai::class)
+        ->name('dosen.nilai');
 
-    // Tugas
-    Route::post('/tambah-tugas', [DashboardInstructorController::class, 'tambahTugas'])
-        ->name('dosen.tugas.tambah');
-    Route::post('/submissions/{id}/grade', [DashboardInstructorController::class, 'updateNilaiTugas'])
-        ->name('dosen.tugas.nilai');
+    // Kelola Jadwal
+    Route::get('/kelola-jadwal', KelolaJadwal::class)
+        ->name('dosen.jadwal');
 
-    // Ubah password
-    Route::get('/ubah-password', [DashboardInstructorController::class, 'ubahPassword'])
-        ->name('dosen.password');
-    Route::post('/ubah-password', [DashboardInstructorController::class, 'ubahPasswordStore'])
-        ->name('dosen.password.store');
+    // Profile
+    Route::get('/profile', Profile::class)
+        ->name('dosen.profile');
 });
 
 
 Route::middleware(['auth', 'student'])->group(function () {
-    Route::view('/dashboard-mahasiswa', 'mahasiswa.dashboard')->name('mahasiswa.dashboard');
+    Route::get('/dashboard-mahasiswa', \App\Livewire\Student\DashboardMahasiswa::class)->name('mahasiswa.dashboard');
     Route::view('/forum', 'mahasiswa.forum')->name('mahasiswa.forum');
-    Route::view('/jadwal', 'mahasiswa.jadwal')->name('mahasiswa.jadwal');
-    Route::view('/kursus', 'mahasiswa.kursus')->name('mahasiswa.kursus');
-    Route::view('/nilai', 'mahasiswa.nilai')->name('mahasiswa.nilai');
-    Route::view('/sertifikat', 'mahasiswa.sertifikat')->name('mahasiswa.sertifikat');
-    Route::view('/tugas', 'mahasiswa.tugas')->name('mahasiswa.tugas');
+    Route::get('/jadwal', \App\Livewire\Student\JadwalMahasiswa::class)->name('mahasiswa.jadwal');
+    Route::get('/kursus', \App\Livewire\Student\KursusSaya::class)->name('mahasiswa.kursus');
+    Route::get('/nilai', \App\Livewire\Student\NilaiMahasiswa::class)->name('mahasiswa.nilai');
+    Route::get('/sertifikat', function () {
+        return redirect()->route('mahasiswa.nilai');
+    })->name('mahasiswa.sertifikat');
+    Route::get('/tugas', \App\Livewire\Student\TugasMahasiswa::class)->name('mahasiswa.tugas');
 });

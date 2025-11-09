@@ -47,15 +47,13 @@
                     <span class="font-medium">Diskusi</span>
                 </a>
         
-                <a href="{{ route('mahasiswa.sertifikat') }}" class="flex items-center gap-4 px-6 py-4 border-l-4 transition-all duration-300 {{ request()->routeIs('certificates') ? 'bg-white/15 border-white' : 'border-transparent hover:bg-white/10 hover:border-white' }}">
-                    <span class="text-2xl">🏆</span>
-                    <span class="font-medium">Sertifikat</span>
-                </a>
-        
-                <a href="#" class="flex items-center gap-4 px-6 py-4 border-l-4 transition-all duration-300 {{ request()->routeIs('settings') ? 'bg-white/15 border-white' : 'border-transparent hover:bg-white/10 hover:border-white' }}">
-                    <span class="text-2xl">⚙️</span>
-                    <span class="font-medium">Pengaturan</span>
-                </a>
+                <form action="{{ route('logout') }}" method="POST" class="w-full">
+                    @csrf
+                    <button type="submit" class="w-full flex items-center gap-4 px-6 py-4 border-l-4 transition-all duration-300 border-transparent hover:bg-white/10 hover:border-white">
+                        <span class="text-2xl">🚪</span>
+                        <span class="font-medium">Logout</span>
+                    </button>
+                </form>
             </nav>
         </aside>
         
@@ -133,7 +131,11 @@
 
             <!-- Page Content -->
             <main class="p-4 lg:p-8">
-                @yield('content')
+                @hasSection('content')
+                    @yield('content')
+                @else
+                    {{ $slot ?? '' }}
+                @endif
             </main>
         </div>
     </div>
