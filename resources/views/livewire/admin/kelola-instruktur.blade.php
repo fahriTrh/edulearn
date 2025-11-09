@@ -32,7 +32,7 @@
 
     <div class="bg-white p-6 rounded-xl mb-8 shadow-sm flex flex-col md:flex-row gap-4 flex-wrap items-center">
         <div class="relative flex-1 min-w-[250px]">
-            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">🔍</span>
+            <x-heroicon-s-magnifying-glass class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input type="text" wire:model.live.debounce.300ms="search" placeholder="Cari nama atau keahlian..." class="w-full p-3 pl-10 border-2 border-gray-200 rounded-lg outline-none focus:border-indigo-500">
         </div>
         <select wire:model.live="statusFilter" class="w-full md:w-auto p-3 border-2 border-gray-200 rounded-lg outline-none cursor-pointer bg-white focus:border-indigo-500">
@@ -48,7 +48,7 @@
             <option value="Mobile">Mobile</option>
         </select>
         <button wire:click="openModal" class="w-full md:w-auto p-3 bg-gradient-to-br from-purple-600 to-purple-800 text-white rounded-lg cursor-pointer font-semibold flex items-center justify-center gap-2 transition-all hover:-translate-y-0.5 hover:shadow-lg">
-            <span>➕</span>
+            <x-heroicon-s-plus-circle class="w-5 h-5" />
             <span>Tambah Instruktur</span>
         </button>
     </div>
@@ -66,21 +66,24 @@
             </div>
             <div class="p-6">
                 <div class="text-xl font-bold text-gray-900 text-center mb-1">{{ $instructor['name'] }}</div>
-                <div class="text-center text-indigo-600 text-sm font-medium mb-4">🎯 {{ $instructor['specialty'] }}</div>
+                <div class="flex items-center justify-center gap-1 text-center text-indigo-600 text-sm font-medium mb-4">
+                    <x-heroicon-s-trophy class="w-4 h-4" />
+                    {{ $instructor['specialty'] }}
+                </div>
                 
                 <div class="flex items-center gap-2 justify-center mb-4">
-                    <span class="text-yellow-500">⭐</span>
+                    <x-heroicon-s-star class="w-5 h-5 text-yellow-500" />
                     <span class="font-bold text-gray-800">{{ $instructor['rating'] }}</span>
                     <span class="text-gray-500 text-sm">({{ $instructor['students'] }} mahasiswa)</span>
                 </div>
                 
                 <div class="space-y-2 mb-4">
                     <div class="flex items-center gap-2 text-sm text-gray-600">
-                        <span class="w-5 text-center">📧</span>
+                        <x-heroicon-s-envelope class="w-4 h-4" />
                         <span>{{ $instructor['email'] }}</span>
                     </div>
                     <div class="flex items-start gap-2 text-sm text-gray-600">
-                        <span class="w-5 text-center pt-1">📝</span>
+                        <x-heroicon-s-document-text class="w-4 h-4 mt-0.5" />
                         <span class="flex-1">{{ Str::limit($instructor['bio'], 50) }}...</span>
                     </div>
                 </div>
@@ -116,7 +119,9 @@
         <div class="bg-white p-8 rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-semibold">{{ $editingId ? 'Edit Instruktur' : 'Tambah Instruktur Baru' }}</h2>
-                <button wire:click="closeModal" class="text-2xl text-gray-500 hover:text-gray-800">✕</button>
+                <button wire:click="closeModal" class="text-gray-500 hover:text-gray-800">
+                    <x-heroicon-s-x-mark class="w-6 h-6" />
+                </button>
             </div>
             <form wire:submit="save">
                 <div class="mb-6">

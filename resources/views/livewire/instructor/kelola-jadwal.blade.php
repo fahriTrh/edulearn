@@ -31,7 +31,7 @@
                             </p>
                             <div class="flex flex-wrap gap-4 text-sm text-gray-600">
                                 <div class="flex items-center gap-1">
-                                    <span>🕐</span>
+                                    <x-heroicon-s-clock class="w-4 h-4" />
                                     <span>{{ \Carbon\Carbon::parse($schedule['start_time'])->format('d M Y, H:i') }}</span>
                                     @if($schedule['end_time'])
                                         <span> - {{ \Carbon\Carbon::parse($schedule['end_time'])->format('H:i') }}</span>
@@ -39,13 +39,13 @@
                                 </div>
                                 @if($schedule['location'])
                                     <div class="flex items-center gap-1">
-                                        <span>📍</span>
+                                        <x-heroicon-s-map-pin class="w-4 h-4" />
                                         <span>{{ $schedule['location'] }}</span>
                                     </div>
                                 @endif
                                 @if($schedule['is_online'] && $schedule['platform'])
                                     <div class="flex items-center gap-1">
-                                        <span>💻</span>
+                                        <x-heroicon-s-computer-desktop class="w-4 h-4" />
                                         <span>{{ $schedule['platform'] }}</span>
                                     </div>
                                 @endif
@@ -66,7 +66,9 @@
                 </div>
                 @empty
                 <div class="text-center py-12 text-gray-500">
-                    <div class="text-6xl mb-4">📅</div>
+                    <div class="flex justify-center mb-4">
+                        <x-heroicon-s-calendar class="w-16 h-16 text-gray-400" />
+                    </div>
                     <p>Belum ada jadwal</p>
                     <button wire:click="openModal" class="mt-4 px-6 py-2 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-colors">
                         Tambah Jadwal Pertama
@@ -83,7 +85,9 @@
         <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6" wire:click.stop>
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-bold text-gray-900">{{ $editingId ? 'Edit Jadwal' : 'Tambah Jadwal' }}</h2>
-                <button wire:click="closeModal" class="text-gray-400 hover:text-gray-600 text-2xl">✕</button>
+                <button wire:click="closeModal" class="text-gray-400 hover:text-gray-600">
+                    <x-heroicon-s-x-mark class="w-6 h-6" />
+                </button>
             </div>
 
             <form wire:submit.prevent="save" class="space-y-4">

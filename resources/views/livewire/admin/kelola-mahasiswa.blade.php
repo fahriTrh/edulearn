@@ -34,7 +34,7 @@
     {{-- Toolbar --}}
     <div class="bg-white p-6 rounded-xl mb-8 shadow-sm flex flex-col md:flex-row gap-4 flex-wrap items-center">
         <div class="relative flex-1 min-w-[250px]">
-            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">🔍</span>
+            <x-heroicon-s-magnifying-glass class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input type="text" wire:model.live.debounce.300ms="search" placeholder="Cari nama, email, atau NIM..." class="w-full p-3 pl-10 border-2 border-gray-200 rounded-lg outline-none focus:border-indigo-500">
         </div>
         <select wire:model.live="statusFilter" class="w-full md:w-auto p-3 border-2 border-gray-200 rounded-lg outline-none cursor-pointer bg-white focus:border-indigo-500">
@@ -44,7 +44,7 @@
             <option value="suspended">Suspended</option>
         </select>
         <button wire:click="openModal" class="w-full md:w-auto p-3 bg-gradient-to-br from-purple-600 to-purple-800 text-white rounded-lg cursor-pointer font-semibold flex items-center justify-center gap-2 transition-all hover:-translate-y-0.5 hover:shadow-lg">
-            <span>➕</span>
+            <x-heroicon-s-plus-circle class="w-5 h-5" />
             <span>Tambah Mahasiswa</span>
         </button>
     </div>
@@ -119,7 +119,9 @@
         <div class="bg-white p-8 rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-semibold">{{ $editingId ? 'Edit Mahasiswa' : 'Tambah Mahasiswa Baru' }}</h2>
-                <button wire:click="closeModal" class="text-2xl text-gray-500 hover:text-gray-800">✕</button>
+                <button wire:click="closeModal" class="text-gray-500 hover:text-gray-800">
+                    <x-heroicon-s-x-mark class="w-6 h-6" />
+                </button>
             </div>
             <form wire:submit="save">
                 <div class="mb-6">

@@ -5,7 +5,9 @@
         <div class="bg-white rounded-xl max-w-md w-full p-6 shadow-xl" wire:click.stop>
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-bold text-gray-900">Daftar Kelas</h2>
-                <button wire:click="closeModal" class="text-gray-400 hover:text-gray-600 text-2xl">✕</button>
+                <button wire:click="closeModal" class="text-gray-400 hover:text-gray-600">
+                    <x-heroicon-s-x-mark class="w-6 h-6" />
+                </button>
             </div>
 
             @if (session()->has('error'))
@@ -16,14 +18,20 @@
 
             <!-- Instructions -->
             <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <h3 class="text-sm font-semibold text-blue-900 mb-2">📋 Cara Mendaftar:</h3>
+                <h3 class="flex items-center gap-2 text-sm font-semibold text-blue-900 mb-2">
+                    <x-heroicon-s-clipboard-document-list class="w-4 h-4" />
+                    Cara Mendaftar:
+                </h3>
                 <ol class="text-xs text-blue-800 space-y-1.5 list-decimal list-inside">
                     <li>Dapatkan kode pendaftaran dari instruktur kelas Anda</li>
                     <li>Masukkan kode pendaftaran di kolom di bawah ini</li>
                     <li>Klik tombol "Daftar" untuk bergabung ke kelas</li>
                     <li>Setelah berhasil, Anda akan diarahkan ke halaman detail kelas</li>
                 </ol>
-                <p class="text-xs text-blue-700 mt-3 font-medium">💡 Tips: Kode pendaftaran biasanya terdiri dari 4-20 karakter</p>
+                <p class="flex items-center gap-2 text-xs text-blue-700 mt-3 font-medium">
+                    <x-heroicon-s-light-bulb class="w-4 h-4" />
+                    Tips: Kode pendaftaran biasanya terdiri dari 4-20 karakter
+                </p>
             </div>
 
             <form wire:submit.prevent="enroll" class="space-y-4">

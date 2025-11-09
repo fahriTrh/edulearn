@@ -12,7 +12,10 @@
     @endif
 
     <div class="bg-white rounded-xl shadow-sm p-8">
-        <h2 class="text-2xl font-bold mb-6">🔒 Ubah Password</h2>
+        <h2 class="flex items-center gap-2 text-2xl font-bold mb-6">
+            <x-heroicon-s-lock-closed class="w-7 h-7" />
+            Ubah Password
+        </h2>
         
         <form wire:submit="save">
             <div class="mb-6">

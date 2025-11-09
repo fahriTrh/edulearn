@@ -54,12 +54,14 @@
             </div>
             <div class="flex gap-2">
                 <button wire:click="openPostModal('announcement')" 
-                        class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium">
-                    📢 Announcement
+                        class="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium">
+                    <x-heroicon-s-megaphone class="w-5 h-5" />
+                    Announcement
                 </button>
                 <button wire:click="openPostModal('discussion')" 
-                        class="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium">
-                    💬 Discussion
+                        class="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium">
+                    <x-heroicon-s-chat-bubble-left-right class="w-5 h-5" />
+                    Discussion
                 </button>
             </div>
         </div>
@@ -77,12 +79,21 @@
                             <div class="flex items-center gap-2">
                                 <h4 class="font-semibold text-gray-900">{{ $post['user']['name'] }}</h4>
                                 @if($post['is_pinned'])
-                                    <span class="px-2 py-0.5 bg-blue-100 text-blue-600 rounded text-xs font-medium">📌 Pinned</span>
+                                    <span class="flex items-center gap-1 px-2 py-0.5 bg-blue-100 text-blue-600 rounded text-xs font-medium">
+                                        <x-heroicon-s-map-pin class="w-3 h-3" />
+                                        Pinned
+                                    </span>
                                 @endif
                                 @if($post['type'] === 'announcement')
-                                    <span class="px-2 py-0.5 bg-blue-100 text-blue-600 rounded text-xs font-medium">📢 Announcement</span>
+                                    <span class="flex items-center gap-1 px-2 py-0.5 bg-blue-100 text-blue-600 rounded text-xs font-medium">
+                                        <x-heroicon-s-megaphone class="w-3 h-3" />
+                                        Announcement
+                                    </span>
                                 @else
-                                    <span class="px-2 py-0.5 bg-green-100 text-green-600 rounded text-xs font-medium">💬 Discussion</span>
+                                    <span class="flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-600 rounded text-xs font-medium">
+                                        <x-heroicon-s-chat-bubble-left-right class="w-3 h-3" />
+                                        Discussion
+                                    </span>
                                 @endif
                             </div>
                             <p class="text-xs text-gray-500">{{ \Carbon\Carbon::parse($post['created_at'])->diffForHumans() }}</p>
@@ -92,13 +103,13 @@
                         <button wire:click="togglePinPost({{ $post['id'] }})" 
                                 class="p-1.5 text-gray-600 hover:bg-gray-100 rounded" 
                                 title="{{ $post['is_pinned'] ? 'Unpin' : 'Pin' }}">
-                            {{ $post['is_pinned'] ? '📌' : '📍' }}
+                            <x-heroicon-s-map-pin class="w-5 h-5" />
                         </button>
                         <button wire:click="deletePost({{ $post['id'] }})" 
                                 wire:confirm="Hapus post ini?"
                                 class="p-1.5 text-red-600 hover:bg-red-50 rounded" 
                                 title="Hapus">
-                            🗑️
+                            <x-heroicon-s-trash class="w-5 h-5" />
                         </button>
                     </div>
                 </div>
@@ -126,7 +137,7 @@
                         <button wire:click="deleteReply({{ $reply['id'] }})" 
                                 wire:confirm="Hapus balasan ini?"
                                 class="p-1 text-red-600 hover:bg-red-50 rounded text-xs">
-                            🗑️
+                            <x-heroicon-s-trash class="w-4 h-4" />
                         </button>
                     </div>
                     @endforeach
@@ -175,7 +186,7 @@
                 @forelse($materials as $material)
                 <div class="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg group">
                     <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                        📄
+                        <x-heroicon-s-document class="w-5 h-5 text-blue-600" />
                     </div>
                     <div class="flex-1 min-w-0">
                         <h4 class="text-sm font-medium text-gray-900 truncate">{{ $material['title'] }}</h4>
@@ -184,12 +195,12 @@
                     <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button wire:click="editMaterial({{ $material['id'] }})" 
                                 class="p-1.5 text-gray-600 hover:bg-gray-200 rounded" title="Edit">
-                            ✏️
+                            <x-heroicon-s-pencil class="w-5 h-5" />
                         </button>
                         <button wire:click="deleteMaterial({{ $material['id'] }})" 
                                 wire:confirm="Hapus materi ini?"
                                 class="p-1.5 text-red-600 hover:bg-red-50 rounded" title="Hapus">
-                            🗑️
+                            <x-heroicon-s-trash class="w-5 h-5" />
                         </button>
                     </div>
                 </div>
@@ -206,7 +217,7 @@
                 @forelse($formatted_assignments as $assignment)
                 <div class="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg group">
                     <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-                        📝
+                        <x-heroicon-s-document-text class="w-5 h-5 text-green-600" />
                     </div>
                     <div class="flex-1 min-w-0">
                         <h4 class="text-sm font-medium text-gray-900 truncate">{{ $assignment['title'] }}</h4>
@@ -364,7 +375,9 @@
         <div class="bg-white p-8 rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" wire:click.stop>
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-semibold">{{ $post_type === 'announcement' ? 'Create Announcement' : 'Create Discussion' }}</h2>
-                <button wire:click="closePostModal" class="text-2xl text-gray-500 hover:text-gray-800">✕</button>
+                <button wire:click="closePostModal" class="text-gray-500 hover:text-gray-800">
+                    <x-heroicon-s-x-mark class="w-6 h-6" />
+                </button>
             </div>
             <form wire:submit.prevent="createPost">
                 @if($post_type === 'discussion')

@@ -18,13 +18,15 @@
                 wire:click="switchTab('instructor')"
                 class="flex-1 px-6 py-3 rounded-lg font-semibold transition-all {{ $activeTab === 'instructor' ? 'bg-gradient-to-r from-purple-600 to-purple-800 text-white' : 'text-gray-600 hover:bg-gray-100' }}"
             >
-                🎓 Informasi Instruktur
+                <x-heroicon-s-academic-cap class="w-5 h-5" />
+                Informasi Instruktur
             </button>
             <button 
                 wire:click="switchTab('password')"
                 class="flex-1 px-6 py-3 rounded-lg font-semibold transition-all {{ $activeTab === 'password' ? 'bg-gradient-to-r from-purple-600 to-purple-800 text-white' : 'text-gray-600 hover:bg-gray-100' }}"
             >
-                🔒 Ubah Password
+                <x-heroicon-s-lock-closed class="w-5 h-5" />
+                Ubah Password
             </button>
         </div>
     </div>
@@ -115,7 +117,10 @@
     <!-- Tab 2: Instructor Information -->
     @if($activeTab === 'instructor')
     <div class="bg-white rounded-xl shadow-sm p-8">
-        <h2 class="text-2xl font-bold mb-6">🎓 Informasi Instruktur</h2>
+        <h2 class="flex items-center gap-2 text-2xl font-bold mb-6">
+            <x-heroicon-s-academic-cap class="w-7 h-7" />
+            Informasi Instruktur
+        </h2>
         
         <form wire:submit.prevent="saveInstructorInfo">
             <div class="space-y-6 mb-6">
@@ -150,7 +155,10 @@
     <!-- Tab 3: Change Password -->
     @if($activeTab === 'password')
     <div class="bg-white rounded-xl shadow-sm p-8">
-        <h2 class="text-2xl font-bold mb-6">🔒 Ubah Password</h2>
+        <h2 class="flex items-center gap-2 text-2xl font-bold mb-6">
+            <x-heroicon-s-lock-closed class="w-7 h-7" />
+            Ubah Password
+        </h2>
         
         <form wire:submit.prevent="savePassword">
             <div class="space-y-6 mb-6">

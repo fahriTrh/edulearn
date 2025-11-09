@@ -19,7 +19,10 @@
                         <h3 class="font-semibold text-gray-900 mb-1">{{ $assignment['title'] }}</h3>
                         <p class="text-sm text-gray-600 mb-2">{{ $assignment['class_name'] }}</p>
                         <div class="flex gap-4 text-xs text-gray-500 mb-2">
-                            <span>📅 {{ \Carbon\Carbon::parse($assignment['deadline'])->format('d M Y') }}</span>
+                            <span class="flex items-center gap-1">
+                                <x-heroicon-s-calendar class="w-3 h-3" />
+                                {{ \Carbon\Carbon::parse($assignment['deadline'])->format('d M Y') }}
+                            </span>
                         </div>
                         <div class="flex gap-3 text-xs">
                             <span class="px-2 py-1 bg-blue-100 text-blue-600 rounded">{{ $assignment['total_submissions'] }} Submit</span>
@@ -90,12 +93,12 @@
 
                         <div class="flex gap-4 text-sm text-gray-600 mb-4">
                             <div class="flex items-center gap-1">
-                                <span>📅</span>
+                                <x-heroicon-s-calendar class="w-4 h-4" />
                                 <span>Dikirim: {{ \Carbon\Carbon::parse($submission['submitted_at'])->format('d M Y, H:i') }}</span>
                             </div>
                             @if($submission['is_late'])
                                 <div class="flex items-center gap-1 text-red-600">
-                                    <span>⚠️</span>
+                                    <x-heroicon-s-exclamation-triangle class="w-4 h-4" />
                                     <span>Terlambat {{ $submission['days_late'] }} hari</span>
                                 </div>
                             @endif
@@ -104,7 +107,7 @@
                         @if($submission['file_path'])
                             <div class="mb-4">
                                 <a href="{{ asset($submission['file_path']) }}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors">
-                                    <span>📎</span>
+                                    <x-heroicon-s-paper-clip class="w-5 h-5" />
                                     <span>{{ $submission['file_name'] ?? 'Download File' }}</span>
                                 </a>
                             </div>
@@ -118,8 +121,9 @@
 
                         @if($submission['submission_link'])
                             <div class="mb-4">
-                                <a href="{{ $submission['submission_link'] }}" target="_blank" class="text-blue-600 hover:underline text-sm">
-                                    🔗 {{ $submission['submission_link'] }}
+                                <a href="{{ $submission['submission_link'] }}" target="_blank" class="flex items-center gap-2 text-blue-600 hover:underline text-sm">
+                                    <x-heroicon-s-link class="w-4 h-4" />
+                                    {{ $submission['submission_link'] }}
                                 </a>
                             </div>
                         @endif
@@ -140,7 +144,9 @@
                     </div>
                     @empty
                     <div class="text-center py-12 text-gray-500">
-                        <div class="text-6xl mb-4">📝</div>
+                        <div class="flex justify-center mb-4">
+                            <x-heroicon-s-document-text class="w-16 h-16 text-gray-400" />
+                        </div>
                         <p>Belum ada submission untuk tugas ini</p>
                     </div>
                     @endforelse
@@ -148,7 +154,9 @@
             </div>
             @else
             <div class="bg-white rounded-xl shadow-sm p-12 text-center">
-                <div class="text-6xl mb-4">📋</div>
+                <div class="flex justify-center mb-4">
+                    <x-heroicon-s-clipboard-document-list class="w-16 h-16 text-gray-400" />
+                </div>
                 <h3 class="text-xl font-semibold text-gray-800 mb-2">Pilih Tugas</h3>
                 <p class="text-gray-600">Pilih tugas dari daftar di sebelah kiri untuk melihat submission</p>
             </div>
@@ -162,7 +170,9 @@
         <div class="bg-white rounded-2xl max-w-lg w-full p-6" wire:click.stop>
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-bold text-gray-900">Beri Nilai</h2>
-                <button wire:click="closeGradingModal" class="text-gray-400 hover:text-gray-600 text-2xl">✕</button>
+                <button wire:click="closeGradingModal" class="text-gray-400 hover:text-gray-600">
+                    <x-heroicon-s-x-mark class="w-6 h-6" />
+                </button>
             </div>
 
             <form wire:submit.prevent="saveGrade" class="space-y-4">

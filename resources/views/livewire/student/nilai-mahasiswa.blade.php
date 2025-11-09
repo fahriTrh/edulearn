@@ -12,7 +12,10 @@
             <div class="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent mb-2">
                 {{ $avgGrade }}
             </div>
-            <div class="text-green-500 text-sm">📊 Dari {{ $completedCourses }} kursus selesai</div>
+            <div class="flex items-center gap-1 text-green-500 text-sm">
+                <x-heroicon-s-chart-bar class="w-4 h-4" />
+                Dari {{ $completedCourses }} kursus selesai
+            </div>
         </div>
 
         <div class="bg-white p-6 md:p-8 rounded-xl shadow-sm border-l-4 border-purple-600">
@@ -20,7 +23,10 @@
             <div class="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent mb-2">
                 {{ $totalCertificates }}
             </div>
-            <div class="text-green-500 text-sm">🏆 Total sertifikat</div>
+            <div class="flex items-center gap-1 text-green-500 text-sm">
+                <x-heroicon-s-trophy class="w-4 h-4" />
+                Total sertifikat
+            </div>
         </div>
 
         <div class="bg-white p-6 md:p-8 rounded-xl shadow-sm border-l-4 border-purple-600">
@@ -28,7 +34,10 @@
             <div class="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent mb-2">
                 {{ $activeCourses }}
             </div>
-            <div class="text-green-500 text-sm">🎯 Sedang berjalan</div>
+            <div class="flex items-center gap-1 text-green-500 text-sm">
+                <x-heroicon-s-trophy class="w-4 h-4" />
+                Sedang berjalan
+            </div>
         </div>
 
         <div class="bg-white p-6 md:p-8 rounded-xl shadow-sm border-l-4 border-purple-600">
@@ -36,7 +45,10 @@
             <div class="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent mb-2">
                 {{ $gradeACertificates }}
             </div>
-            <div class="text-green-500 text-sm">⭐ Dengan predikat A</div>
+            <div class="flex items-center gap-1 text-green-500 text-sm">
+                <x-heroicon-s-star class="w-4 h-4" />
+                Dengan predikat A
+            </div>
         </div>
     </div>
 
@@ -73,7 +85,10 @@
                                 @if($course['status'] === 'completed')
                                     <span class="inline-block px-4 py-2 rounded-full text-sm font-semibold bg-green-100 text-green-600">Lulus</span>
                                     @if($course['has_certificate'])
-                                        <span class="inline-flex items-center gap-1 px-2 py-1 bg-yellow-400 rounded-lg text-xs font-semibold ml-2">🏆 Sertifikat</span>
+                                        <span class="inline-flex items-center gap-1 px-2 py-1 bg-yellow-400 rounded-lg text-xs font-semibold ml-2">
+                                            <x-heroicon-s-trophy class="w-3 h-3" />
+                                            Sertifikat
+                                        </span>
                                     @endif
                                 @else
                                     <span class="inline-block px-4 py-2 rounded-full text-sm font-semibold bg-orange-100 text-orange-600">Berlangsung</span>
@@ -87,8 +102,9 @@
                                             Detail
                                         </button>
                                         @if($course['has_certificate'])
-                                            <button class="px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-800 text-white rounded-lg font-semibold hover:opacity-90 transition-opacity">
-                                                🏆 Sertifikat
+                                            <button class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-800 text-white rounded-lg font-semibold hover:opacity-90 transition-opacity">
+                                                <x-heroicon-s-trophy class="w-5 h-5" />
+                                                Sertifikat
                                             </button>
                                         @endif
                                     </div>
@@ -130,7 +146,10 @@
                         @if($course['status'] === 'completed')
                             <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-600">Lulus</span>
                             @if($course['has_certificate'])
-                                <span class="inline-flex items-center gap-1 px-2 py-1 bg-yellow-400 rounded-lg text-xs font-semibold ml-2">🏆 Sertifikat</span>
+                                <span class="inline-flex items-center gap-1 px-2 py-1 bg-yellow-400 rounded-lg text-xs font-semibold ml-2">
+                                    <x-heroicon-s-trophy class="w-3 h-3" />
+                                    Sertifikat
+                                </span>
                             @endif
                         @else
                             <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-orange-100 text-orange-600">Berlangsung</span>
@@ -151,8 +170,9 @@
                                 Detail
                             </button>
                             @if($course['has_certificate'])
-                                <button class="flex-1 px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-800 text-white rounded-lg font-semibold hover:opacity-90 transition-opacity">
-                                    🏆 Sertifikat
+                                <button class="flex items-center justify-center gap-2 flex-1 px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-800 text-white rounded-lg font-semibold hover:opacity-90 transition-opacity">
+                                    <x-heroicon-s-trophy class="w-5 h-5" />
+                                    Sertifikat
                                 </button>
                             @endif
                         </div>

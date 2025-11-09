@@ -4,8 +4,8 @@
         <!-- Stat Card 1 -->
         <div class="bg-white rounded-xl shadow-sm p-6 hover:-translate-y-1 hover:shadow-md transition-all">
             <div class="flex items-center gap-4">
-                <div class="w-14 h-14 bg-indigo-100 rounded-xl flex items-center justify-center text-2xl">
-                    📚
+                <div class="w-14 h-14 bg-indigo-100 rounded-xl flex items-center justify-center">
+                    <x-heroicon-s-academic-cap class="w-8 h-8 text-indigo-600" />
                 </div>
                 <div>
                     <h3 class="text-2xl font-bold text-gray-900">{{ $activeCourses }}</h3>
@@ -17,8 +17,8 @@
         <!-- Stat Card 2 -->
         <div class="bg-white rounded-xl shadow-sm p-6 hover:-translate-y-1 hover:shadow-md transition-all">
             <div class="flex items-center gap-4">
-                <div class="w-14 h-14 bg-green-100 rounded-xl flex items-center justify-center text-2xl">
-                    ✅
+                <div class="w-14 h-14 bg-green-100 rounded-xl flex items-center justify-center">
+                    <x-heroicon-s-check-circle class="w-8 h-8 text-green-600" />
                 </div>
                 <div>
                     <h3 class="text-2xl font-bold text-gray-900">{{ $completedAssignments }}</h3>
@@ -30,8 +30,8 @@
         <!-- Stat Card 3 -->
         <div class="bg-white rounded-xl shadow-sm p-6 hover:-translate-y-1 hover:shadow-md transition-all">
             <div class="flex items-center gap-4">
-                <div class="w-14 h-14 bg-orange-100 rounded-xl flex items-center justify-center text-2xl">
-                    ⏰
+                <div class="w-14 h-14 bg-orange-100 rounded-xl flex items-center justify-center">
+                    <x-heroicon-s-clock class="w-8 h-8 text-orange-600" />
                 </div>
                 <div>
                     <h3 class="text-2xl font-bold text-gray-900">{{ $pendingAssignments }}</h3>
@@ -43,8 +43,8 @@
         <!-- Stat Card 4 -->
         <div class="bg-white rounded-xl shadow-sm p-6 hover:-translate-y-1 hover:shadow-md transition-all">
             <div class="flex items-center gap-4">
-                <div class="w-14 h-14 bg-red-100 rounded-xl flex items-center justify-center text-2xl">
-                    🎯
+                <div class="w-14 h-14 bg-red-100 rounded-xl flex items-center justify-center">
+                    <x-heroicon-s-trophy class="w-8 h-8 text-red-600" />
                 </div>
                 <div>
                     <h3 class="text-2xl font-bold text-gray-900">{{ $averageGrade }}</h3>
@@ -60,17 +60,17 @@
         <div class="lg:col-span-2 bg-white rounded-xl shadow-sm p-6">
             <div class="flex items-center justify-between mb-6">
                 <h2 class="text-xl font-bold text-gray-900">Kursus Sedang Berjalan</h2>
-                <a href="{{ route('mahasiswa.kursus') }}" class="text-indigo-600 text-sm font-semibold hover:underline">Lihat Semua →</a>
+                <a href="{{ route('mahasiswa.kursus') }}" wire:navigate class="text-indigo-600 text-sm font-semibold hover:underline">Lihat Semua →</a>
             </div>
 
             <div class="space-y-4">
                 @forelse($coursesInProgress as $course)
-                <a href="{{ route('mahasiswa.detail-kursus', $course['id']) }}" class="flex gap-4 p-4 border border-gray-200 rounded-xl hover:border-indigo-600 hover:shadow-md transition-all cursor-pointer">
-                    <div class="w-20 h-20 bg-gradient-to-br from-indigo-600 to-purple-700 rounded-lg flex items-center justify-center text-3xl flex-shrink-0">
+                <a href="{{ route('mahasiswa.detail-kursus', $course['id']) }}" wire:navigate class="flex gap-4 p-4 border border-gray-200 rounded-xl hover:border-indigo-600 hover:shadow-md transition-all cursor-pointer">
+                    <div class="w-20 h-20 bg-gradient-to-br from-indigo-600 to-purple-700 rounded-lg flex items-center justify-center flex-shrink-0">
                         @if($course['cover_image'])
                             <img src="{{ $course['cover_image'] }}" alt="{{ $course['title'] }}" class="w-full h-full object-cover rounded-lg">
                         @else
-                            📚
+                            <x-heroicon-s-academic-cap class="w-10 h-10 text-white" />
                         @endif
                     </div>
                     <div class="flex-1">
@@ -85,7 +85,7 @@
                 @empty
                 <div class="text-center py-8 text-gray-500">
                     <p class="mb-2">Belum ada kursus aktif</p>
-                    <a href="{{ route('mahasiswa.kursus') }}" class="text-indigo-600 hover:underline">Lihat semua kursus →</a>
+                    <a href="{{ route('mahasiswa.kursus') }}" wire:navigate class="text-indigo-600 hover:underline">Lihat semua kursus →</a>
                 </div>
                 @endforelse
             </div>
@@ -102,13 +102,25 @@
                         <p class="text-gray-600 text-xs mb-2">{{ $assignment['class_name'] }}</p>
                         <div class="flex items-center justify-between">
                             @if($assignment['days_left'] < 0)
-                                <p class="text-red-500 text-sm font-semibold">⏰ Terlambat {{ abs($assignment['days_left']) }} hari</p>
+                                <p class="flex items-center gap-1 text-red-500 text-sm font-semibold">
+                                    <x-heroicon-s-clock class="w-4 h-4" />
+                                    Terlambat {{ abs($assignment['days_left']) }} hari
+                                </p>
                             @elseif($assignment['days_left'] <= 3)
-                                <p class="text-red-500 text-sm font-semibold">⏰ Deadline: {{ $assignment['days_left'] }} hari lagi</p>
+                                <p class="flex items-center gap-1 text-red-500 text-sm font-semibold">
+                                    <x-heroicon-s-clock class="w-4 h-4" />
+                                    Deadline: {{ $assignment['days_left'] }} hari lagi
+                                </p>
                             @elseif($assignment['days_left'] <= 7)
-                                <p class="text-orange-500 text-sm font-semibold">⏰ Deadline: {{ $assignment['days_left'] }} hari lagi</p>
+                                <p class="flex items-center gap-1 text-orange-500 text-sm font-semibold">
+                                    <x-heroicon-s-clock class="w-4 h-4" />
+                                    Deadline: {{ $assignment['days_left'] }} hari lagi
+                                </p>
                             @else
-                                <p class="text-gray-500 text-sm font-semibold">⏰ Deadline: {{ $assignment['days_left'] }} hari lagi</p>
+                                <p class="flex items-center gap-1 text-gray-500 text-sm font-semibold">
+                                    <x-heroicon-s-clock class="w-4 h-4" />
+                                    Deadline: {{ $assignment['days_left'] }} hari lagi
+                                </p>
                             @endif
                             @if($assignment['is_submitted'])
                                 @if($assignment['is_graded'])

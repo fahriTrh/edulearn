@@ -15,8 +15,8 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div class="bg-white rounded-xl shadow-sm p-6 hover:-translate-y-1 hover:shadow-md transition-all">
             <div class="flex items-center gap-4">
-                <div class="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center text-2xl">
-                    👥
+                <div class="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center">
+                    <x-heroicon-s-users class="w-8 h-8 text-blue-600" />
                 </div>
                 <div>
                     <h3 class="text-2xl font-bold text-gray-900">{{ $totalStudents }}</h3>
@@ -27,8 +27,8 @@
 
         <div class="bg-white rounded-xl shadow-sm p-6 hover:-translate-y-1 hover:shadow-md transition-all">
             <div class="flex items-center gap-4">
-                <div class="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center text-2xl">
-                    📋
+                <div class="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center">
+                    <x-heroicon-s-clipboard-document-list class="w-8 h-8 text-purple-600" />
                 </div>
                 <div>
                     <h3 class="text-2xl font-bold text-gray-900">{{ $totalAssignments }}</h3>
@@ -39,8 +39,8 @@
 
         <div class="bg-white rounded-xl shadow-sm p-6 hover:-translate-y-1 hover:shadow-md transition-all">
             <div class="flex items-center gap-4">
-                <div class="w-14 h-14 bg-green-100 rounded-xl flex items-center justify-center text-2xl">
-                    📚
+                <div class="w-14 h-14 bg-green-100 rounded-xl flex items-center justify-center">
+                    <x-heroicon-s-academic-cap class="w-8 h-8 text-green-600" />
                 </div>
                 <div>
                     <h3 class="text-2xl font-bold text-gray-900">{{ $totalMaterials }}</h3>
@@ -51,8 +51,8 @@
 
         <div class="bg-white rounded-xl shadow-sm p-6 hover:-translate-y-1 hover:shadow-md transition-all">
             <div class="flex items-center gap-4">
-                <div class="w-14 h-14 bg-orange-100 rounded-xl flex items-center justify-center text-2xl">
-                    ⏰
+                <div class="w-14 h-14 bg-orange-100 rounded-xl flex items-center justify-center">
+                    <x-heroicon-s-clock class="w-8 h-8 text-orange-600" />
                 </div>
                 <div>
                     <h3 class="text-2xl font-bold text-gray-900">{{ $pendingSubmissions }}</h3>
@@ -69,14 +69,17 @@
             <div class="bg-white rounded-xl shadow-sm p-6">
                 <h2 class="text-xl font-semibold text-gray-800 mb-4">Quick Actions</h2>
                 <div class="space-y-3">
-                    <a href="{{ route('dosen.kelas') }}" class="block w-full px-4 py-3 bg-gradient-to-r from-purple-600 to-purple-800 text-white rounded-lg font-semibold hover:opacity-90 transition-opacity text-center">
-                        📚 Kelola Kelas
+                    <a href="{{ route('dosen.kelas') }}" class="flex items-center justify-center gap-2 w-full px-4 py-3 bg-gradient-to-r from-purple-600 to-purple-800 text-white rounded-lg font-semibold hover:opacity-90 transition-opacity text-center">
+                        <x-heroicon-s-academic-cap class="w-5 h-5" />
+                        Kelola Kelas
                     </a>
-                    <a href="{{ route('dosen.nilai') }}" class="block w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-lg font-semibold hover:opacity-90 transition-opacity text-center">
-                        📊 Nilai
+                    <a href="{{ route('dosen.nilai') }}" class="flex items-center justify-center gap-2 w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-lg font-semibold hover:opacity-90 transition-opacity text-center">
+                        <x-heroicon-s-chart-bar class="w-5 h-5" />
+                        Nilai
                     </a>
-                    <a href="{{ route('dosen.jadwal') }}" class="block w-full px-4 py-3 bg-gradient-to-r from-green-600 to-green-800 text-white rounded-lg font-semibold hover:opacity-90 transition-opacity text-center">
-                        📅 Kelola Jadwal
+                    <a href="{{ route('dosen.jadwal') }}" class="flex items-center justify-center gap-2 w-full px-4 py-3 bg-gradient-to-r from-green-600 to-green-800 text-white rounded-lg font-semibold hover:opacity-90 transition-opacity text-center">
+                        <x-heroicon-s-calendar class="w-5 h-5" />
+                        Kelola Jadwal
                     </a>
                 </div>
             </div>
@@ -88,7 +91,7 @@
                     @forelse($todaySchedules as $schedule)
                     <div class="p-3 border border-gray-200 rounded-lg">
                         <div class="flex items-center gap-2 text-purple-600 font-semibold text-sm mb-1">
-                            <span>🕐</span>
+                            <x-heroicon-s-clock class="w-4 h-4" />
                             <span>{{ $schedule->start_time->format('H:i') }}</span>
                             @if($schedule->end_time)
                                 <span>- {{ $schedule->end_time->format('H:i') }}</span>
@@ -127,7 +130,7 @@
                             </span>
                         </div>
                         <div class="flex items-center gap-2 text-sm text-gray-600">
-                            <span>📅</span>
+                            <x-heroicon-s-calendar class="w-4 h-4" />
                             <span>{{ $assignment->deadline->format('d M Y, H:i') }}</span>
                         </div>
                     </div>
@@ -160,7 +163,7 @@
                             @endif
                         </div>
                         <div class="flex items-center gap-2 text-xs text-gray-500">
-                            <span>📅</span>
+                            <x-heroicon-s-calendar class="w-4 h-4" />
                             <span>{{ $submission->submitted_at->format('d M Y, H:i') }}</span>
                         </div>
                     </div>
@@ -177,7 +180,7 @@
         <h2 class="text-xl font-semibold text-gray-800 mb-6">Ringkasan Kelas</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             @forelse($classPerformance as $class)
-            <a href="{{ route('dosen.detail-kelas', $class['id']) }}" class="block border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all relative group">
+            <a href="{{ route('dosen.detail-kelas', $class['id']) }}" wire:navigate class="block border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all relative group">
                 <button wire:click.stop="deleteClass({{ $class['id'] }})" 
                         wire:confirm="Apakah Anda yakin ingin menghapus kelas ini? Tindakan ini tidak dapat dibatalkan."
                         class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1.5 text-red-600 hover:bg-red-50 rounded z-10" 

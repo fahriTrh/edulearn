@@ -148,7 +148,9 @@
             </div>
             @else
             <div class="bg-white rounded-xl shadow-sm p-12 text-center">
-                <div class="text-6xl mb-4">📊</div>
+                <div class="flex justify-center mb-4">
+                    <x-heroicon-s-chart-bar class="w-16 h-16 text-gray-400" />
+                </div>
                 <h3 class="text-xl font-semibold text-gray-800 mb-2">Pilih Kelas</h3>
                 <p class="text-gray-600">Pilih kelas dari daftar di sebelah kiri untuk menghitung nilai akhir</p>
             </div>

@@ -55,7 +55,10 @@
             <div class="p-4">
                 <h3 class="text-base font-medium text-gray-900 mb-1 line-clamp-2" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">{{ $course['title'] }}</h3>
                 <p class="text-sm text-gray-600 mb-2">{{ $course['code'] }}</p>
-                <p class="text-xs text-gray-500 mb-2">👨‍🏫 {{ $course['instructor'] }}</p>
+                <p class="flex items-center gap-1 text-xs text-gray-500 mb-2">
+                    <x-heroicon-s-academic-cap class="w-3 h-3" />
+                    {{ $course['instructor'] }}
+                </p>
                 
                 <!-- Quick Stats -->
                 <div class="flex items-center gap-3 text-xs text-gray-500 mb-3">
@@ -83,12 +86,12 @@
                             Nilai
                         </a>
                     @else
-                        <a href="{{ route('mahasiswa.detail-kursus', $course['id']) }}" 
+                        <a href="{{ route('mahasiswa.detail-kursus', $course['id']) }}" wire:navigate
                            class="flex-1 text-center px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded text-xs font-medium">
                             Lanjutkan
                         </a>
                     @endif
-                    <a href="{{ route('mahasiswa.detail-kursus', $course['id']) }}" 
+                    <a href="{{ route('mahasiswa.detail-kursus', $course['id']) }}" wire:navigate
                        class="px-3 py-1.5 text-gray-600 hover:bg-gray-100 rounded text-xs" title="Detail">
                         Detail
                     </a>
@@ -97,7 +100,9 @@
         </div>
         @empty
         <div class="col-span-full text-center py-12">
-            <div class="text-6xl mb-4">📚</div>
+            <div class="flex justify-center mb-4">
+                <x-heroicon-s-academic-cap class="w-16 h-16 text-gray-400" />
+            </div>
             <h3 class="text-xl font-semibold text-gray-800 mb-2">Belum ada kursus</h3>
             <p class="text-gray-600">Daftar ke kursus untuk memulai pembelajaran</p>
         </div>

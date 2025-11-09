@@ -22,7 +22,7 @@ class DashboardMahasiswa extends Component
     {
         $user = Auth::user();
         
-        // Get enrolled classes
+        // Get enrolled classes with eager loading
         $enrolledClasses = $user->classes()
             ->with(['instructor', 'materials', 'assignments'])
             ->where('status', 'active')
@@ -36,22 +36,25 @@ class DashboardMahasiswa extends Component
             ->where('status', 'published')
             ->get();
         
-        // Completed assignments (submitted and graded)
-        $completedAssignments = AssignmentSubmission::where('user_id', $user->id)
-            ->whereIn('assignment_id', $allAssignments->pluck('id'))
-            ->whereNotNull('score')
-            ->count();
+        $allAssignmentIds = $allAssignments->pluck('id');
         
-        // Pending assignments (not submitted or submitted but not graded)
-        $pendingAssignments = $allAssignments->filter(function ($assignment) use ($user) {
+        // Get ALL submissions for this user in ONE query (eliminates N+1)
+        $allSubmissions = AssignmentSubmission::where('user_id', $user->id)
+            ->whereIn('assignment_id', $allAssignmentIds)
+            ->get()
+            ->keyBy('assignment_id'); // Key by assignment_id for fast lookup
+        
+        // Completed assignments (submitted and graded) - use collection
+        $completedAssignments = $allSubmissions->whereNotNull('score')->count();
+        
+        // Pending assignments (not submitted or submitted but not graded) - use collection
+        $pendingAssignments = $allAssignments->filter(function ($assignment) use ($allSubmissions) {
             // Only count assignments that haven't passed deadline or allow late submission
             if ($assignment->deadline < now() && !$assignment->allow_late_submission) {
                 return false;
             }
             
-            $submission = AssignmentSubmission::where('assignment_id', $assignment->id)
-                ->where('user_id', $user->id)
-                ->first();
+            $submission = $allSubmissions->get($assignment->id);
             
             // Pending if: no submission OR submission exists but no score
             return !$submission || ($submission && is_null($submission->score));
@@ -70,22 +73,31 @@ class DashboardMahasiswa extends Component
         
         $averageGrade = $averageGrade ? number_format($averageGrade, 1) : '0.0';
 
-        // Get courses in progress with progress calculation
-        $coursesInProgress = $enrolledClasses->map(function ($class) use ($user) {
+        // Get ALL material completions and assignment submissions in ONE query each (eliminates N+1)
+        $allMaterialIds = $enrolledClasses->flatMap(function ($class) {
+            return $class->materials->pluck('id');
+        })->unique();
+        
+        $allCompletedMaterials = MaterialCompletion::where('user_id', $user->id)
+            ->whereIn('material_id', $allMaterialIds)
+            ->where('is_completed', true)
+            ->pluck('material_id')
+            ->toArray();
+        
+        $allCompletedAssignments = $allSubmissions->whereNotNull('score')->pluck('assignment_id')->toArray();
+
+        // Get courses in progress with progress calculation - use collections instead of queries
+        $coursesInProgress = $enrolledClasses->map(function ($class) use ($user, $allCompletedMaterials, $allCompletedAssignments) {
             $totalMaterials = $class->materials->where('is_published', true)->count();
             $totalAssignments = $class->assignments->where('status', 'published')->count();
             $totalItems = $totalMaterials + $totalAssignments;
             
-            // Calculate progress based on completed materials and assignments
-            $completedMaterials = MaterialCompletion::where('user_id', $user->id)
-                ->whereIn('material_id', $class->materials->pluck('id'))
-                ->where('is_completed', true)
-                ->count();
+            // Calculate progress using collections (no database queries)
+            $classMaterialIds = $class->materials->pluck('id')->toArray();
+            $completedMaterials = count(array_intersect($allCompletedMaterials, $classMaterialIds));
             
-            $completedAssignments = AssignmentSubmission::where('user_id', $user->id)
-                ->whereIn('assignment_id', $class->assignments->pluck('id'))
-                ->whereNotNull('score')
-                ->count();
+            $classAssignmentIds = $class->assignments->where('status', 'published')->pluck('id')->toArray();
+            $completedAssignments = count(array_intersect($allCompletedAssignments, $classAssignmentIds));
             
             $completedItems = $completedMaterials + $completedAssignments;
             $progress = $totalItems > 0 ? round(($completedItems / $totalItems) * 100) : 0;
@@ -101,21 +113,18 @@ class DashboardMahasiswa extends Component
             ];
         })->take(3); // Show only 3 courses
 
-        // Get upcoming assignments (deadline in future, not submitted)
-        $upcomingAssignments = Assignment::whereIn('class_id', $enrolledClasses->pluck('id'))
-            ->where('status', 'published')
+        // Get upcoming assignments (deadline in future, not submitted) - use existing data
+        $upcomingAssignments = $allAssignments
             ->where('deadline', '>', now())
-            ->with(['class', 'submissions' => function($query) use ($user) {
-                $query->where('user_id', $user->id);
-            }])
-            ->get()
-            ->filter(function ($assignment) use ($user) {
+            ->filter(function ($assignment) use ($allSubmissions) {
                 // Only show if not submitted or submitted but not graded
-                $submission = $assignment->submissions->first();
+                $submission = $allSubmissions->get($assignment->id);
                 return !$submission || ($submission && is_null($submission->score));
             })
-            ->map(function ($assignment) use ($user) {
-                $submission = $assignment->submissions->first();
+            ->map(function ($assignment) use ($allSubmissions, $enrolledClasses) {
+                $submission = $allSubmissions->get($assignment->id);
+                $class = $enrolledClasses->firstWhere('id', $assignment->class_id);
+                
                 // Calculate days left properly (rounded, not float)
                 $deadline = \Carbon\Carbon::parse($assignment->deadline);
                 $now = now();
@@ -124,7 +133,7 @@ class DashboardMahasiswa extends Component
                 return [
                     'id' => $assignment->id,
                     'title' => $assignment->title,
-                    'class_name' => $assignment->class->title,
+                    'class_name' => $class->title ?? 'N/A',
                     'deadline' => $assignment->deadline,
                     'days_left' => $daysLeft,
                     'is_submitted' => $submission ? true : false,

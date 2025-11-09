@@ -53,8 +53,9 @@
                 </div>
             </div>
             <button wire:click="openPostModal" 
-                    class="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium">
-                💬 Create Discussion
+                    class="w-full flex items-center justify-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium">
+                <x-heroicon-s-chat-bubble-left-right class="w-5 h-5" />
+                Create Discussion
             </button>
         </div>
 
@@ -71,12 +72,21 @@
                             <div class="flex items-center gap-2">
                                 <h4 class="font-semibold text-gray-900">{{ $post['user']['name'] }}</h4>
                                 @if($post['is_pinned'])
-                                    <span class="px-2 py-0.5 bg-blue-100 text-blue-600 rounded text-xs font-medium">📌 Pinned</span>
+                                    <span class="flex items-center gap-1 px-2 py-0.5 bg-blue-100 text-blue-600 rounded text-xs font-medium">
+                                        <x-heroicon-s-map-pin class="w-3 h-3" />
+                                        Pinned
+                                    </span>
                                 @endif
                                 @if($post['type'] === 'announcement')
-                                    <span class="px-2 py-0.5 bg-blue-100 text-blue-600 rounded text-xs font-medium">📢 Announcement</span>
+                                    <span class="flex items-center gap-1 px-2 py-0.5 bg-blue-100 text-blue-600 rounded text-xs font-medium">
+                                        <x-heroicon-s-megaphone class="w-3 h-3" />
+                                        Announcement
+                                    </span>
                                 @else
-                                    <span class="px-2 py-0.5 bg-green-100 text-green-600 rounded text-xs font-medium">💬 Discussion</span>
+                                    <span class="flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-600 rounded text-xs font-medium">
+                                        <x-heroicon-s-chat-bubble-left-right class="w-3 h-3" />
+                                        Discussion
+                                    </span>
                                 @endif
                             </div>
                             <p class="text-xs text-gray-500">{{ \Carbon\Carbon::parse($post['created_at'])->diffForHumans() }}</p>
@@ -141,13 +151,13 @@
                 @forelse($materials as $material)
                 <div class="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg group">
                     <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                        📄
+                        <x-heroicon-s-document class="w-5 h-5 text-blue-600" />
                     </div>
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center gap-2">
                             <h4 class="text-sm font-medium text-gray-900 truncate">{{ $material['title'] }}</h4>
                             @if($material['is_completed'])
-                                <span class="text-xs text-green-600">✓</span>
+                                <x-heroicon-s-check-circle class="w-4 h-4 text-green-600" />
                             @endif
                         </div>
                         <p class="text-xs text-gray-500">{{ $material['type'] }} • {{ $material['uploadDate'] }}</p>
@@ -185,7 +195,7 @@
                 @forelse($assignments as $assignment)
                 <div class="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg group">
                     <div class="w-10 h-10 {{ $assignment['has_submission'] ? 'bg-green-100' : 'bg-orange-100' }} rounded-full flex items-center justify-center flex-shrink-0">
-                        📝
+                        <x-heroicon-s-document-text class="w-5 h-5 {{ $assignment['has_submission'] ? 'text-green-600' : 'text-orange-600' }}" />
                     </div>
                     <div class="flex-1 min-w-0">
                         <h4 class="text-sm font-medium text-gray-900 truncate">{{ $assignment['title'] }}</h4>
@@ -274,9 +284,18 @@
                 <div class="mb-6 p-4 bg-gray-50 rounded-lg">
                     <p class="text-sm text-gray-700 mb-2">{{ $selectedAssignment->description }}</p>
                     <div class="flex items-center gap-4 text-xs text-gray-600">
-                        <span>📅 Deadline: {{ \Carbon\Carbon::parse($selectedAssignment->deadline)->format('d M Y, H:i') }}</span>
-                        <span>📊 Weight: {{ $selectedAssignment->weight_percentage }}%</span>
-                        <span>📎 Type: {{ ucfirst($selectedAssignment->submission_type) }}</span>
+                        <span class="flex items-center gap-1">
+                            <x-heroicon-s-calendar class="w-3 h-3" />
+                            Deadline: {{ \Carbon\Carbon::parse($selectedAssignment->deadline)->format('d M Y, H:i') }}
+                        </span>
+                        <span class="flex items-center gap-1">
+                            <x-heroicon-s-chart-bar class="w-3 h-3" />
+                            Weight: {{ $selectedAssignment->weight_percentage }}%
+                        </span>
+                        <span class="flex items-center gap-1">
+                            <x-heroicon-s-paper-clip class="w-3 h-3" />
+                            Type: {{ ucfirst($selectedAssignment->submission_type) }}
+                        </span>
                     </div>
                 </div>
 
@@ -392,7 +411,9 @@
         <div class="bg-white p-8 rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" wire:click.stop>
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-semibold">Create Discussion</h2>
-                <button wire:click="closePostModal" class="text-2xl text-gray-500 hover:text-gray-800">✕</button>
+                <button wire:click="closePostModal" class="text-gray-500 hover:text-gray-800">
+                    <x-heroicon-s-x-mark class="w-6 h-6" />
+                </button>
             </div>
             <form wire:submit.prevent="createPost">
                 <div class="mb-6">
@@ -418,4 +439,3 @@
     </div>
     @endif
 </div>
-

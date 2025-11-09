@@ -8,8 +8,8 @@
     <!-- Stats Grid -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
         <div class="bg-white p-4 md:p-6 rounded-xl shadow-sm flex items-center gap-4">
-            <div class="w-14 h-14 md:w-16 md:h-16 bg-red-100 rounded-xl flex items-center justify-center text-2xl md:text-3xl">
-                ⚠️
+            <div class="w-14 h-14 md:w-16 md:h-16 bg-red-100 rounded-xl flex items-center justify-center">
+                <x-heroicon-s-exclamation-triangle class="w-8 h-8 md:w-10 md:h-10 text-red-600" />
             </div>
             <div>
                 <h3 class="text-2xl md:text-3xl font-bold text-purple-600">{{ $urgentCount }}</h3>
@@ -17,8 +17,8 @@
             </div>
         </div>
         <div class="bg-white p-4 md:p-6 rounded-xl shadow-sm flex items-center gap-4">
-            <div class="w-14 h-14 md:w-16 md:h-16 bg-orange-100 rounded-xl flex items-center justify-center text-2xl md:text-3xl">
-                ⏰
+            <div class="w-14 h-14 md:w-16 md:h-16 bg-orange-100 rounded-xl flex items-center justify-center">
+                <x-heroicon-s-clock class="w-8 h-8 md:w-10 md:h-10 text-orange-600" />
             </div>
             <div>
                 <h3 class="text-2xl md:text-3xl font-bold text-purple-600">{{ $pendingCount }}</h3>
@@ -26,8 +26,8 @@
             </div>
         </div>
         <div class="bg-white p-4 md:p-6 rounded-xl shadow-sm flex items-center gap-4">
-            <div class="w-14 h-14 md:w-16 md:h-16 bg-green-100 rounded-xl flex items-center justify-center text-2xl md:text-3xl">
-                ✅
+            <div class="w-14 h-14 md:w-16 md:h-16 bg-green-100 rounded-xl flex items-center justify-center">
+                <x-heroicon-s-check-circle class="w-8 h-8 md:w-10 md:h-10 text-green-600" />
             </div>
             <div>
                 <h3 class="text-2xl md:text-3xl font-bold text-purple-600">{{ $submittedCount }}</h3>
@@ -35,8 +35,8 @@
             </div>
         </div>
         <div class="bg-white p-4 md:p-6 rounded-xl shadow-sm flex items-center gap-4">
-            <div class="w-14 h-14 md:w-16 md:h-16 bg-blue-100 rounded-xl flex items-center justify-center text-2xl md:text-3xl">
-                📊
+            <div class="w-14 h-14 md:w-16 md:h-16 bg-blue-100 rounded-xl flex items-center justify-center">
+                <x-heroicon-s-chart-bar class="w-8 h-8 md:w-10 md:h-10 text-blue-600" />
             </div>
             <div>
                 <h3 class="text-2xl md:text-3xl font-bold text-purple-600">{{ $gradedCount }}</h3>
@@ -82,7 +82,7 @@
             
             <div class="flex flex-wrap gap-4 mb-4 text-sm">
                 <div class="flex items-center gap-2 {{ $assignment['days_left'] <= 3 && $assignment['days_left'] >= 0 ? 'text-red-600' : 'text-gray-600' }} font-semibold">
-                    <span>⏰</span>
+                    <x-heroicon-s-clock class="w-4 h-4" />
                     <span>
                         @if($assignment['days_left'] < 0)
                             Terlambat {{ abs($assignment['days_left']) }} hari
@@ -96,7 +96,7 @@
                     </span>
                 </div>
                 <div class="flex items-center gap-2 text-gray-600">
-                    <span>📎</span>
+                    <x-heroicon-s-paper-clip class="w-4 h-4" />
                     <span>{{ ucfirst($assignment['submission_type']) }} Upload</span>
                 </div>
             </div>
@@ -107,21 +107,22 @@
             
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-4 border-t border-gray-200">
                 <div class="flex items-center gap-2 text-gray-600 text-sm">
-                    <span>📊</span>
+                    <x-heroicon-s-chart-bar class="w-4 h-4" />
                     <span>Bobot: {{ $assignment['weight_percentage'] }}%</span>
                 </div>
                 <div class="flex gap-2">
                     @if($assignment['status'] === 'graded')
                         <div class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-800 text-white rounded-full font-semibold">
-                            <span>🎯</span>
+                            <x-heroicon-s-trophy class="w-5 h-5" />
                             <span>Nilai: {{ $assignment['score'] }}/100</span>
                         </div>
                         <button class="px-4 py-2 bg-gray-100 text-purple-600 rounded-lg font-semibold hover:bg-gray-200 transition-colors">
                             Lihat Feedback
                         </button>
                     @elseif($assignment['status'] === 'submitted')
-                        <button class="flex-1 sm:flex-initial px-4 py-2 bg-green-500 text-white rounded-lg font-semibold">
-                            ✓ Sudah Dikirim
+                        <button class="flex items-center justify-center gap-2 flex-1 sm:flex-initial px-4 py-2 bg-green-500 text-white rounded-lg font-semibold">
+                            <x-heroicon-s-check-circle class="w-5 h-5" />
+                            Sudah Dikirim
                         </button>
                         <button class="flex-1 sm:flex-initial px-4 py-2 bg-gray-100 text-purple-600 rounded-lg font-semibold hover:bg-gray-200 transition-colors">
                             Lihat Kiriman
@@ -139,7 +140,9 @@
         </div>
         @empty
         <div class="bg-white rounded-xl shadow-sm p-12 text-center">
-            <div class="text-6xl mb-4">📋</div>
+            <div class="flex justify-center mb-4">
+                <x-heroicon-s-clipboard-document-list class="w-16 h-16 text-gray-400" />
+            </div>
             <h3 class="text-xl font-semibold text-gray-800 mb-2">Tidak ada tugas</h3>
             <p class="text-gray-600">Belum ada tugas untuk ditampilkan</p>
         </div>

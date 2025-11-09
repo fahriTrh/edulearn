@@ -19,37 +19,37 @@
             <div class="px-6 py-4 border-b border-white/20">
                 <button onclick="window.dispatchEvent(new CustomEvent('open-enroll-modal'))" 
                         class="w-full flex items-center justify-center gap-3 px-4 py-3 bg-white/20 hover:bg-white/30 rounded-lg font-semibold transition-all duration-300 border-2 border-white/30 hover:border-white/50">
-                    <span class="text-xl">➕</span>
+                    <x-heroicon-s-plus-circle class="w-6 h-6" />
                     <span>Daftar Kelas</span>
                 </button>
             </div>
         
             <!-- Navigation Menu -->
             <nav class="py-8">
-                <a href="{{ route('mahasiswa.dashboard') }}" class="flex items-center gap-4 px-6 py-4 border-l-4 transition-all duration-300 {{ request()->routeIs('mahasiswa.dashboard') ? 'bg-white/15 border-white' : 'border-transparent hover:bg-white/10 hover:border-white' }}">
-                    <span class="text-2xl">📊</span>
+                <a href="{{ route('mahasiswa.dashboard') }}" wire:navigate class="flex items-center gap-4 px-6 py-4 border-l-4 transition-all duration-300 {{ request()->routeIs('mahasiswa.dashboard') ? 'bg-white/15 border-white' : 'border-transparent hover:bg-white/10 hover:border-white' }}">
+                    <x-heroicon-s-squares-2x2 class="w-6 h-6" />
                     <span class="font-medium">Dashboard</span>
                 </a>
         
-                <a href="{{ route('mahasiswa.kursus') }}" class="flex items-center gap-4 px-6 py-4 border-l-4 transition-all duration-300 {{ request()->routeIs('mahasiswa.kursus') ? 'bg-white/15 border-white' : 'border-transparent hover:bg-white/10 hover:border-white' }}">
-                    <span class="text-2xl">📚</span>
+                <a href="{{ route('mahasiswa.kursus') }}" wire:navigate class="flex items-center gap-4 px-6 py-4 border-l-4 transition-all duration-300 {{ request()->routeIs('mahasiswa.kursus') ? 'bg-white/15 border-white' : 'border-transparent hover:bg-white/10 hover:border-white' }}">
+                    <x-heroicon-s-academic-cap class="w-6 h-6" />
                     <span class="font-medium">Kursus Saya</span>
                 </a>
         
-                <a href="{{ route('mahasiswa.tugas') }}" class="flex items-center gap-4 px-6 py-4 border-l-4 transition-all duration-300 {{ request()->routeIs('mahasiswa.tugas') ? 'bg-white/15 border-white' : 'border-transparent hover:bg-white/10 hover:border-white' }}">
-                    <span class="text-2xl">✍️</span>
+                <a href="{{ route('mahasiswa.tugas') }}" wire:navigate class="flex items-center gap-4 px-6 py-4 border-l-4 transition-all duration-300 {{ request()->routeIs('mahasiswa.tugas') ? 'bg-white/15 border-white' : 'border-transparent hover:bg-white/10 hover:border-white' }}">
+                    <x-heroicon-s-document-text class="w-6 h-6" />
                     <span class="font-medium">Tugas</span>
                 </a>
         
-                <a href="{{ route('mahasiswa.nilai') }}" class="flex items-center gap-4 px-6 py-4 border-l-4 transition-all duration-300 {{ request()->routeIs('mahasiswa.nilai') ? 'bg-white/15 border-white' : 'border-transparent hover:bg-white/10 hover:border-white' }}">
-                    <span class="text-2xl">📈</span>
+                <a href="{{ route('mahasiswa.nilai') }}" wire:navigate class="flex items-center gap-4 px-6 py-4 border-l-4 transition-all duration-300 {{ request()->routeIs('mahasiswa.nilai') ? 'bg-white/15 border-white' : 'border-transparent hover:bg-white/10 hover:border-white' }}">
+                    <x-heroicon-s-chart-bar class="w-6 h-6" />
                     <span class="font-medium">Nilai</span>
                 </a>
         
                 <form action="{{ route('logout') }}" method="POST" class="w-full">
                     @csrf
                     <button type="submit" class="w-full flex items-center gap-4 px-6 py-4 border-l-4 transition-all duration-300 border-transparent hover:bg-white/10 hover:border-white">
-                        <span class="text-2xl">🚪</span>
+                        <x-heroicon-s-arrow-right-on-rectangle class="w-6 h-6" />
                         <span class="font-medium">Logout</span>
                     </button>
                 </form>
@@ -68,14 +68,12 @@
                     <div class="flex items-center gap-4 flex-1">
                         <!-- Hamburger Menu (Mobile) -->
                         <button class="lg:hidden text-gray-600 hover:text-gray-900" id="mobile-menu-btn">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                            </svg>
+                            <x-heroicon-s-bars-3 class="w-6 h-6" />
                         </button>
             
                         <!-- Search Bar -->
                         <div class="flex items-center bg-gray-100 rounded-full px-4 py-2 flex-1 max-w-md">
-                            <span>🔍</span>
+                            <x-heroicon-s-magnifying-glass class="w-5 h-5 text-gray-500" />
                             <input 
                                 type="text" 
                                 placeholder="Cari kursus, materi, atau tugas..." 
@@ -89,7 +87,7 @@
                         <!-- Notification Bell -->
                         <div class="relative">
                             <button class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors">
-                                <span>🔔</span>
+                                <x-heroicon-s-bell class="w-5 h-5 text-gray-600" />
                             </button>
                             <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
                         </div>
@@ -158,9 +156,11 @@
                 }
             }
         });
+
     </script>
     @endpush
 
     @stack('scripts')
+    @livewireScripts
 </body>
 </html>

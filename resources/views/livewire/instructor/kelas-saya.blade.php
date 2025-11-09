@@ -32,9 +32,7 @@
                         wire:confirm="Apakah Anda yakin ingin menghapus kelas ini? Tindakan ini tidak dapat dibatalkan."
                         class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1.5 bg-red-500 hover:bg-red-600 text-white rounded shadow-lg" 
                         title="Hapus Kelas">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                    </svg>
+                    <x-heroicon-s-trash class="w-4 h-4" />
                 </button>
             </div>
             
@@ -68,17 +66,17 @@
                 
                 <!-- Actions -->
                 <div class="flex gap-2 pt-3 border-t border-gray-100">
-                    <a href="{{ route('dosen.detail-kelas', $class['id']) }}" 
+                    <a href="{{ route('dosen.detail-kelas', $class['id']) }}" wire:navigate
                        class="flex-1 text-center px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded text-xs font-medium">
                         Buka
                     </a>
                     <button wire:click="edit({{ $class['id'] }})" 
                             class="px-3 py-1.5 text-gray-600 hover:bg-gray-100 rounded text-xs" title="Edit">
-                        ⚙️
+                        <x-heroicon-s-cog-6-tooth class="w-4 h-4" />
                     </button>
                     <button wire:click="openPasswordModal({{ $class['id'] }})" 
                             class="px-3 py-1.5 text-gray-600 hover:bg-gray-100 rounded text-xs" title="Kode Pendaftaran">
-                        🔑
+                        <x-heroicon-s-key class="w-4 h-4" />
                     </button>
                 </div>
             </div>
@@ -95,7 +93,9 @@
         <div class="bg-white p-8 rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-semibold">{{ $editingId ? 'Edit Kelas' : 'Tambah Kelas Baru' }}</h2>
-                <button wire:click="closeModal" class="text-2xl text-gray-500 hover:text-gray-800">✕</button>
+                <button wire:click="closeModal" class="text-gray-500 hover:text-gray-800">
+                    <x-heroicon-s-x-mark class="w-6 h-6" />
+                </button>
             </div>
             <form wire:submit="save">
                 <div class="mb-6">
@@ -165,7 +165,9 @@
         <div class="bg-white p-8 rounded-xl max-w-md w-full" wire:click.stop>
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-semibold">Kelola Kode Pendaftaran</h2>
-                <button wire:click="closePasswordModal" class="text-2xl text-gray-500 hover:text-gray-800">✕</button>
+                <button wire:click="closePasswordModal" class="text-gray-500 hover:text-gray-800">
+                    <x-heroicon-s-x-mark class="w-6 h-6" />
+                </button>
             </div>
             <form wire:submit.prevent="savePassword">
                 <div class="mb-6">

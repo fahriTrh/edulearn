@@ -15,45 +15,46 @@
             <!-- Logo Section -->
             <div class="px-6 py-8 border-b border-white/20">
                 <h1 class="text-3xl font-bold">EduLearn</h1>
-                <span class="inline-block mt-2 px-3 py-1 bg-white/20 rounded-full text-xs font-semibold">
-                    👨‍🏫 Instruktur
+                <span class="inline-flex items-center gap-2 mt-2 px-3 py-1 bg-white/20 rounded-full text-xs font-semibold">
+                    <x-heroicon-s-academic-cap class="w-4 h-4" />
+                    Instruktur
                 </span>
             </div>
         
             <!-- Navigation Menu -->
             <nav class="py-8">
-                <a href="{{ route('dosen.dashboard') }}" 
+                <a href="{{ route('dosen.dashboard') }}" wire:navigate
                    class="flex items-center gap-4 px-6 py-4 border-l-4 transition-all duration-300 {{ request()->routeIs('dosen.dashboard') ? 'bg-white/15 border-white' : 'border-transparent hover:bg-white/10 hover:border-white' }}">
-                    <span class="text-2xl">📊</span>
+                    <x-heroicon-s-squares-2x2 class="w-6 h-6" />
                     <span class="font-medium">Dashboard</span>
                 </a>
         
-                <a href="{{ route('dosen.kelas') }}" 
+                <a href="{{ route('dosen.kelas') }}" wire:navigate
                    class="flex items-center gap-4 px-6 py-4 border-l-4 transition-all duration-300 {{ request()->routeIs('dosen.kelas*') ? 'bg-white/15 border-white' : 'border-transparent hover:bg-white/10 hover:border-white' }}">
-                    <span class="text-2xl">📚</span>
+                    <x-heroicon-s-academic-cap class="w-6 h-6" />
                     <span class="font-medium">Kelas Saya</span>
                 </a>
 
-                <a href="{{ route('dosen.nilai') }}" 
+                <a href="{{ route('dosen.nilai') }}" wire:navigate
                    class="flex items-center gap-4 px-6 py-4 border-l-4 transition-all duration-300 {{ request()->routeIs('dosen.nilai') ? 'bg-white/15 border-white' : 'border-transparent hover:bg-white/10 hover:border-white' }}">
-                    <span class="text-2xl">📊</span>
+                    <x-heroicon-s-chart-bar class="w-6 h-6" />
                     <span class="font-medium">Nilai</span>
                 </a>
 
-                <a href="{{ route('dosen.jadwal') }}" 
+                <a href="{{ route('dosen.jadwal') }}" wire:navigate
                    class="flex items-center gap-4 px-6 py-4 border-l-4 transition-all duration-300 {{ request()->routeIs('dosen.jadwal') ? 'bg-white/15 border-white' : 'border-transparent hover:bg-white/10 hover:border-white' }}">
-                    <span class="text-2xl">📅</span>
+                    <x-heroicon-s-calendar class="w-6 h-6" />
                     <span class="font-medium">Kelola Jadwal</span>
                 </a>
         
-                <a href="{{ route('dosen.profile') }}" 
+                <a href="{{ route('dosen.profile') }}" wire:navigate
                    class="flex items-center gap-4 px-6 py-4 border-l-4 transition-all duration-300 {{ request()->routeIs('dosen.profile') ? 'bg-white/15 border-white' : 'border-transparent hover:bg-white/10 hover:border-white' }}">
-                    <span class="text-2xl">👤</span>
+                    <x-heroicon-s-user-circle class="w-6 h-6" />
                     <span class="font-medium">Profile</span>
                 </a>
         
                 <button onclick="handleLogout()" class="w-full flex items-center gap-4 px-6 py-4 border-l-4 border-transparent hover:bg-white/10 hover:border-white transition-all duration-300">
-                    <span class="text-2xl">🚪</span>
+                    <x-heroicon-s-arrow-right-on-rectangle class="w-6 h-6" />
                     <span class="font-medium">Logout</span>
                 </button>
             </nav>
@@ -72,9 +73,7 @@
                     <div class="flex items-center gap-4 flex-1">
                         <!-- Hamburger Menu (Mobile) -->
                         <button class="lg:hidden text-gray-600 hover:text-gray-900" id="mobile-menu-btn">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                            </svg>
+                            <x-heroicon-s-bars-3 class="w-6 h-6" />
                         </button>
 
                         <!-- Page Title -->
@@ -89,7 +88,7 @@
                         <!-- Notification Bell -->
                         <div class="relative">
                             <button class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors">
-                                <span>🔔</span>
+                                <x-heroicon-s-bell class="w-5 h-5 text-gray-600" />
                             </button>
                             <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
                         </div>
@@ -241,5 +240,7 @@
             animation: slide-in 0.3s ease;
         }
     </style>
+
+    @livewireScripts
 </body>
 </html>
