@@ -6,16 +6,14 @@ use App\Models\Assignment;
 use App\Models\AssignmentSubmission;
 use App\Models\ClassModel;
 use App\Models\FinalGrade as FinalGradeModel;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
-use Livewire\Attributes\Layout;
 use Livewire\Component;
 
-#[Layout('dosen.app')]
 class Nilai extends Component
 {
     public $title = 'Nilai';
     public $sub_title = 'Kelola semua nilai mahasiswa';
-    public $instructor_name = '';
 
     // Active tab: 'review', 'daftar', 'final'
     public $activeTab = 'review';
@@ -38,7 +36,7 @@ class Nilai extends Component
 
     public function mount()
     {
-        $this->instructor_name = Auth::user()->name;
+        //
     }
 
     public function switchTab($tab)
@@ -422,6 +420,10 @@ class Nilai extends Component
             }
         }
 
+        // Fetch instructor name directly from database
+        $user = User::find(Auth::id());
+        $instructor_name = $user && $user->name ? $user->name : 'Instructor';
+
         return view('livewire.instructor.nilai', [
             'classes' => $instructorClasses,
             // Tab 1
@@ -437,6 +439,10 @@ class Nilai extends Component
             'finalGrades' => $finalGrades,
             'classSummary' => $classSummary,
             'selectedClassFinal' => $selectedClassFinal,
+        ])->layout('dosen.app', [
+            'title' => $this->title,
+            'sub_title' => $this->sub_title,
+            'instructor_name' => $instructor_name,
         ]);
     }
 }

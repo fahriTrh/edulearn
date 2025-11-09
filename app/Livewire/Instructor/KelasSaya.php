@@ -3,6 +3,7 @@
 namespace App\Livewire\Instructor;
 
 use App\Models\ClassModel;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -24,6 +25,10 @@ class KelasSaya extends Component
     public $status = 'active';
     public $max_students = 50;
     public $cover_image;
+    public $enrollment_password = '';
+    public $enrollment_enabled = true;
+    public $showPasswordModal = false;
+    public $passwordClassId = null;
 
     public function mount()
     {
@@ -52,6 +57,8 @@ class KelasSaya extends Component
         $this->status = 'active';
         $this->max_students = 50;
         $this->cover_image = null;
+        $this->enrollment_password = '';
+        $this->enrollment_enabled = true;
     }
 
     public function edit($id)
@@ -67,6 +74,8 @@ class KelasSaya extends Component
         $this->semester = $class->semester;
         $this->status = $class->status;
         $this->max_students = $class->max_students ?? 50;
+        $this->enrollment_password = $class->enrollment_password ?? '';
+        $this->enrollment_enabled = $class->enrollment_enabled ?? true;
         $this->showModal = true;
     }
 
@@ -115,6 +124,8 @@ class KelasSaya extends Component
                 'status' => $validated['status'],
                 'max_students' => $validated['max_students'] ?? 50,
                 'cover_image' => $coverPath,
+                'enrollment_password' => $this->enrollment_password ?: Str::random(8),
+                'enrollment_enabled' => $this->enrollment_enabled,
             ]);
 
             session()->flash('success', 'Kelas berhasil dibuat!');
@@ -146,6 +157,8 @@ class KelasSaya extends Component
             $class->description = $validated['description'];
             $class->semester = $validated['semester'];
             $class->status = $validated['status'];
+            $class->enrollment_password = $this->enrollment_password ?: $class->enrollment_password;
+            $class->enrollment_enabled = $this->enrollment_enabled;
 
             if ($this->cover_image) {
                 if ($class->cover_image && file_exists(public_path($class->cover_image))) {
@@ -195,14 +208,81 @@ class KelasSaya extends Component
         }
     }
 
+    public function openPasswordModal($classId)
+    {
+        $this->passwordClassId = $classId;
+        $class = ClassModel::where('id', $classId)
+            ->where('instructor_id', Auth::user()->instructor->id)
+            ->firstOrFail();
+        
+        $this->enrollment_password = $class->enrollment_password ?? '';
+        $this->enrollment_enabled = $class->enrollment_enabled ?? true;
+        $this->showPasswordModal = true;
+    }
+
+    public function closePasswordModal()
+    {
+        $this->showPasswordModal = false;
+        $this->passwordClassId = null;
+        $this->enrollment_password = '';
+    }
+
+    public function generatePassword()
+    {
+        $this->enrollment_password = Str::random(8);
+    }
+
+    public function savePassword()
+    {
+        $this->validate([
+            'enrollment_password' => 'required|string|min:4|max:20',
+        ]);
+
+        try {
+            $class = ClassModel::where('id', $this->passwordClassId)
+                ->where('instructor_id', Auth::user()->instructor->id)
+                ->firstOrFail();
+
+            $class->enrollment_password = $this->enrollment_password;
+            $class->enrollment_enabled = $this->enrollment_enabled;
+            $class->save();
+
+            session()->flash('success', 'Kode pendaftaran berhasil diperbarui!');
+            $this->closePasswordModal();
+        } catch (\Exception $e) {
+            Log::error('Gagal update password: ' . $e->getMessage());
+            session()->flash('error', 'Terjadi kesalahan saat memperbarui kode pendaftaran.');
+        }
+    }
+
+    public function toggleEnrollment($classId)
+    {
+        try {
+            $class = ClassModel::where('id', $classId)
+                ->where('instructor_id', Auth::user()->instructor->id)
+                ->firstOrFail();
+
+            $class->enrollment_enabled = !$class->enrollment_enabled;
+            $class->save();
+
+            session()->flash('success', $class->enrollment_enabled ? 'Pendaftaran diaktifkan!' : 'Pendaftaran dinonaktifkan!');
+        } catch (\Exception $e) {
+            Log::error('Gagal toggle enrollment: ' . $e->getMessage());
+            session()->flash('error', 'Terjadi kesalahan.');
+        }
+    }
+
     public function render()
     {
         $title = 'Kelas Saya';
         $sub_title = 'Kelola semua kelas yang Anda ajar';
-        $instructor_name = Auth::user()->name;
+        
+        // Fetch instructor name directly from database
+        $user = User::find(Auth::id());
+        $instructor_name = $user && $user->name ? $user->name : 'Instructor';
 
         try {
-            $classes = ClassModel::withCount(['materials', 'assignments'])
+            $classes = ClassModel::withCount(['materials', 'assignments', 'students'])
                 ->where('instructor_id', Auth::user()->instructor->id)
                 ->get()
                 ->map(function ($class) {
@@ -211,11 +291,13 @@ class KelasSaya extends Component
                         'name' => $class->title,
                         'code' => $class->code,
                         'desc' => $class->description,
-                        'students' => 0,
+                        'students' => $class->students_count,
                         'materials' => $class->materials_count,
                         'assignments' => $class->assignments_count,
                         'semester' => $class->semester,
                         'status' => $class->status,
+                        'enrollment_password' => $class->enrollment_password,
+                        'enrollment_enabled' => $class->enrollment_enabled,
                         'color' => collect(['blue', 'green', 'orange', 'purple', 'red'])->random(),
                         'icon' => collect(['💻', '🔢', '🗄️', '📱', '🧠', '📘'])->random(),
                         'coverImage' => $class->cover_image ? asset($class->cover_image) : null,

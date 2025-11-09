@@ -38,63 +38,65 @@
         </button>
     </div>
 
-    <!-- Courses Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <!-- Courses Grid - Google Classroom Style -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         @forelse($courses as $course)
-        <div class="bg-white rounded-2xl shadow-sm overflow-hidden hover:-translate-y-2 hover:shadow-xl transition-all">
-            <div class="h-36 {{ $course['cover_image'] ? '' : 'bg-gradient-to-br from-indigo-600 to-purple-700' }} flex items-center justify-center text-5xl relative" style="{{ $course['cover_image'] ? "background-image: url('{$course['cover_image']}'); background-size: cover; background-position: center;" : '' }}">
-                @if(!$course['cover_image'])
-                    📚
-                @endif
-                <span class="absolute top-4 right-4 px-3 py-1 bg-white/90 {{ $course['status'] === 'completed' ? 'text-indigo-600' : 'text-green-600' }} rounded-full text-xs font-semibold">
+        <div class="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow cursor-pointer group">
+            <!-- Large Header Banner -->
+            <div class="h-24 relative" 
+                 style="background: {{ $course['cover_image'] ? 'url(' . $course['cover_image'] . ') center/cover' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }};">
+                <div class="absolute inset-0 bg-black/20"></div>
+                <span class="absolute top-2 right-2 px-2 py-0.5 bg-white/90 {{ $course['status'] === 'completed' ? 'text-indigo-600' : 'text-green-600' }} rounded text-xs font-semibold">
                     {{ $course['status'] === 'completed' ? 'Selesai' : 'Aktif' }}
                 </span>
             </div>
-            <div class="p-6">
-                <span class="inline-block px-3 py-1 bg-indigo-100 text-indigo-600 rounded-full text-xs font-semibold mb-3">{{ $course['code'] }}</span>
-                <h3 class="text-xl font-semibold text-gray-900 mb-2">{{ $course['title'] }}</h3>
-                <div class="flex items-center gap-1 text-gray-600 text-sm mb-4">
-                    <span>👨‍🏫</span>
-                    <span>{{ $course['instructor'] }}</span>
+            
+            <!-- Class Info -->
+            <div class="p-4">
+                <h3 class="text-base font-medium text-gray-900 mb-1 line-clamp-2" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">{{ $course['title'] }}</h3>
+                <p class="text-sm text-gray-600 mb-2">{{ $course['code'] }}</p>
+                <p class="text-xs text-gray-500 mb-2">👨‍🏫 {{ $course['instructor'] }}</p>
+                
+                <!-- Quick Stats -->
+                <div class="flex items-center gap-3 text-xs text-gray-500 mb-3">
+                    <span>{{ $course['materials_count'] }} materi</span>
+                    <span>•</span>
+                    <span>{{ $course['assignments_count'] }} tugas</span>
                 </div>
-                <div class="flex gap-4 text-sm text-gray-600 mb-4 pt-4 border-t border-gray-200">
-                    <div class="flex items-center gap-1">
-                        <span>📄</span> {{ $course['materials_count'] }} Materi
+                
+                <!-- Progress Bar -->
+                <div class="mb-3">
+                    <div class="flex justify-between text-xs mb-1">
+                        <span class="text-gray-600">Progress</span>
+                        <span class="font-semibold {{ $course['progress'] >= 100 ? 'text-green-600' : 'text-blue-600' }}">{{ $course['progress'] }}%</span>
                     </div>
-                    <div class="flex items-center gap-1">
-                        <span>📋</span> {{ $course['assignments_count'] }} Tugas
-                    </div>
-                    <div class="flex items-center gap-1">
-                        <span>👥</span> {{ $course['students_count'] }}
-                    </div>
-                </div>
-                <div class="mb-4">
-                    <div class="flex justify-between text-sm mb-2">
-                        <span class="text-gray-600">Progress Pembelajaran</span>
-                        <span class="font-semibold {{ $course['progress'] >= 100 ? 'text-green-600' : 'text-indigo-600' }}">{{ $course['progress'] }}%</span>
-                    </div>
-                    <div class="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-                        <div class="h-full {{ $course['progress'] >= 100 ? 'bg-gradient-to-r from-green-500 to-emerald-500' : 'bg-gradient-to-r from-indigo-600 to-purple-700' }} rounded-full transition-all duration-300" style="width: {{ $course['progress'] }}%"></div>
+                    <div class="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                        <div class="h-full {{ $course['progress'] >= 100 ? 'bg-green-500' : 'bg-blue-600' }} rounded-full transition-all duration-300" style="width: {{ $course['progress'] }}%"></div>
                     </div>
                 </div>
-                <div class="flex gap-2">
+                
+                <!-- Actions -->
+                <div class="flex gap-2 pt-3 border-t border-gray-100">
                     @if($course['progress'] >= 100)
-                        <a href="{{ route('mahasiswa.nilai') }}" class="flex-1 px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-700 text-white rounded-lg font-semibold hover:-translate-y-1 hover:shadow-lg transition-all text-center">
-                            Lihat Nilai
+                        <a href="{{ route('mahasiswa.nilai') }}" 
+                           class="flex-1 text-center px-3 py-1.5 bg-green-50 hover:bg-green-100 text-green-700 rounded text-xs font-medium">
+                            Nilai
                         </a>
                     @else
-                        <button class="flex-1 px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-700 text-white rounded-lg font-semibold hover:-translate-y-1 hover:shadow-lg transition-all">
+                        <a href="{{ route('mahasiswa.detail-kursus', $course['id']) }}" 
+                           class="flex-1 text-center px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded text-xs font-medium">
                             Lanjutkan
-                        </button>
+                        </a>
                     @endif
-                    <button class="px-4 py-2 bg-gray-100 text-indigo-600 rounded-lg font-semibold hover:bg-gray-200 transition-colors">
+                    <a href="{{ route('mahasiswa.detail-kursus', $course['id']) }}" 
+                       class="px-3 py-1.5 text-gray-600 hover:bg-gray-100 rounded text-xs" title="Detail">
                         Detail
-                    </button>
+                    </a>
                 </div>
             </div>
         </div>
         @empty
-        <div class="col-span-full text-center bg-white p-16 rounded-2xl shadow-sm">
+        <div class="col-span-full text-center py-12">
             <div class="text-6xl mb-4">📚</div>
             <h3 class="text-xl font-semibold text-gray-800 mb-2">Belum ada kursus</h3>
             <p class="text-gray-600">Daftar ke kursus untuk memulai pembelajaran</p>

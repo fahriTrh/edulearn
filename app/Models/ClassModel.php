@@ -9,6 +9,10 @@ class ClassModel extends Model
     protected $table = 'classes';
     protected $guarded = ['id'];
 
+    protected $casts = [
+        'enrollment_enabled' => 'boolean',
+    ];
+
     public function instructor()
     {
         return $this->belongsTo(User::class, 'instructor_id');

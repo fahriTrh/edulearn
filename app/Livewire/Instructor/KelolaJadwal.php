@@ -4,16 +4,14 @@ namespace App\Livewire\Instructor;
 
 use App\Models\ClassModel;
 use App\Models\Schedule;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
-use Livewire\Attributes\Layout;
 use Livewire\Component;
 
-#[Layout('dosen.app')]
 class KelolaJadwal extends Component
 {
     public $title = 'Kelola Jadwal';
     public $sub_title = 'Kelola jadwal kelas Anda';
-    public $instructor_name = '';
 
     // Modal state
     public $showModal = false;
@@ -35,7 +33,7 @@ class KelolaJadwal extends Component
 
     public function mount()
     {
-        $this->instructor_name = Auth::user()->name;
+        //
     }
 
     public function openModal()
@@ -217,9 +215,17 @@ class KelolaJadwal extends Component
                 ];
             });
 
+        // Fetch instructor name directly from database
+        $user = User::find(Auth::id());
+        $instructor_name = $user && $user->name ? $user->name : 'Instructor';
+
         return view('livewire.instructor.kelola-jadwal', [
             'classes' => $instructorClasses,
             'schedules' => $schedules,
+        ])->layout('dosen.app', [
+            'title' => $this->title,
+            'sub_title' => $this->sub_title,
+            'instructor_name' => $instructor_name,
         ]);
     }
 }

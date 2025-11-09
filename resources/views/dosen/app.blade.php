@@ -79,8 +79,8 @@
 
                         <!-- Page Title -->
                         <div>
-                            <h2 class="text-xl md:text-2xl font-bold text-gray-800">Dashboard Instruktur</h2>
-                            <p class="text-sm text-gray-600 mt-1">Selamat datang kembali!</p>
+                            <h2 class="text-xl md:text-2xl font-bold text-gray-800">{{ $title ?? 'Dashboard Instruktur' }}</h2>
+                            <p class="text-sm text-gray-600 mt-1">{{ $sub_title ?? '' }}</p>
                         </div>
                     </div>
             
@@ -108,24 +108,6 @@
                 </div>
             </header>
 
-            <!-- Welcome Banner -->
-            <div class="m-4 lg:m-8 bg-gradient-to-br from-purple-600 to-purple-800 rounded-2xl p-6 md:p-8 text-white shadow-lg">
-                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                    <div>
-                        <h2 class="text-2xl md:text-3xl font-bold mb-2">
-                            Selamat Datang, {{ $instructor_name ?? 'Instructor' }}! 👋
-                        </h2>
-                        <p class="text-white/90 text-base md:text-lg">
-                            {{ $sub_title ?? 'Kelola kelas dan pantau progres mahasiswa Anda' }}
-                        </p>
-                    </div>
-                    <a href="{{ route('dosen.kelas') }}" 
-                       class="inline-flex items-center gap-2 px-6 py-3 bg-white text-purple-600 rounded-xl font-semibold hover:shadow-lg hover:-translate-y-1 transition-all duration-300 whitespace-nowrap">
-                        <span>📋</span>
-                        <span>Lihat Tugas</span>
-                    </a>
-                </div>
-            </div>
             @endunless
 
             <!-- Page Content -->

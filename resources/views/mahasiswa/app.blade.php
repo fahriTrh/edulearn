@@ -15,36 +15,35 @@
                 <h1 class="text-3xl font-bold">EduLearn</h1>
             </div>
         
+            <!-- Enroll Class Button -->
+            <div class="px-6 py-4 border-b border-white/20">
+                <button onclick="window.dispatchEvent(new CustomEvent('open-enroll-modal'))" 
+                        class="w-full flex items-center justify-center gap-3 px-4 py-3 bg-white/20 hover:bg-white/30 rounded-lg font-semibold transition-all duration-300 border-2 border-white/30 hover:border-white/50">
+                    <span class="text-xl">➕</span>
+                    <span>Daftar Kelas</span>
+                </button>
+            </div>
+        
             <!-- Navigation Menu -->
             <nav class="py-8">
-                <a href="{{ route('mahasiswa.dashboard') }}" class="flex items-center gap-4 px-6 py-4 border-l-4 transition-all duration-300 {{ request()->routeIs('dashboard') ? 'bg-white/15 border-white' : 'border-transparent hover:bg-white/10 hover:border-white' }}">
+                <a href="{{ route('mahasiswa.dashboard') }}" class="flex items-center gap-4 px-6 py-4 border-l-4 transition-all duration-300 {{ request()->routeIs('mahasiswa.dashboard') ? 'bg-white/15 border-white' : 'border-transparent hover:bg-white/10 hover:border-white' }}">
                     <span class="text-2xl">📊</span>
                     <span class="font-medium">Dashboard</span>
                 </a>
         
-                <a href="{{ route('mahasiswa.kursus') }}" class="flex items-center gap-4 px-6 py-4 border-l-4 transition-all duration-300 {{ request()->routeIs('courses.*') ? 'bg-white/15 border-white' : 'border-transparent hover:bg-white/10 hover:border-white' }}">
+                <a href="{{ route('mahasiswa.kursus') }}" class="flex items-center gap-4 px-6 py-4 border-l-4 transition-all duration-300 {{ request()->routeIs('mahasiswa.kursus') ? 'bg-white/15 border-white' : 'border-transparent hover:bg-white/10 hover:border-white' }}">
                     <span class="text-2xl">📚</span>
                     <span class="font-medium">Kursus Saya</span>
                 </a>
         
-                <a href="{{ route('mahasiswa.jadwal') }}" class="flex items-center gap-4 px-6 py-4 border-l-4 transition-all duration-300 {{ request()->routeIs('schedule') ? 'bg-white/15 border-white' : 'border-transparent hover:bg-white/10 hover:border-white' }}">
-                    <span class="text-2xl">📅</span>
-                    <span class="font-medium">Jadwal</span>
-                </a>
-        
-                <a href="{{ route('mahasiswa.tugas') }}" class="flex items-center gap-4 px-6 py-4 border-l-4 transition-all duration-300 {{ request()->routeIs('assignments') ? 'bg-white/15 border-white' : 'border-transparent hover:bg-white/10 hover:border-white' }}">
+                <a href="{{ route('mahasiswa.tugas') }}" class="flex items-center gap-4 px-6 py-4 border-l-4 transition-all duration-300 {{ request()->routeIs('mahasiswa.tugas') ? 'bg-white/15 border-white' : 'border-transparent hover:bg-white/10 hover:border-white' }}">
                     <span class="text-2xl">✍️</span>
                     <span class="font-medium">Tugas</span>
                 </a>
         
-                <a href="{{ route('mahasiswa.nilai') }}" class="flex items-center gap-4 px-6 py-4 border-l-4 transition-all duration-300 {{ request()->routeIs('grades') ? 'bg-white/15 border-white' : 'border-transparent hover:bg-white/10 hover:border-white' }}">
+                <a href="{{ route('mahasiswa.nilai') }}" class="flex items-center gap-4 px-6 py-4 border-l-4 transition-all duration-300 {{ request()->routeIs('mahasiswa.nilai') ? 'bg-white/15 border-white' : 'border-transparent hover:bg-white/10 hover:border-white' }}">
                     <span class="text-2xl">📈</span>
                     <span class="font-medium">Nilai</span>
-                </a>
-        
-                <a href="{{ route('mahasiswa.forum') }}" class="flex items-center gap-4 px-6 py-4 border-l-4 transition-all duration-300 {{ request()->routeIs('discussions') ? 'bg-white/15 border-white' : 'border-transparent hover:bg-white/10 hover:border-white' }}">
-                    <span class="text-2xl">💬</span>
-                    <span class="font-medium">Diskusi</span>
                 </a>
         
                 <form action="{{ route('logout') }}" method="POST" class="w-full">
@@ -139,6 +138,28 @@
             </main>
         </div>
     </div>
+
+    <!-- Enrollment Modal (rendered in main content area) -->
+    @livewire('student.enroll-class-modal', key('enroll-modal'))
+
+    @push('scripts')
+    <script>
+        // Listen for custom event to open modal
+        window.addEventListener('open-enroll-modal', function() {
+            // Find the Livewire component by its container ID
+            const componentElement = document.getElementById('enroll-class-modal-component');
+            if (componentElement) {
+                const wireId = componentElement.getAttribute('wire:id');
+                if (wireId) {
+                    const component = Livewire.find(wireId);
+                    if (component) {
+                        component.openModal();
+                    }
+                }
+            }
+        });
+    </script>
+    @endpush
 
     @stack('scripts')
 </body>

@@ -41,7 +41,10 @@ class TugasMahasiswa extends Component
 
         $assignments = $allAssignments->map(function ($assignment) use ($user, &$urgentCount, &$pendingCount, &$submittedCount, &$gradedCount) {
             $submission = $assignment->submissions->first();
-            $daysLeft = now()->diffInDays($assignment->deadline, false);
+            // Calculate days left properly (rounded, not float)
+            $deadline = \Carbon\Carbon::parse($assignment->deadline);
+            $now = now();
+            $daysLeft = (int) floor($now->diffInDays($deadline, false));
             
             $status = 'pending';
             if ($submission) {

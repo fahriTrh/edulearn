@@ -3,20 +3,18 @@
 namespace App\Livewire\Instructor;
 
 use App\Models\Instructor;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
-#[Layout('dosen.app')]
 class Profile extends Component
 {
     use WithFileUploads;
 
     public $title = 'Profile';
     public $sub_title = 'Kelola informasi profil dan kredensial Anda';
-    public $instructor_name = '';
 
     // Active tab: 'profile', 'instructor', 'password'
     public $activeTab = 'profile';
@@ -42,7 +40,6 @@ class Profile extends Component
 
     public function mount()
     {
-        $this->instructor_name = Auth::user()->name;
         $this->loadProfile();
     }
 
@@ -111,7 +108,6 @@ class Profile extends Component
             }
 
             $user->save();
-            $this->instructor_name = $user->name;
 
             session()->flash('success', 'Profil berhasil diperbarui!');
             $this->loadProfile();
@@ -190,10 +186,18 @@ class Profile extends Component
     {
         $user = Auth::user();
         $instructor = $user->instructor;
+        
+        // Fetch instructor name directly from database
+        $dbUser = User::find(Auth::id());
+        $instructor_name = $dbUser && $dbUser->name ? $dbUser->name : 'Instructor';
 
         return view('livewire.instructor.profile', [
             'user' => $user,
             'instructor' => $instructor,
+        ])->layout('dosen.app', [
+            'title' => $this->title,
+            'sub_title' => $this->sub_title,
+            'instructor_name' => $instructor_name,
         ]);
     }
 }

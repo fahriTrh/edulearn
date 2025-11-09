@@ -1,4 +1,16 @@
 <div>
+    @if (session()->has('success'))
+        <div class="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    @if (session()->has('error'))
+        <div class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+            {{ session('error') }}
+        </div>
+    @endif
+
     <!-- Stats Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div class="bg-white rounded-xl shadow-sm p-6 hover:-translate-y-1 hover:shadow-md transition-all">
@@ -111,7 +123,7 @@
                                 <p class="text-sm text-gray-600">{{ $assignment->class->title ?? 'N/A' }}</p>
                             </div>
                             <span class="px-3 py-1 bg-orange-100 text-orange-600 rounded-full text-xs font-semibold">
-                                {{ now()->diffInDays($assignment->deadline) }} hari lagi
+                                {{ (int) floor(now()->diffInDays($assignment->deadline, false)) }} hari lagi
                             </span>
                         </div>
                         <div class="flex items-center gap-2 text-sm text-gray-600">
@@ -165,8 +177,16 @@
         <h2 class="text-xl font-semibold text-gray-800 mb-6">Ringkasan Kelas</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             @forelse($classPerformance as $class)
-            <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all">
-                <h3 class="font-semibold text-gray-900 mb-1">{{ $class['title'] }}</h3>
+            <a href="{{ route('dosen.detail-kelas', $class['id']) }}" class="block border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all relative group">
+                <button wire:click.stop="deleteClass({{ $class['id'] }})" 
+                        wire:confirm="Apakah Anda yakin ingin menghapus kelas ini? Tindakan ini tidak dapat dibatalkan."
+                        class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1.5 text-red-600 hover:bg-red-50 rounded z-10" 
+                        title="Hapus Kelas">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                </button>
+                <h3 class="font-semibold text-gray-900 mb-1 pr-8">{{ $class['title'] }}</h3>
                 <p class="text-sm text-gray-600 mb-3">{{ $class['code'] }}</p>
                 <div class="space-y-2 text-sm">
                     <div class="flex justify-between">
@@ -186,10 +206,7 @@
                         <span class="font-semibold text-purple-600">{{ $class['avg_score'] }}</span>
                     </div>
                 </div>
-                <a href="{{ route('dosen.detail-kelas', $class['id']) }}" class="block mt-4 text-center px-4 py-2 bg-purple-100 text-purple-600 rounded-lg font-semibold hover:bg-purple-200 transition-colors">
-                    Lihat Detail
-                </a>
-            </div>
+            </a>
             @empty
             <div class="col-span-full text-center py-8 text-gray-500">
                 <p>Belum ada kelas</p>

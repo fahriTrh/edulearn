@@ -65,7 +65,7 @@
 
             <div class="space-y-4">
                 @forelse($coursesInProgress as $course)
-                <a href="{{ route('mahasiswa.kursus') }}" class="flex gap-4 p-4 border border-gray-200 rounded-xl hover:border-indigo-600 hover:shadow-md transition-all cursor-pointer">
+                <a href="{{ route('mahasiswa.detail-kursus', $course['id']) }}" class="flex gap-4 p-4 border border-gray-200 rounded-xl hover:border-indigo-600 hover:shadow-md transition-all cursor-pointer">
                     <div class="w-20 h-20 bg-gradient-to-br from-indigo-600 to-purple-700 rounded-lg flex items-center justify-center text-3xl flex-shrink-0">
                         @if($course['cover_image'])
                             <img src="{{ $course['cover_image'] }}" alt="{{ $course['title'] }}" class="w-full h-full object-cover rounded-lg">
@@ -90,37 +90,6 @@
                 @endforelse
             </div>
         </div>
-
-        <!-- Schedule & Assignments -->
-        <div class="space-y-6">
-            <!-- Schedule -->
-            <div class="bg-white rounded-xl shadow-sm p-6">
-                <h2 class="text-xl font-bold text-gray-900 mb-6">Jadwal Hari Ini</h2>
-                <div class="space-y-4">
-                    @forelse($todaySchedule as $schedule)
-                    <div class="p-4 border border-gray-200 rounded-lg hover:border-indigo-600 transition-colors">
-                        <div class="flex items-start justify-between mb-2">
-                            <div class="flex-1">
-                                <h4 class="font-semibold text-gray-900 mb-1">{{ $schedule['course'] }}</h4>
-                                <p class="text-gray-600 text-xs mb-2">{{ $schedule['location'] }}</p>
-                            </div>
-                            @if($schedule['type'] === 'live_session' || $schedule['type'] === 'webinar')
-                                @if($schedule['meeting_link'])
-                                    <a href="{{ $schedule['meeting_link'] }}" target="_blank" class="px-3 py-1 bg-indigo-100 text-indigo-600 rounded-full text-xs font-semibold hover:bg-indigo-200 transition-colors">
-                                        Join
-                                    </a>
-                                @endif
-                            @endif
-                        </div>
-                        <p class="text-indigo-600 text-sm font-medium">🕐 {{ $schedule['time'] }}</p>
-                    </div>
-                    @empty
-                    <div class="text-center py-8 text-gray-500 text-sm">
-                        <p>Tidak ada jadwal untuk hari ini</p>
-                    </div>
-                    @endforelse
-                </div>
-            </div>
 
             <!-- Assignments -->
             <div class="bg-white rounded-xl shadow-sm p-6">

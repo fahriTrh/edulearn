@@ -61,9 +61,9 @@ Route::middleware(['auth', 'instructor'])->group(function () {
 
 Route::middleware(['auth', 'student'])->group(function () {
     Route::get('/dashboard-mahasiswa', \App\Livewire\Student\DashboardMahasiswa::class)->name('mahasiswa.dashboard');
-    Route::view('/forum', 'mahasiswa.forum')->name('mahasiswa.forum');
-    Route::get('/jadwal', \App\Livewire\Student\JadwalMahasiswa::class)->name('mahasiswa.jadwal');
+    Route::get('/daftar-kelas', \App\Livewire\Student\DaftarKelas::class)->name('mahasiswa.daftar-kelas');
     Route::get('/kursus', \App\Livewire\Student\KursusSaya::class)->name('mahasiswa.kursus');
+    Route::get('/kursus/detail/{id}', \App\Livewire\Student\DetailKursus::class)->name('mahasiswa.detail-kursus');
     Route::get('/nilai', \App\Livewire\Student\NilaiMahasiswa::class)->name('mahasiswa.nilai');
     Route::get('/sertifikat', function () {
         return redirect()->route('mahasiswa.nilai');

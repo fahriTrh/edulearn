@@ -7,6 +7,8 @@ use App\Models\AssignmentSubmission;
 use App\Models\ClassModel;
 use App\Models\ClassUser;
 use App\Models\Material;
+use App\Models\Post;
+use App\Models\PostReply;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -21,6 +23,7 @@ class DetailKelas extends Component
 
     public $classId;
     public $class;
+    public $activeTab = 'classwork'; // 'stream', 'classwork', 'people'
     
     // Material modal
     public $showMaterialModal = false;
@@ -45,6 +48,15 @@ class DetailKelas extends Component
     public $showStudentModal = false;
     public $student_identifier = '';
 
+    // Stream/Announcement
+    public $announcement_text = '';
+    public $post_type = 'announcement'; // 'announcement' or 'discussion'
+    public $post_title = '';
+    public $post_content = '';
+    public $showPostModal = false;
+    public $selectedPostId = null;
+    public $reply_content = [];
+
     public function mount($id)
     {
         $this->classId = $id;
@@ -57,6 +69,11 @@ class DetailKelas extends Component
             ->where('instructor_id', Auth::user()->instructor->id)
             ->with(['students', 'assignments', 'materials'])
             ->firstOrFail();
+    }
+
+    public function switchTab($tab)
+    {
+        $this->activeTab = $tab;
     }
 
     // Material methods
@@ -379,6 +396,116 @@ class DetailKelas extends Component
         }
     }
 
+    // Post methods
+    public function openPostModal($type = 'announcement')
+    {
+        $this->post_type = $type;
+        $this->post_title = '';
+        $this->post_content = '';
+        $this->showPostModal = true;
+    }
+
+    public function closePostModal()
+    {
+        $this->showPostModal = false;
+        $this->post_type = 'announcement';
+        $this->post_title = '';
+        $this->post_content = '';
+    }
+
+    public function createPost()
+    {
+        $this->validate([
+            'post_content' => 'required|string',
+            'post_title' => $this->post_type === 'discussion' ? 'required|string|max:255' : 'nullable',
+        ]);
+
+        try {
+            Post::create([
+                'class_id' => $this->classId,
+                'user_id' => Auth::id(),
+                'type' => $this->post_type,
+                'title' => $this->post_type === 'discussion' ? $this->post_title : null,
+                'content' => $this->post_content,
+            ]);
+
+            session()->flash('success', $this->post_type === 'announcement' ? 'Pengumuman berhasil dibuat!' : 'Diskusi berhasil dibuat!');
+            $this->closePostModal();
+        } catch (\Exception $e) {
+            Log::error('Gagal membuat post: ' . $e->getMessage());
+            session()->flash('error', 'Terjadi kesalahan saat membuat post.');
+        }
+    }
+
+    public function deletePost($postId)
+    {
+        try {
+            $post = Post::where('id', $postId)
+                ->where('class_id', $this->classId)
+                ->firstOrFail();
+
+            $post->delete();
+            session()->flash('success', 'Post berhasil dihapus!');
+        } catch (\Exception $e) {
+            Log::error('Gagal menghapus post: ' . $e->getMessage());
+            session()->flash('error', 'Terjadi kesalahan saat menghapus post.');
+        }
+    }
+
+    public function togglePinPost($postId)
+    {
+        try {
+            $post = Post::where('id', $postId)
+                ->where('class_id', $this->classId)
+                ->firstOrFail();
+
+            $post->is_pinned = !$post->is_pinned;
+            $post->save();
+        } catch (\Exception $e) {
+            Log::error('Gagal toggle pin post: ' . $e->getMessage());
+        }
+    }
+
+    public function addReply($postId)
+    {
+        $this->validate([
+            "reply_content.{$postId}" => 'required|string',
+        ]);
+
+        try {
+            PostReply::create([
+                'post_id' => $postId,
+                'user_id' => Auth::id(),
+                'content' => $this->reply_content[$postId] ?? '',
+            ]);
+
+            $this->reply_content[$postId] = '';
+            session()->flash('success', 'Balasan berhasil ditambahkan!');
+        } catch (\Exception $e) {
+            Log::error('Gagal menambahkan reply: ' . $e->getMessage());
+            session()->flash('error', 'Terjadi kesalahan saat menambahkan balasan.');
+        }
+    }
+
+    public function deleteReply($replyId)
+    {
+        try {
+            $reply = PostReply::findOrFail($replyId);
+            $post = Post::findOrFail($reply->post_id);
+
+            // Only allow deletion if user is the author or instructor
+            if ($reply->user_id === Auth::id() || $this->class->instructor_id === Auth::user()->instructor->id) {
+                $reply->delete();
+                session()->flash('success', 'Balasan berhasil dihapus!');
+            } else {
+                session()->flash('error', 'Anda tidak memiliki izin untuk menghapus balasan ini.');
+            }
+        } catch (\Exception $e) {
+            Log::error('Gagal menghapus reply: ' . $e->getMessage());
+            session()->flash('error', 'Terjadi kesalahan saat menghapus balasan.');
+        }
+    }
+
     public function render()
     {
         if (!$this->class) {
@@ -469,14 +596,54 @@ class DetailKelas extends Component
             )
             ->get();
 
+        // Get posts (pinned first, then by date)
+        $posts = Post::where('class_id', $this->classId)
+            ->with(['user', 'replies.user'])
+            ->orderBy('is_pinned', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($post) {
+                return [
+                    'id' => $post->id,
+                    'type' => $post->type,
+                    'title' => $post->title,
+                    'content' => $post->content,
+                    'is_pinned' => $post->is_pinned,
+                    'user' => [
+                        'id' => $post->user->id,
+                        'name' => $post->user->name,
+                        'initial' => substr($post->user->name, 0, 1),
+                    ],
+                    'created_at' => $post->created_at->format('Y-m-d H:i:s'),
+                    'created_at_carbon' => $post->created_at,
+                    'replies' => $post->replies->map(function ($reply) {
+                        return [
+                            'id' => $reply->id,
+                            'content' => $reply->content,
+                            'user' => [
+                                'id' => $reply->user->id,
+                                'name' => $reply->user->name,
+                                'initial' => substr($reply->user->name, 0, 1),
+                            ],
+                            'created_at' => $reply->created_at->format('Y-m-d H:i:s'),
+                            'created_at_carbon' => $reply->created_at,
+                        ];
+                    }),
+                ];
+            });
+
         $title = $this->class->title;
         $sub_title = $this->class->description ?? '';
-        $instructor_name = Auth::user()->name;
+        
+        // Fetch instructor name directly from database
+        $user = User::find(Auth::id());
+        $instructor_name = $user && $user->name ? $user->name : 'Instructor';
 
         return view('livewire.instructor.detail-kelas', [
             'materials' => $materials,
             'mahasiswa' => $mahasiswa,
-            'formatted_assignments' => $formatted_assignments
+            'formatted_assignments' => $formatted_assignments,
+            'posts' => $posts,
         ])->layout('dosen.app', [
             'title' => $title,
             'sub_title' => $sub_title,

@@ -116,7 +116,10 @@ class DashboardMahasiswa extends Component
             })
             ->map(function ($assignment) use ($user) {
                 $submission = $assignment->submissions->first();
-                $daysLeft = now()->diffInDays($assignment->deadline, false);
+                // Calculate days left properly (rounded, not float)
+                $deadline = \Carbon\Carbon::parse($assignment->deadline);
+                $now = now();
+                $daysLeft = (int) floor($now->diffInDays($deadline, false));
                 
                 return [
                     'id' => $assignment->id,

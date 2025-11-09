@@ -7,21 +7,43 @@ use App\Models\AssignmentSubmission;
 use App\Models\ClassModel;
 use App\Models\Material;
 use App\Models\Schedule;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
-use Livewire\Attributes\Layout;
+use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 
-#[Layout('dosen.app')]
 class DashboardInstructor extends Component
 {
     public $title = 'Dashboard Instruktur';
     public $sub_title = 'Selamat datang kembali!';
-    public $instructor_name = '';
+
+    public function deleteClass($id)
+    {
+        try {
+            $class = ClassModel::where('id', $id)
+                ->where('instructor_id', Auth::user()->instructor->id)
+                ->firstOrFail();
+
+            // Delete cover image if exists
+            if ($class->cover_image && file_exists(public_path($class->cover_image))) {
+                unlink(public_path($class->cover_image));
+            }
+
+            $class->delete();
+
+            session()->flash('success', 'Kelas berhasil dihapus!');
+        } catch (\Exception $e) {
+            Log::error('Gagal menghapus kelas dari dashboard: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'user_id' => Auth::id(),
+                'class_id' => $id,
+            ]);
+            session()->flash('error', 'Terjadi kesalahan saat menghapus kelas. Silakan coba lagi.');
+        }
+    }
 
     public function render()
     {
-        $this->instructor_name = Auth::user()->name;
-
         $instructorClasses = ClassModel::where('instructor_id', Auth::user()->instructor->id)
             ->with(['assignments', 'students', 'materials'])
             ->get();
@@ -108,6 +130,10 @@ class DashboardInstructor extends Component
             ];
         });
 
+        // Fetch instructor name directly from database
+        $user = User::find(Auth::id());
+        $instructor_name = $user && $user->name ? $user->name : 'Instructor';
+
         return view('livewire.instructor.dashboard-instructor', [
             'totalStudents' => $totalStudents,
             'totalAssignments' => $totalAssignments,
@@ -118,6 +144,10 @@ class DashboardInstructor extends Component
             'recentSubmissions' => $recentSubmissions,
             'classPerformance' => $classPerformance,
             'instructorClasses' => $instructorClasses,
+        ])->layout('dosen.app', [
+            'title' => $this->title,
+            'sub_title' => $this->sub_title,
+            'instructor_name' => $instructor_name,
         ]);
     }
 }
