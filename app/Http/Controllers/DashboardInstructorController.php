@@ -51,7 +51,7 @@ class DashboardInstructorController extends Controller
         }
 
 
-        return view('dosen.dashboard-dosen', [
+        return view('dosen.dashboard', [
             'title' => $title,
             'instructor_name' => $instructor_name,
             'sub_title' => "Anda memiliki " . count($all_assignments) . " tugas",

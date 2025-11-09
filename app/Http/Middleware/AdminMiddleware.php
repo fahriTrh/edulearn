@@ -25,7 +25,7 @@ class AdminMiddleware
         if (Auth::user()->role !== 'admin') {
             abort(403, 'Access denied. You are not an admin.');
         }
-        
+
         return $next($request);
     }
 }

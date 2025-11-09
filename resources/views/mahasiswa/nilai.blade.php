@@ -1,517 +1,257 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nilai - EduLearn</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+@extends('mahasiswa.app')
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f5f7fa;
-            color: #333;
-        }
+@section('title', 'Nilai - EduLearn')
 
-        .dashboard {
-            display: flex;
-            min-height: 100vh;
-        }
+@section('content')
+<div class="min-h-screen bg-gray-50 p-4 md:p-8">
+    <!-- Page Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-2">Nilai & Sertifikat</h1>
+        <p class="text-gray-600 text-lg">Pantau pencapaian dan progres belajar Anda di setiap kursus</p>
+    </div>
 
-        .sidebar {
-            width: 260px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 2rem 0;
-            position: fixed;
-            height: 100vh;
-            overflow-y: auto;
-        }
-
-        .logo-section {
-            padding: 0 1.5rem 2rem;
-            font-size: 1.8rem;
-            font-weight: bold;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .menu-item {
-            padding: 1rem 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            cursor: pointer;
-            transition: all 0.3s;
-            border-left: 3px solid transparent;
-        }
-
-        .menu-item:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-left-color: white;
-        }
-
-        .menu-item.active {
-            background: rgba(255, 255, 255, 0.15);
-            border-left-color: white;
-        }
-
-        .main-content {
-            flex: 1;
-            margin-left: 260px;
-            padding: 2rem;
-        }
-
-        .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-            background: white;
-            padding: 1.5rem;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-
-        .search-bar {
-            display: flex;
-            align-items: center;
-            background: #f5f7fa;
-            padding: 0.7rem 1.2rem;
-            border-radius: 25px;
-            flex: 1;
-            max-width: 400px;
-        }
-
-        .search-bar input {
-            border: none;
-            background: none;
-            outline: none;
-            width: 100%;
-            margin-left: 0.5rem;
-        }
-
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-        }
-
-        .page-header h1 {
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .page-header p {
-            color: #666;
-            margin-bottom: 2rem;
-        }
-
-        .summary-cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .summary-card {
-            background: white;
-            padding: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            border-left: 4px solid #667eea;
-        }
-
-        .summary-label {
-            color: #666;
-            font-size: 0.9rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .summary-value {
-            font-size: 2.5rem;
-            font-weight: bold;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .summary-note {
-            color: #2ed573;
-            font-size: 0.85rem;
-            margin-top: 0.5rem;
-        }
-
-        .chart-section {
-            background: white;
-            padding: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            margin-bottom: 2rem;
-        }
-
-        .chart-title {
-            font-size: 1.3rem;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
-        }
-
-        .grades-table {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-
-        .grades-table thead {
-            background: #f5f7fa;
-        }
-
-        .grades-table th {
-            padding: 1rem;
-            text-align: left;
-            font-weight: 600;
-            border-bottom: 2px solid #e8ebf0;
-        }
-
-        .grades-table td {
-            padding: 1rem;
-            border-bottom: 1px solid #e8ebf0;
-        }
-
-        .course-name {
-            font-weight: 600;
-            color: #333;
-        }
-
-        .course-category {
-            font-size: 0.85rem;
-            color: #667eea;
-            margin-top: 0.3rem;
-        }
-
-        .grade-badge {
-            padding: 0.5rem 1rem;
-            border-radius: 25px;
-            font-weight: 600;
-        }
-
-        .grade-excellent {
-            background: rgba(46, 213, 115, 0.1);
-            color: #2ed573;
-        }
-
-        .grade-good {
-            background: rgba(79, 172, 254, 0.1);
-            color: #4facfe;
-        }
-
-        .grade-progress {
-            background: rgba(255, 165, 2, 0.1);
-            color: #ffa502;
-        }
-
-        .certificate-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.3rem;
-            padding: 0.3rem 0.6rem;
-            background: #ffd700;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            margin-left: 0.5rem;
-        }
-
-        .score-cell {
-            font-weight: 600;
-            font-size: 1.1rem;
-            color: #667eea;
-        }
-
-        .detail-btn {
-            padding: 0.5rem 1rem;
-            border: 2px solid #667eea;
-            background: white;
-            color: #667eea;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-        }
-
-        .detail-btn:hover {
-            background: #667eea;
-            color: white;
-        }
-
-        .breakdown-section {
-            padding: 1rem;
-            background: #f5f7fa;
-            border-radius: 8px;
-            display: none;
-        }
-
-        .breakdown-section.active {
-            display: block;
-        }
-
-        .breakdown-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 0.5rem 0;
-            border-bottom: 1px solid #e8ebf0;
-        }
-
-        @media (max-width: 768px) {
-            .sidebar { width: 0; padding: 0; }
-            .main-content { margin-left: 0; }
-        }
-    </style>
-</head>
-<body>
-    <div class="dashboard">
-        <aside class="sidebar">
-            <div class="logo-section">EduLearn</div>
-            <div style="padding: 2rem 0;">
-                <div class="menu-item"><span>📊</span> Dashboard</div>
-                <div class="menu-item"><span>📚</span> Kursus Saya</div>
-                <div class="menu-item"><span>📅</span> Jadwal</div>
-                <div class="menu-item"><span>✍️</span> Tugas</div>
-                <div class="menu-item active"><span>📈</span> Nilai</div>
-                <div class="menu-item"><span>💬</span> Diskusi</div>
-                <div class="menu-item"><span>🏆</span> Sertifikat</div>
-                <div class="menu-item"><span>⚙️</span> Pengaturan</div>
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <!-- Card 1 -->
+        <div class="bg-white p-6 md:p-8 rounded-xl shadow-sm border-l-4 border-purple-600">
+            <div class="text-gray-600 text-sm mb-2">Rata-rata Nilai</div>
+            <div class="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent mb-2">
+                85.5
             </div>
-        </aside>
+            <div class="text-green-500 text-sm">📊 Dari 8 kursus selesai</div>
+        </div>
 
-        <main class="main-content">
-            <div class="top-bar">
-                <div class="search-bar">
-                    <span>🔍</span>
-                    <input type="text" placeholder="Cari kursus...">
-                </div>
-                <div style="display: flex; align-items: center; gap: 1rem;">
-                    <div style="width: 40px; height: 40px; background: #f5f7fa; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer;">🔔</div>
-                    <div class="user-avatar">AM</div>
-                    <div>
-                        <div style="font-weight: 600;">Ahmad Maulana</div>
-                        <div style="font-size: 0.85rem; color: #666;">Mahasiswa</div>
-                    </div>
-                </div>
+        <!-- Card 2 -->
+        <div class="bg-white p-6 md:p-8 rounded-xl shadow-sm border-l-4 border-purple-600">
+            <div class="text-gray-600 text-sm mb-2">Kursus Selesai</div>
+            <div class="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent mb-2">
+                8
             </div>
+            <div class="text-green-500 text-sm">✅ Dengan sertifikat</div>
+        </div>
 
-            <div class="page-header">
-                <h1>Nilai & Sertifikat</h1>
-                <p>Pantau pencapaian dan progres belajar Anda di setiap kursus</p>
+        <!-- Card 3 -->
+        <div class="bg-white p-6 md:p-8 rounded-xl shadow-sm border-l-4 border-purple-600">
+            <div class="text-gray-600 text-sm mb-2">Kursus Aktif</div>
+            <div class="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent mb-2">
+                5
             </div>
+            <div class="text-green-500 text-sm">🎯 Sedang berjalan</div>
+        </div>
 
-            <div class="summary-cards">
-                <div class="summary-card">
-                    <div class="summary-label">Rata-rata Nilai</div>
-                    <div class="summary-value">85.5</div>
-                    <div class="summary-note">📊 Dari 8 kursus selesai</div>
-                </div>
-                <div class="summary-card">
-                    <div class="summary-label">Kursus Selesai</div>
-                    <div class="summary-value">8</div>
-                    <div class="summary-note">✅ Dengan sertifikat</div>
-                </div>
-                <div class="summary-card">
-                    <div class="summary-label">Kursus Aktif</div>
-                    <div class="summary-value">5</div>
-                    <div class="summary-note">🎯 Sedang berjalan</div>
-                </div>
-                <div class="summary-card">
-                    <div class="summary-label">Total Jam Belajar</div>
-                    <div class="summary-value">328</div>
-                    <div class="summary-note">⏱️ Jam pembelajaran</div>
-                </div>
+        <!-- Card 4 -->
+        <div class="bg-white p-6 md:p-8 rounded-xl shadow-sm border-l-4 border-purple-600">
+            <div class="text-gray-600 text-sm mb-2">Total Jam Belajar</div>
+            <div class="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent mb-2">
+                328
             </div>
+            <div class="text-green-500 text-sm">⏱️ Jam pembelajaran</div>
+        </div>
+    </div>
 
-            <div class="chart-section">
-                <h2 class="chart-title">Daftar Nilai Kursus</h2>
-                <table class="grades-table">
-                    <thead>
+    <!-- Grades Table Section -->
+    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div class="p-6 md:p-8">
+            <h2 class="text-xl md:text-2xl font-semibold text-gray-800 mb-6">Daftar Nilai Kursus</h2>
+            
+            <!-- Desktop Table -->
+            <div class="hidden lg:block overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50">
                         <tr>
-                            <th>Nama Kursus</th>
-                            <th>Durasi</th>
-                            <th>Nilai</th>
-                            <th>Status</th>
-                            <th>Instruktur</th>
-                            <th>Aksi</th>
+                            <th class="px-4 py-4 text-left text-sm font-semibold text-gray-700 border-b-2 border-gray-200">Nama Kursus</th>
+                            <th class="px-4 py-4 text-left text-sm font-semibold text-gray-700 border-b-2 border-gray-200">Durasi</th>
+                            <th class="px-4 py-4 text-left text-sm font-semibold text-gray-700 border-b-2 border-gray-200">Nilai</th>
+                            <th class="px-4 py-4 text-left text-sm font-semibold text-gray-700 border-b-2 border-gray-200">Status</th>
+                            <th class="px-4 py-4 text-left text-sm font-semibold text-gray-700 border-b-2 border-gray-200">Instruktur</th>
+                            <th class="px-4 py-4 text-left text-sm font-semibold text-gray-700 border-b-2 border-gray-200">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>
-                                <div class="course-name">Pemrograman Web Lanjut</div>
-                                <div class="course-category">💻 Pemrograman</div>
+                        <!-- Row 1 -->
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-4 py-4 border-b border-gray-200">
+                                <div class="font-semibold text-gray-800">Pemrograman Web Lanjut</div>
+                                <div class="text-sm text-purple-600 mt-1">💻 Pemrograman</div>
                             </td>
-                            <td>24 Jam</td>
-                            <td class="score-cell">88</td>
-                            <td>
-                                <span class="grade-badge grade-excellent">Lulus</span>
-                                <span class="certificate-badge">🏆 Sertifikat</span>
+                            <td class="px-4 py-4 border-b border-gray-200 text-gray-700">24 Jam</td>
+                            <td class="px-4 py-4 border-b border-gray-200 font-semibold text-lg text-purple-600">88</td>
+                            <td class="px-4 py-4 border-b border-gray-200">
+                                <span class="inline-block px-4 py-2 rounded-full text-sm font-semibold bg-green-100 text-green-600">Lulus</span>
+                                <span class="inline-flex items-center gap-1 px-2 py-1 bg-yellow-400 rounded-lg text-xs font-semibold ml-2">🏆 Sertifikat</span>
                             </td>
-                            <td>Dr. Budi Santoso</td>
-                            <td><button class="detail-btn" onclick="toggleBreakdown(1)">Detail</button></td>
+                            <td class="px-4 py-4 border-b border-gray-200 text-gray-700">Dr. Budi Santoso</td>
+                            <td class="px-4 py-4 border-b border-gray-200">
+                                <button onclick="toggleBreakdown(1)" class="px-4 py-2 border-2 border-purple-600 text-purple-600 rounded-lg font-semibold hover:bg-purple-600 hover:text-white transition-colors">
+                                    Detail
+                                </button>
+                            </td>
                         </tr>
-                        <tr>
-                            <td colspan="6">
-                                <div class="breakdown-section" id="breakdown-1">
-                                    <div class="breakdown-item">
-                                        <span>📝 Quiz & Latihan (30%)</span>
-                                        <span style="font-weight: 600;">85/100</span>
+                        <tr id="breakdown-1" class="hidden">
+                            <td colspan="6" class="px-4 py-4 border-b border-gray-200">
+                                <div class="bg-gray-50 p-4 rounded-lg">
+                                    <div class="flex justify-between py-2 border-b border-gray-200">
+                                        <span class="text-gray-700">📝 Quiz & Latihan (30%)</span>
+                                        <span class="font-semibold text-gray-800">85/100</span>
                                     </div>
-                                    <div class="breakdown-item">
-                                        <span>📋 Tugas & Project (40%)</span>
-                                        <span style="font-weight: 600;">90/100</span>
+                                    <div class="flex justify-between py-2 border-b border-gray-200">
+                                        <span class="text-gray-700">📋 Tugas & Project (40%)</span>
+                                        <span class="font-semibold text-gray-800">90/100</span>
                                     </div>
-                                    <div class="breakdown-item">
-                                        <span>🎯 Ujian Akhir (30%)</span>
-                                        <span style="font-weight: 600;">88/100</span>
+                                    <div class="flex justify-between py-2">
+                                        <span class="text-gray-700">🎯 Ujian Akhir (30%)</span>
+                                        <span class="font-semibold text-gray-800">88/100</span>
                                     </div>
                                 </div>
                             </td>
                         </tr>
 
-                        <tr>
-                            <td>
-                                <div class="course-name">Struktur Data & Algoritma</div>
-                                <div class="course-category">🔢 Algoritma</div>
+                        <!-- Row 2 -->
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-4 py-4 border-b border-gray-200">
+                                <div class="font-semibold text-gray-800">Struktur Data & Algoritma</div>
+                                <div class="text-sm text-purple-600 mt-1">🔢 Algoritma</div>
                             </td>
-                            <td>30 Jam</td>
-                            <td class="score-cell">85</td>
-                            <td>
-                                <span class="grade-badge grade-excellent">Lulus</span>
-                                <span class="certificate-badge">🏆 Sertifikat</span>
+                            <td class="px-4 py-4 border-b border-gray-200 text-gray-700">30 Jam</td>
+                            <td class="px-4 py-4 border-b border-gray-200 font-semibold text-lg text-purple-600">85</td>
+                            <td class="px-4 py-4 border-b border-gray-200">
+                                <span class="inline-block px-4 py-2 rounded-full text-sm font-semibold bg-green-100 text-green-600">Lulus</span>
+                                <span class="inline-flex items-center gap-1 px-2 py-1 bg-yellow-400 rounded-lg text-xs font-semibold ml-2">🏆 Sertifikat</span>
                             </td>
-                            <td>Prof. Siti Nurhaliza</td>
-                            <td><button class="detail-btn" onclick="toggleBreakdown(2)">Detail</button></td>
+                            <td class="px-4 py-4 border-b border-gray-200 text-gray-700">Prof. Siti Nurhaliza</td>
+                            <td class="px-4 py-4 border-b border-gray-200">
+                                <button onclick="toggleBreakdown(2)" class="px-4 py-2 border-2 border-purple-600 text-purple-600 rounded-lg font-semibold hover:bg-purple-600 hover:text-white transition-colors">
+                                    Detail
+                                </button>
+                            </td>
                         </tr>
-                        <tr>
-                            <td colspan="6">
-                                <div class="breakdown-section" id="breakdown-2">
-                                    <div class="breakdown-item">
-                                        <span>📝 Quiz & Latihan (30%)</span>
-                                        <span style="font-weight: 600;">82/100</span>
+                        <tr id="breakdown-2" class="hidden">
+                            <td colspan="6" class="px-4 py-4 border-b border-gray-200">
+                                <div class="bg-gray-50 p-4 rounded-lg">
+                                    <div class="flex justify-between py-2 border-b border-gray-200">
+                                        <span class="text-gray-700">📝 Quiz & Latihan (30%)</span>
+                                        <span class="font-semibold text-gray-800">82/100</span>
                                     </div>
-                                    <div class="breakdown-item">
-                                        <span>📋 Tugas & Project (40%)</span>
-                                        <span style="font-weight: 600;">88/100</span>
+                                    <div class="flex justify-between py-2 border-b border-gray-200">
+                                        <span class="text-gray-700">📋 Tugas & Project (40%)</span>
+                                        <span class="font-semibold text-gray-800">88/100</span>
                                     </div>
-                                    <div class="breakdown-item">
-                                        <span>🎯 Ujian Akhir (30%)</span>
-                                        <span style="font-weight: 600;">85/100</span>
+                                    <div class="flex justify-between py-2">
+                                        <span class="text-gray-700">🎯 Ujian Akhir (30%)</span>
+                                        <span class="font-semibold text-gray-800">85/100</span>
                                     </div>
                                 </div>
                             </td>
                         </tr>
 
-                        <tr>
-                            <td>
-                                <div class="course-name">Desain Interaksi</div>
-                                <div class="course-category">🎨 Design</div>
+                        <!-- Row 3 -->
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-4 py-4 border-b border-gray-200">
+                                <div class="font-semibold text-gray-800">Desain Interaksi</div>
+                                <div class="text-sm text-purple-600 mt-1">🎨 Design</div>
                             </td>
-                            <td>20 Jam</td>
-                            <td class="score-cell">90</td>
-                            <td>
-                                <span class="grade-badge grade-excellent">Lulus</span>
-                                <span class="certificate-badge">🏆 Sertifikat</span>
+                            <td class="px-4 py-4 border-b border-gray-200 text-gray-700">20 Jam</td>
+                            <td class="px-4 py-4 border-b border-gray-200 font-semibold text-lg text-purple-600">90</td>
+                            <td class="px-4 py-4 border-b border-gray-200">
+                                <span class="inline-block px-4 py-2 rounded-full text-sm font-semibold bg-green-100 text-green-600">Lulus</span>
+                                <span class="inline-flex items-center gap-1 px-2 py-1 bg-yellow-400 rounded-lg text-xs font-semibold ml-2">🏆 Sertifikat</span>
                             </td>
-                            <td>Andi Wijaya, M.Kom</td>
-                            <td><button class="detail-btn" onclick="toggleBreakdown(3)">Detail</button></td>
+                            <td class="px-4 py-4 border-b border-gray-200 text-gray-700">Andi Wijaya, M.Kom</td>
+                            <td class="px-4 py-4 border-b border-gray-200">
+                                <button onclick="toggleBreakdown(3)" class="px-4 py-2 border-2 border-purple-600 text-purple-600 rounded-lg font-semibold hover:bg-purple-600 hover:text-white transition-colors">
+                                    Detail
+                                </button>
+                            </td>
                         </tr>
-                        <tr>
-                            <td colspan="6">
-                                <div class="breakdown-section" id="breakdown-3">
-                                    <div class="breakdown-item">
-                                        <span>📝 Quiz & Latihan (25%)</span>
-                                        <span style="font-weight: 600;">88/100</span>
+                        <tr id="breakdown-3" class="hidden">
+                            <td colspan="6" class="px-4 py-4 border-b border-gray-200">
+                                <div class="bg-gray-50 p-4 rounded-lg">
+                                    <div class="flex justify-between py-2 border-b border-gray-200">
+                                        <span class="text-gray-700">📝 Quiz & Latihan (25%)</span>
+                                        <span class="font-semibold text-gray-800">88/100</span>
                                     </div>
-                                    <div class="breakdown-item">
-                                        <span>🎨 Project Design (45%)</span>
-                                        <span style="font-weight: 600;">92/100</span>
+                                    <div class="flex justify-between py-2 border-b border-gray-200">
+                                        <span class="text-gray-700">🎨 Project Design (45%)</span>
+                                        <span class="font-semibold text-gray-800">92/100</span>
                                     </div>
-                                    <div class="breakdown-item">
-                                        <span>🎯 Ujian Akhir (30%)</span>
-                                        <span style="font-weight: 600;">90/100</span>
+                                    <div class="flex justify-between py-2">
+                                        <span class="text-gray-700">🎯 Ujian Akhir (30%)</span>
+                                        <span class="font-semibold text-gray-800">90/100</span>
                                     </div>
                                 </div>
                             </td>
                         </tr>
 
-                        <tr>
-                            <td>
-                                <div class="course-name">Machine Learning Dasar</div>
-                                <div class="course-category">🤖 AI & ML</div>
+                        <!-- Row 4 -->
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-4 py-4 border-b border-gray-200">
+                                <div class="font-semibold text-gray-800">Machine Learning Dasar</div>
+                                <div class="text-sm text-purple-600 mt-1">🤖 AI & ML</div>
                             </td>
-                            <td>32 Jam</td>
-                            <td class="score-cell">82</td>
-                            <td>
-                                <span class="grade-badge grade-good">Lulus</span>
-                                <span class="certificate-badge">🏆 Sertifikat</span>
+                            <td class="px-4 py-4 border-b border-gray-200 text-gray-700">32 Jam</td>
+                            <td class="px-4 py-4 border-b border-gray-200 font-semibold text-lg text-purple-600">82</td>
+                            <td class="px-4 py-4 border-b border-gray-200">
+                                <span class="inline-block px-4 py-2 rounded-full text-sm font-semibold bg-blue-100 text-blue-600">Lulus</span>
+                                <span class="inline-flex items-center gap-1 px-2 py-1 bg-yellow-400 rounded-lg text-xs font-semibold ml-2">🏆 Sertifikat</span>
                             </td>
-                            <td>Dr. Maya Sari</td>
-                            <td><button class="detail-btn" onclick="toggleBreakdown(4)">Detail</button></td>
+                            <td class="px-4 py-4 border-b border-gray-200 text-gray-700">Dr. Maya Sari</td>
+                            <td class="px-4 py-4 border-b border-gray-200">
+                                <button onclick="toggleBreakdown(4)" class="px-4 py-2 border-2 border-purple-600 text-purple-600 rounded-lg font-semibold hover:bg-purple-600 hover:text-white transition-colors">
+                                    Detail
+                                </button>
+                            </td>
                         </tr>
-                        <tr>
-                            <td colspan="6">
-                                <div class="breakdown-section" id="breakdown-4">
-                                    <div class="breakdown-item">
-                                        <span>📝 Quiz & Latihan (30%)</span>
-                                        <span style="font-weight: 600;">80/100</span>
+                        <tr id="breakdown-4" class="hidden">
+                            <td colspan="6" class="px-4 py-4 border-b border-gray-200">
+                                <div class="bg-gray-50 p-4 rounded-lg">
+                                    <div class="flex justify-between py-2 border-b border-gray-200">
+                                        <span class="text-gray-700">📝 Quiz & Latihan (30%)</span>
+                                        <span class="font-semibold text-gray-800">80/100</span>
                                     </div>
-                                    <div class="breakdown-item">
-                                        <span>📋 Tugas & Project (40%)</span>
-                                        <span style="font-weight: 600;">85/100</span>
+                                    <div class="flex justify-between py-2 border-b border-gray-200">
+                                        <span class="text-gray-700">📋 Tugas & Project (40%)</span>
+                                        <span class="font-semibold text-gray-800">85/100</span>
                                     </div>
-                                    <div class="breakdown-item">
-                                        <span>🎯 Ujian Akhir (30%)</span>
-                                        <span style="font-weight: 600;">80/100</span>
+                                    <div class="flex justify-between py-2">
+                                        <span class="text-gray-700">🎯 Ujian Akhir (30%)</span>
+                                        <span class="font-semibold text-gray-800">80/100</span>
                                     </div>
                                 </div>
                             </td>
                         </tr>
 
-                        <tr>
-                            <td>
-                                <div class="course-name">Database Management System</div>
-                                <div class="course-category">🗄️ Database</div>
+                        <!-- Row 5 -->
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-4 py-4 border-b border-gray-200">
+                                <div class="font-semibold text-gray-800">Database Management System</div>
+                                <div class="text-sm text-purple-600 mt-1">🗄️ Database</div>
                             </td>
-                            <td>28 Jam</td>
-                            <td class="score-cell">-</td>
-                            <td>
-                                <span class="grade-badge grade-progress">Berlangsung</span>
+                            <td class="px-4 py-4 border-b border-gray-200 text-gray-700">28 Jam</td>
+                            <td class="px-4 py-4 border-b border-gray-200 font-semibold text-lg text-purple-600">-</td>
+                            <td class="px-4 py-4 border-b border-gray-200">
+                                <span class="inline-block px-4 py-2 rounded-full text-sm font-semibold bg-orange-100 text-orange-600">Berlangsung</span>
                             </td>
-                            <td>Ir. Joko Widodo</td>
-                            <td><button class="detail-btn" onclick="toggleBreakdown(5)">Detail</button></td>
+                            <td class="px-4 py-4 border-b border-gray-200 text-gray-700">Ir. Joko Widodo</td>
+                            <td class="px-4 py-4 border-b border-gray-200">
+                                <button onclick="toggleBreakdown(5)" class="px-4 py-2 border-2 border-purple-600 text-purple-600 rounded-lg font-semibold hover:bg-purple-600 hover:text-white transition-colors">
+                                    Detail
+                                </button>
+                            </td>
                         </tr>
-                        <tr>
-                            <td colspan="6">
-                                <div class="breakdown-section" id="breakdown-5">
-                                    <div class="breakdown-item">
-                                        <span>📝 Quiz & Latihan (30%)</span>
-                                        <span style="font-weight: 600;">75/100</span>
+                        <tr id="breakdown-5" class="hidden">
+                            <td colspan="6" class="px-4 py-4 border-b border-gray-200">
+                                <div class="bg-gray-50 p-4 rounded-lg">
+                                    <div class="flex justify-between py-2 border-b border-gray-200">
+                                        <span class="text-gray-700">📝 Quiz & Latihan (30%)</span>
+                                        <span class="font-semibold text-gray-800">75/100</span>
                                     </div>
-                                    <div class="breakdown-item">
-                                        <span>📋 Tugas (40%)</span>
-                                        <span style="font-weight: 600;">Belum selesai</span>
+                                    <div class="flex justify-between py-2 border-b border-gray-200">
+                                        <span class="text-gray-700">📋 Tugas (40%)</span>
+                                        <span class="font-semibold text-gray-800">Belum selesai</span>
                                     </div>
-                                    <div class="breakdown-item">
-                                        <span>🎯 Ujian Akhir (30%)</span>
-                                        <span style="font-weight: 600;">Belum tersedia</span>
+                                    <div class="flex justify-between py-2">
+                                        <span class="text-gray-700">🎯 Ujian Akhir (30%)</span>
+                                        <span class="font-semibold text-gray-800">Belum tersedia</span>
                                     </div>
                                 </div>
                             </td>
@@ -519,14 +259,67 @@
                     </tbody>
                 </table>
             </div>
-        </main>
-    </div>
 
-    <script>
-        function toggleBreakdown(id) {
-            const breakdown = document.getElementById(`breakdown-${id}`);
-            breakdown.classList.toggle('active');
-        }
-    </script>
-</body>
-</html>
+            <!-- Mobile Cards -->
+            <div class="lg:hidden space-y-4">
+                @foreach([
+                    ['name' => 'Pemrograman Web Lanjut', 'category' => '💻 Pemrograman', 'duration' => '24 Jam', 'score' => '88', 'status' => 'Lulus', 'statusClass' => 'bg-green-100 text-green-600', 'hasCertificate' => true, 'instructor' => 'Dr. Budi Santoso', 'id' => 1, 'breakdown' => [['name' => '📝 Quiz & Latihan (30%)', 'score' => '85/100'], ['name' => '📋 Tugas & Project (40%)', 'score' => '90/100'], ['name' => '🎯 Ujian Akhir (30%)', 'score' => '88/100']]],
+                    ['name' => 'Struktur Data & Algoritma', 'category' => '🔢 Algoritma', 'duration' => '30 Jam', 'score' => '85', 'status' => 'Lulus', 'statusClass' => 'bg-green-100 text-green-600', 'hasCertificate' => true, 'instructor' => 'Prof. Siti Nurhaliza', 'id' => 2, 'breakdown' => [['name' => '📝 Quiz & Latihan (30%)', 'score' => '82/100'], ['name' => '📋 Tugas & Project (40%)', 'score' => '88/100'], ['name' => '🎯 Ujian Akhir (30%)', 'score' => '85/100']]],
+                    ['name' => 'Desain Interaksi', 'category' => '🎨 Design', 'duration' => '20 Jam', 'score' => '90', 'status' => 'Lulus', 'statusClass' => 'bg-green-100 text-green-600', 'hasCertificate' => true, 'instructor' => 'Andi Wijaya, M.Kom', 'id' => 3, 'breakdown' => [['name' => '📝 Quiz & Latihan (25%)', 'score' => '88/100'], ['name' => '🎨 Project Design (45%)', 'score' => '92/100'], ['name' => '🎯 Ujian Akhir (30%)', 'score' => '90/100']]],
+                    ['name' => 'Machine Learning Dasar', 'category' => '🤖 AI & ML', 'duration' => '32 Jam', 'score' => '82', 'status' => 'Lulus', 'statusClass' => 'bg-blue-100 text-blue-600', 'hasCertificate' => true, 'instructor' => 'Dr. Maya Sari', 'id' => 4, 'breakdown' => [['name' => '📝 Quiz & Latihan (30%)', 'score' => '80/100'], ['name' => '📋 Tugas & Project (40%)', 'score' => '85/100'], ['name' => '🎯 Ujian Akhir (30%)', 'score' => '80/100']]],
+                    ['name' => 'Database Management System', 'category' => '🗄️ Database', 'duration' => '28 Jam', 'score' => '-', 'status' => 'Berlangsung', 'statusClass' => 'bg-orange-100 text-orange-600', 'hasCertificate' => false, 'instructor' => 'Ir. Joko Widodo', 'id' => 5, 'breakdown' => [['name' => '📝 Quiz & Latihan (30%)', 'score' => '75/100'], ['name' => '📋 Tugas (40%)', 'score' => 'Belum selesai'], ['name' => '🎯 Ujian Akhir (30%)', 'score' => 'Belum tersedia']]]
+                ] as $course)
+                <div class="bg-white border border-gray-200 rounded-lg p-4">
+                    <div class="font-semibold text-gray-800 mb-1">{{ $course['name'] }}</div>
+                    <div class="text-sm text-purple-600 mb-3">{{ $course['category'] }}</div>
+                    
+                    <div class="grid grid-cols-2 gap-2 text-sm mb-3">
+                        <div>
+                            <span class="text-gray-500">Durasi:</span>
+                            <span class="font-medium text-gray-700 ml-1">{{ $course['duration'] }}</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-500">Nilai:</span>
+                            <span class="font-semibold text-purple-600 ml-1 text-lg">{{ $course['score'] }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold {{ $course['statusClass'] }}">{{ $course['status'] }}</span>
+                        @if($course['hasCertificate'])
+                        <span class="inline-flex items-center gap-1 px-2 py-1 bg-yellow-400 rounded-lg text-xs font-semibold ml-2">🏆 Sertifikat</span>
+                        @endif
+                    </div>
+                    
+                    <div class="text-sm text-gray-600 mb-3">
+                        <span class="text-gray-500">Instruktur:</span> {{ $course['instructor'] }}
+                    </div>
+                    
+                    <button onclick="toggleBreakdown({{ $course['id'] }})" class="w-full px-4 py-2 border-2 border-purple-600 text-purple-600 rounded-lg font-semibold hover:bg-purple-600 hover:text-white transition-colors">
+                        Lihat Detail
+                    </button>
+                    
+                    <div id="breakdown-{{ $course['id'] }}" class="hidden mt-3 bg-gray-50 p-3 rounded-lg">
+                        @foreach($course['breakdown'] as $item)
+                        <div class="flex justify-between py-2 {{ !$loop->last ? 'border-b border-gray-200' : '' }}">
+                            <span class="text-sm text-gray-700">{{ $item['name'] }}</span>
+                            <span class="text-sm font-semibold text-gray-800">{{ $item['score'] }}</span>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        </div>
+    </div>
+</div>
+@endsection
+
+@push('scripts')
+<script>
+    function toggleBreakdown(id) {
+        const breakdown = document.getElementById(`breakdown-${id}`);
+        breakdown.classList.toggle('hidden');
+    }
+</script>
+@endpush

@@ -29,7 +29,7 @@ class DashboardAdminController extends Controller
 
         $total_class = ClassModel::count();
 
-        return view('admin.dashboard-admin', [
+        return view('admin.dashboard', [
             'title' => $title,
             'admin_name' => $admin_name,
             'sub_title' => $sub_title,

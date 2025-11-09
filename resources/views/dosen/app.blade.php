@@ -1,569 +1,251 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ $title }} - EduLearn</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f5f7fa;
-            color: #333;
-        }
-
-        .dashboard {
-            display: flex;
-            min-height: 100vh;
-        }
-
-        .sidebar {
-            width: 260px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 2rem 0;
-            position: fixed;
-            height: 100vh;
-            overflow-y: auto;
-            z-index: 100;
-        }
-
-        .logo-section {
-            padding: 0 1.5rem 2rem;
-            font-size: 1.8rem;
-            font-weight: bold;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .instructor-badge {
-            background: rgba(255, 255, 255, 0.2);
-            padding: 0.3rem 0.8rem;
-            border-radius: 15px;
-            font-size: 0.75rem;
-            margin-top: 0.5rem;
-            display: inline-block;
-        }
-
-        .menu-item {
-            padding: 1rem 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            cursor: pointer;
-            transition: all 0.3s;
-            border-left: 3px solid transparent;
-        }
-
-        .menu-item:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-left-color: white;
-        }
-
-        .menu-item.active {
-            background: rgba(255, 255, 255, 0.15);
-            border-left-color: white;
-        }
-
-        .main-content {
-            flex: 1;
-            margin-left: 260px;
-            padding: 2rem;
-        }
-
-        .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-            background: white;
-            padding: 1.5rem;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-
-        .page-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-        }
-
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-        }
-
-        .welcome-section {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 2rem;
-            border-radius: 12px;
-            margin-bottom: 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .stat-card {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            transition: transform 0.3s;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .stat-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.8rem;
-        }
-
-        .stat-icon.blue {
-            background: rgba(102, 126, 234, 0.1);
-        }
-
-        .stat-icon.green {
-            background: rgba(46, 213, 115, 0.1);
-        }
-
-        .stat-icon.orange {
-            background: rgba(255, 165, 2, 0.1);
-        }
-
-        .stat-icon.purple {
-            background: rgba(118, 75, 162, 0.1);
-        }
-
-        .stat-info h3 {
-            font-size: 1.8rem;
-            color: #667eea;
-            margin-bottom: 0.2rem;
-        }
-
-        .stat-info p {
-            color: #666;
-            font-size: 0.9rem;
-        }
-
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .section-title {
-            font-size: 1.3rem;
-            font-weight: 600;
-        }
-
-        .btn-primary {
-            padding: 0.8rem 1.5rem;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: all 0.3s;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-
-        .card {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-            margin-bottom: 2rem;
-        }
-
-        .classes-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .class-card {
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-            transition: all 0.3s;
-            cursor: pointer;
-        }
-
-        .class-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-        }
-
-        .class-header {
-            height: 120px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2.5rem;
-        }
-
-        .class-body {
-            padding: 1.5rem;
-        }
-
-        .class-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-
-        .class-meta {
-            display: flex;
-            gap: 1rem;
-            margin: 1rem 0;
-            font-size: 0.85rem;
-            color: #666;
-        }
-
-        .class-actions {
-            display: flex;
-            gap: 0.5rem;
-            margin-top: 1rem;
-        }
-
-        .btn-action {
-            flex: 1;
-            padding: 0.6rem;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s;
-            font-size: 0.85rem;
-        }
-
-        .btn-manage {
-            background: #667eea;
-            color: white;
-        }
-
-        .btn-students {
-            background: #f5f7fa;
-            color: #667eea;
-        }
-
-        .assignments-list {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .assignment-item {
-            padding: 1rem;
-            border: 1px solid #e8ebf0;
-            border-radius: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: all 0.3s;
-        }
-
-        .assignment-item:hover {
-            border-color: #667eea;
-            background: #f5f7fa;
-        }
-
-        .assignment-info h4 {
-            margin-bottom: 0.3rem;
-        }
-
-        .assignment-meta {
-            font-size: 0.85rem;
-            color: #666;
-        }
-
-        .pending-badge {
-            background: rgba(255, 165, 2, 0.1);
-            color: #ffa502;
-            padding: 0.3rem 0.8rem;
-            border-radius: 15px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem;
-        }
-
-        .modal.active {
-            display: flex;
-        }
-
-        .modal-content {
-            background: white;
-            padding: 2rem;
-            border-radius: 15px;
-            max-width: 600px;
-            width: 100%;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .close-modal {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-        }
-
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 0.8rem;
-            border: 2px solid #e8ebf0;
-            border-radius: 8px;
-            outline: none;
-            font-family: inherit;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            border-color: #667eea;
-        }
-
-        .form-group textarea {
-            resize: vertical;
-            min-height: 120px;
-        }
-
-        .file-upload {
-            border: 2px dashed #667eea;
-            border-radius: 8px;
-            padding: 2rem;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .file-upload:hover {
-            background: rgba(102, 126, 234, 0.05);
-        }
-
-        .submit-btn {
-            width: 100%;
-            padding: 0.8rem;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 1rem;
-        }
-
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 0;
-                padding: 0;
-                transform: translateX(-100%);
-            }
-
-            .main-content {
-                margin-left: 0;
-                padding: 1rem;
-            }
-
-            .classes-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
-
+    <title>{{ $title ?? 'Dashboard' }} - EduLearn</title>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('styles')
 </head>
-
-<body>
-    <div class="dashboard">
-        <aside class="sidebar">
-            <div class="logo-section">
-                EduLearn
-                <div class="instructor-badge">👨‍🏫 Instruktur</div>
+<body class="bg-gray-50 text-gray-900 antialiased">
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-gradient-to-br from-purple-600 to-purple-800 text-white fixed h-screen overflow-y-auto transition-all duration-300 z-30 -translate-x-full lg:translate-x-0" id="sidebar">
+            <!-- Logo Section -->
+            <div class="px-6 py-8 border-b border-white/20">
+                <h1 class="text-3xl font-bold">EduLearn</h1>
+                <span class="inline-block mt-2 px-3 py-1 bg-white/20 rounded-full text-xs font-semibold">
+                    👨‍🏫 Instruktur
+                </span>
             </div>
-            <div style="padding: 2rem 0;">
-                <a href="/dashboard-dosen"
-                    class="menu-item {{ Request::is('dashboard-dosen') ? 'active' : '' }}"
-                    style="text-decoration: none; color: inherit;">
-                    <span>📊</span>Dashboard
+        
+            <!-- Navigation Menu -->
+            <nav class="py-8">
+                <a href="{{ route('dosen.dashboard') }}" 
+                   class="flex items-center gap-4 px-6 py-4 border-l-4 transition-all duration-300 {{ request()->routeIs('dosen.dashboard') ? 'bg-white/15 border-white' : 'border-transparent hover:bg-white/10 hover:border-white' }}">
+                    <span class="text-2xl">📊</span>
+                    <span class="font-medium">Dashboard</span>
                 </a>
-                <a href="/kelas-saya"
-                    class="menu-item {{ Request::is('kelas-saya*') ? 'active' : '' }}"
-                    style="text-decoration: none; color: inherit;">
-                    <span>📚</span> Kelas Saya
+        
+                <a href="{{ route('dosen.kelas') }}" 
+                   class="flex items-center gap-4 px-6 py-4 border-l-4 transition-all duration-300 {{ request()->routeIs('dosen.kelas*') ? 'bg-white/15 border-white' : 'border-transparent hover:bg-white/10 hover:border-white' }}">
+                    <span class="text-2xl">📚</span>
+                    <span class="font-medium">Kelas Saya</span>
                 </a>
-                <a href="/ubah-password"
-                    class="menu-item {{ Request::is('ubah-password*') ? 'active' : '' }}"
-                    style="text-decoration: none; color: inherit;">
-                    <span>🔒</span> Ubah Password
+        
+                <a href="{{ route('dosen.password') }}" 
+                   class="flex items-center gap-4 px-6 py-4 border-l-4 transition-all duration-300 {{ request()->routeIs('dosen.password') ? 'bg-white/15 border-white' : 'border-transparent hover:bg-white/10 hover:border-white' }}">
+                    <span class="text-2xl">🔒</span>
+                    <span class="font-medium">Ubah Password</span>
                 </a>
-                <a class="menu-item" style="text-decoration: none; color: inherit;"><span>🚪</span> Logout</a>
-                <!-- <div class="menu-item"><span>📝</span> Materi</div>
-                <div class="menu-item"><span>✍️</span> Tugas</div>
-                <div class="menu-item"><span>👥</span> Mahasiswa</div>
-                <div class="menu-item"><span>📈</span> Nilai</div>
-                <div class="menu-item"><span>💬</span> Diskusi</div>
-                <div class="menu-item"><span>⚙️</span> Pengaturan</div> -->
-            </div>
+        
+                <button onclick="handleLogout()" class="w-full flex items-center gap-4 px-6 py-4 border-l-4 border-transparent hover:bg-white/10 hover:border-white transition-all duration-300">
+                    <span class="text-2xl">🚪</span>
+                    <span class="font-medium">Logout</span>
+                </button>
+            </nav>
         </aside>
+        
+        <!-- Mobile Sidebar Overlay -->
+        <div class="fixed inset-0 bg-black/50 z-20 lg:hidden hidden" id="sidebar-overlay"></div>
 
-        <main class="main-content">
-            @unless (Request::is('kelas-saya/detail-kelas*') || Request::is('ubah-password'))
-            <div class="top-bar">
-                <div>
-                    <div class="page-title">Dashboard Instruktur</div>
-                    <div style="color: #666; font-size: 0.9rem; margin-top: 0.3rem;">Selamat datang kembali!</div>
-                </div>
-                <div style="display: flex; align-items: center; gap: 1rem;">
-                    <div style="width: 40px; height: 40px; background: #f5f7fa; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer;">🔔</div>
-                    <div class="user-avatar" id="userAvatar">US</div>
-                    <div>
-                        <div style="font-weight: 600;">{{ $instructor_name }}</div>
-                        <div style="font-size: 0.85rem; color: #666;">Instruktur</div>
+        <!-- Main Content Wrapper -->
+        <div class="flex-1 ml-0 lg:ml-64 transition-all duration-300">
+            @unless (request()->routeIs('dosen.kelas.detail') || request()->routeIs('dosen.password'))
+            <!-- Top Bar -->
+            <header class="bg-white shadow-sm sticky top-0 z-10">
+                <div class="flex items-center justify-between px-4 py-4 lg:px-8 flex-wrap gap-4">
+                    <!-- Mobile Menu Button & Title -->
+                    <div class="flex items-center gap-4 flex-1">
+                        <!-- Hamburger Menu (Mobile) -->
+                        <button class="lg:hidden text-gray-600 hover:text-gray-900" id="mobile-menu-btn">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                            </svg>
+                        </button>
+
+                        <!-- Page Title -->
+                        <div>
+                            <h2 class="text-xl md:text-2xl font-bold text-gray-800">Dashboard Instruktur</h2>
+                            <p class="text-sm text-gray-600 mt-1">Selamat datang kembali!</p>
+                        </div>
+                    </div>
+            
+                    <!-- User Section -->
+                    <div class="flex items-center gap-3 lg:gap-4">
+                        <!-- Notification Bell -->
+                        <div class="relative">
+                            <button class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors">
+                                <span>🔔</span>
+                            </button>
+                            <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                        </div>
+            
+                        <!-- User Info -->
+                        <div class="flex items-center gap-3">
+                            <div id="userAvatar" class="w-10 h-10 bg-gradient-to-br from-purple-600 to-purple-800 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                                US
+                            </div>
+                            <div class="hidden md:block">
+                                <div class="font-semibold text-sm">{{ $instructor_name ?? 'Instructor' }}</div>
+                                <div class="text-xs text-gray-600">Instruktur</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </header>
 
-            <div class="welcome-section">
-                <div>
-                    <h2 style="margin-bottom: 0.5rem;">Selamat Datang, {{ $instructor_name }}! 👋</h2>
-                    <p style="opacity: 0.9;">{{ $sub_title }}</p>
+            <!-- Welcome Banner -->
+            <div class="m-4 lg:m-8 bg-gradient-to-br from-purple-600 to-purple-800 rounded-2xl p-6 md:p-8 text-white shadow-lg">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div>
+                        <h2 class="text-2xl md:text-3xl font-bold mb-2">
+                            Selamat Datang, {{ $instructor_name ?? 'Instructor' }}! 👋
+                        </h2>
+                        <p class="text-white/90 text-base md:text-lg">
+                            {{ $sub_title ?? 'Kelola kelas dan pantau progres mahasiswa Anda' }}
+                        </p>
+                    </div>
+                    <a href="{{ route('dosen.kelas') }}" 
+                       class="inline-flex items-center gap-2 px-6 py-3 bg-white text-purple-600 rounded-xl font-semibold hover:shadow-lg hover:-translate-y-1 transition-all duration-300 whitespace-nowrap">
+                        <span>📋</span>
+                        <span>Lihat Tugas</span>
+                    </a>
                 </div>
-                <a href="/kelas-saya" class="btn-primary" style="background: white; color: #667eea; text-decoration: none;" onclick="showNotification('Membuka daftar tugas pending...', 'info')">
-                    <span>📋</span>
-                    <span>Lihat Tugas</span>
-                </a>
             </div>
             @endunless
 
-            @yield('content')
-
-
-        </main>
-
-        <form id="logoutForm" action="{{ route('logout') }}" method="POST" style="display:none;">
-            @csrf
-        </form>
+            <!-- Page Content -->
+            <main class="p-4 lg:p-8">
+                @yield('content')
+            </main>
+        </div>
     </div>
 
+    <!-- Logout Form -->
+    <form id="logoutForm" action="{{ route('logout') }}" method="POST" class="hidden">
+        @csrf
+    </form>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed top-5 right-5 z-50 space-y-3"></div>
+
     <script>
-        // Menu interaction
-        document.querySelectorAll('.menu-item').forEach(item => {
-            item.addEventListener('click', function() {
-                if (this.textContent.includes('Logout')) {
-                    if (confirm('Apakah Anda yakin ingin logout?')) {
-                        // showNotification('👋 Logout berhasil! Sampai jumpa lagi.', 'success');
-                        document.getElementById('logoutForm').submit();
-                    }
-                } else {
-                    document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
-                    this.classList.add('active');
-                    showNotification(`Navigasi ke: ${this.textContent.trim()}`, 'info');
-                }
-            });
+        // Mobile menu toggle
+        document.getElementById('mobile-menu-btn')?.addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
         });
 
+        // Close sidebar when clicking overlay
+        document.getElementById('sidebar-overlay')?.addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.add('-translate-x-full');
+            this.classList.add('hidden');
+        });
+
+        // Handle logout
+        function handleLogout() {
+            if (confirm('Apakah Anda yakin ingin logout?')) {
+                document.getElementById('logoutForm').submit();
+            }
+        }
+
+        // Generate user initials
         document.addEventListener('DOMContentLoaded', function() {
-            const instructorName = "{{ $instructor_name }}";
+            const instructorName = "{{ $instructor_name ?? 'User' }}";
             const avatarElement = document.getElementById('userAvatar');
 
             function getInitials(name) {
                 if (!name) return 'US';
 
-                const words = name.split(' ');
+                const words = name.trim().split(' ');
                 let initials = '';
 
                 if (words.length >= 2) {
-                    // Ambil huruf pertama dari kata pertama dan terakhir
                     initials = words[0].charAt(0) + words[words.length - 1].charAt(0);
                 } else {
-                    // Ambil 2 huruf pertama dari nama
                     initials = name.substring(0, 2);
                 }
 
                 return initials.toUpperCase();
             }
 
-            avatarElement.textContent = getInitials(instructorName);
+            if (avatarElement) {
+                avatarElement.textContent = getInitials(instructorName);
+            }
         });
+
+        // Toast notification function
+        function showNotification(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            const bgColors = {
+                success: 'bg-green-500',
+                error: 'bg-red-500',
+                warning: 'bg-orange-500',
+                info: 'bg-purple-600'
+            };
+
+            const icons = {
+                success: '✓',
+                error: '✕',
+                warning: '⚠',
+                info: 'ℹ'
+            };
+
+            toast.className = `${bgColors[type]} text-white px-6 py-4 rounded-lg shadow-lg flex items-center gap-3 animate-slide-in max-w-md`;
+            toast.innerHTML = `
+                <span class="text-xl font-bold">${icons[type]}</span>
+                <span class="flex-1">${message}</span>
+                <button onclick="this.parentElement.remove()" class="text-white/80 hover:text-white text-xl font-bold">×</button>
+            `;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slide-out 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 5000);
+        }
+
+        // Make showNotification globally available
+        window.showNotification = showNotification;
     </script>
 
     @stack('scripts')
-</body>
 
+    <style>
+        @keyframes slide-in {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slide-out {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+        
+        .animate-slide-in {
+            animation: slide-in 0.3s ease;
+        }
+    </style>
+</body>
 </html>
