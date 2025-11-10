@@ -6,13 +6,17 @@
     <title>@yield('title', 'Dashboard') - EduLearn</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="bg-gray-50 text-gray-900">
+<body class="bg-gray-50 text-gray-900 antialiased">
     <div class="flex min-h-screen">
         <!-- Sidebar -->
-        <aside class="w-64 bg-gradient-to-br from-indigo-600 to-purple-700 text-white fixed h-screen overflow-y-auto transition-all duration-300 z-30 -translate-x-full lg:translate-x-0" id="sidebar">
+        <aside class="w-64 bg-gradient-to-br from-purple-600 to-purple-800 text-white fixed h-screen overflow-y-auto transition-all duration-300 z-30 -translate-x-full lg:translate-x-0" id="sidebar">
             <!-- Logo Section -->
             <div class="px-6 py-8 border-b border-white/20">
                 <h1 class="text-3xl font-bold">EduLearn</h1>
+                <span class="inline-flex items-center gap-2 mt-2 px-3 py-1 bg-white/20 rounded-full text-xs font-semibold">
+                    <x-heroicon-s-academic-cap class="w-4 h-4" />
+                    Mahasiswa
+                </span>
             </div>
         
             <!-- Enroll Class Button -->
@@ -94,7 +98,7 @@
             
                         <!-- User Info -->
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-gradient-to-br from-indigo-600 to-purple-700 rounded-full flex items-center justify-center text-white font-bold">
+                            <div class="w-10 h-10 bg-gradient-to-br from-purple-600 to-purple-800 rounded-full flex items-center justify-center text-white font-bold">
                                 {{ strtoupper(substr(Auth::user()->name ?? 'AM', 0, 2)) }}
                             </div>
                             <div class="hidden md:block">
