@@ -155,8 +155,8 @@ class DetailKursus extends Component
                     mkdir($destinationPath, 0777, true);
                 }
 
-                $this->submission_file->move($destinationPath, $filename);
-                $filePath = 'submissions/' . $filename;
+                $this->submission_file->storeAs('submissions', $fileName, 'public');
+                $filePath = 'storage/submissions/' . $fileName;
                 $fileName = $this->submission_file->getClientOriginalName();
                 $fileSize = round($this->submission_file->getSize() / 1024); // KB
             }

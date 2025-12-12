@@ -15,7 +15,15 @@ class ClassModel extends Model
 
     public function instructor()
     {
-        return $this->belongsTo(User::class, 'instructor_id');
+        // return $this->belongsTo(User::class, 'instructor_id');
+        return $this->hasOneThrough(
+            \App\Models\User::class,          // model tujuan yang ingin diambil
+            \App\Models\Instructor::class,    // model perantara
+            'id',                             // Foreign key di instructors (instructors.id)
+            'id',                             // Foreign key di users (users.id)
+            'instructor_id',                  // FK di classes (classes.instructor_id)
+            'user_id'                         // FK di instructors (instructors.user_id)
+        );
     }
 
     public function materials()

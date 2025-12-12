@@ -386,6 +386,9 @@
                             @if($existingSubmission->score !== null)
                                 <p class="text-xs text-blue-700 mt-1">Score: {{ $existingSubmission->score }}/100</p>
                             @endif
+                            @if($existingSubmission->feedback)
+                                <p class="text-xs text-blue-700 mt-1">Feedback: {{ $existingSubmission->feedback }}</p>
+                            @endif
                         </div>
                     @endif
 

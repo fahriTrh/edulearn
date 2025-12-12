@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\LoginController;
 use App\Livewire\Admin\DashboardAdmin;
 use App\Livewire\Admin\KelolaInstruktur;
@@ -69,4 +70,16 @@ Route::middleware(['auth', 'student'])->group(function () {
         return redirect()->route('mahasiswa.nilai');
     })->name('mahasiswa.sertifikat');
     Route::get('/tugas', \App\Livewire\Student\TugasMahasiswa::class)->name('mahasiswa.tugas');
+    
+    // Certificate Routes
+    Route::controller(CertificateController::class)->prefix('sertifikat')->name('sertifikat.')->group(function () {
+        Route::get('/', 'index')->name('index'); // atau hanya 'sertifikat' jika tidak ada name
+        Route::get('/{id}', 'show')->name('lihat');
+        Route::get('/{id}/unduh', 'download')->name('unduh');
+    });
+    
+    // Public certificate verification (bisa diakses tanpa login)
+    // Route::get('/verify/{certificateId}', [CertificateController::class, 'verify'])
+    //     ->name('sertifikat.verify')
+    //     ->withoutMiddleware(['auth', 'role:mahasiswa']);
 });

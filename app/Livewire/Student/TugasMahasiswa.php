@@ -69,6 +69,7 @@ class TugasMahasiswa extends Component
                 'title' => $assignment->title,
                 'description' => $assignment->description,
                 'class_name' => $assignment->class->title ?? 'N/A',
+                'class_id' => $assignment->class_id,
                 'deadline' => $assignment->deadline,
                 'days_left' => $daysLeft,
                 'weight_percentage' => $assignment->weight_percentage,

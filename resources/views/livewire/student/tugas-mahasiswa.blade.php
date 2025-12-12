@@ -1,4 +1,3 @@
-<!-- try to write somethin -->
 <div>
     <!-- Page Header -->
     <div class="mb-8">
@@ -80,32 +79,32 @@
                     {{ $assignment['status'] === 'urgent' ? 'Mendesak' : ($assignment['status'] === 'graded' ? 'Dinilai' : ($assignment['status'] === 'submitted' ? 'Terkirim' : 'Pending')) }}
                 </span>
             </div>
-            
+
             <div class="flex flex-wrap gap-4 mb-4 text-sm">
                 <div class="flex items-center gap-2 {{ $assignment['days_left'] <= 3 && $assignment['days_left'] >= 0 ? 'text-red-600' : 'text-gray-600' }} font-semibold">
                     <x-heroicon-s-clock class="w-4 h-4" />
                     <span>
                         @if($assignment['days_left'] < 0)
                             Terlambat {{ abs($assignment['days_left']) }} hari
-                        @elseif($assignment['days_left'] === 0)
+                            @elseif($assignment['days_left']===0)
                             Deadline: Hari ini, {{ \Carbon\Carbon::parse($assignment['deadline'])->format('H:i') }}
-                        @elseif($assignment['days_left'] === 1)
+                            @elseif($assignment['days_left']===1)
                             Deadline: Besok, {{ \Carbon\Carbon::parse($assignment['deadline'])->format('H:i') }}
-                        @else
+                            @else
                             Deadline: {{ $assignment['days_left'] }} hari lagi, {{ \Carbon\Carbon::parse($assignment['deadline'])->format('H:i') }}
-                        @endif
-                    </span>
+                            @endif
+                            </span>
                 </div>
                 <div class="flex items-center gap-2 text-gray-600">
                     <x-heroicon-s-paper-clip class="w-4 h-4" />
                     <span>{{ ucfirst($assignment['submission_type']) }} Upload</span>
                 </div>
             </div>
-            
+
             @if($assignment['description'])
             <p class="text-gray-600 mb-4 leading-relaxed">{{ \Illuminate\Support\Str::limit($assignment['description'], 200) }}</p>
             @endif
-            
+
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-4 border-t border-gray-200">
                 <div class="flex items-center gap-2 text-gray-600 text-sm">
                     <x-heroicon-s-chart-bar class="w-4 h-4" />
@@ -113,28 +112,28 @@
                 </div>
                 <div class="flex gap-2">
                     @if($assignment['status'] === 'graded')
-                        <div class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-800 text-white rounded-full font-semibold">
-                            <x-heroicon-s-trophy class="w-5 h-5" />
-                            <span>Nilai: {{ $assignment['score'] }}/100</span>
-                        </div>
-                        <button class="px-4 py-2 bg-gray-100 text-purple-600 rounded-lg font-semibold hover:bg-gray-200 transition-colors">
-                            Lihat Feedback
-                        </button>
+                    <div class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-800 text-white rounded-full font-semibold">
+                        <x-heroicon-s-trophy class="w-5 h-5" />
+                        <span>Nilai: {{ $assignment['score'] }}/100</span>
+                    </div>
+                    <button class="px-4 py-2 bg-gray-100 text-purple-600 rounded-lg font-semibold hover:bg-gray-200 transition-colors">
+                        Lihat Feedback
+                    </button>
                     @elseif($assignment['status'] === 'submitted')
-                        <button class="flex items-center justify-center gap-2 flex-1 sm:flex-initial px-4 py-2 bg-green-500 text-white rounded-lg font-semibold">
-                            <x-heroicon-s-check-circle class="w-5 h-5" />
-                            Sudah Dikirim
-                        </button>
-                        <button class="flex-1 sm:flex-initial px-4 py-2 bg-gray-100 text-purple-600 rounded-lg font-semibold hover:bg-gray-200 transition-colors">
-                            Lihat Kiriman
-                        </button>
+                    <button class="flex items-center justify-center gap-2 flex-1 sm:flex-initial px-4 py-2 bg-green-500 text-white rounded-lg font-semibold">
+                        <x-heroicon-s-check-circle class="w-5 h-5" />
+                        Sudah Dikirim
+                    </button>
+                    <button class="flex-1 sm:flex-initial px-4 py-2 bg-gray-100 text-purple-600 rounded-lg font-semibold hover:bg-gray-200 transition-colors">
+                        Lihat Kiriman
+                    </button>
                     @else
-                        <button class="flex-1 sm:flex-initial px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-800 text-white rounded-lg font-semibold hover:opacity-90 transition-opacity">
-                            Upload Tugas
-                        </button>
-                        <button class="flex-1 sm:flex-initial px-4 py-2 bg-gray-100 text-purple-600 rounded-lg font-semibold hover:bg-gray-200 transition-colors">
-                            Detail
-                        </button>
+                    <!-- <a href="{{ route('mahasiswa.detail-kursus', $assignment['class_id']) }}" class="flex-1 sm:flex-initial px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-800 text-white rounded-lg font-semibold hover:opacity-90 transition-opacity">
+                        Upload Tugas
+                    </a> -->
+                    <a href="{{ route('mahasiswa.detail-kursus', $assignment['class_id']) }}" class="flex-1 sm:flex-initial px-4 py-2 bg-gray-100 text-purple-600 rounded-lg font-semibold hover:bg-gray-200 transition-colors">
+                        Detail
+                    </a>
                     @endif
                 </div>
             </div>

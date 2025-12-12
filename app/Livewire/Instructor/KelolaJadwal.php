@@ -212,6 +212,7 @@ class KelolaJadwal extends Component
                     'platform' => $schedule->platform,
                     'is_online' => $schedule->is_online,
                     'meeting_link' => $schedule->meeting_link,
+                    'description' => $schedule->description,
                 ];
             });
 

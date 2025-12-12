@@ -164,7 +164,7 @@
                         </div>
                         <div class="flex items-center gap-2 text-xs text-gray-500">
                             <x-heroicon-s-calendar class="w-4 h-4" />
-                            <span>{{ $submission->submitted_at->format('d M Y, H:i') }}</span>
+                            <span>{{ \Carbon\Carbon::createFromTimestamp($submission->submitted_at)->format('d M Y, H:i') }}</span>
                         </div>
                     </div>
                     @empty

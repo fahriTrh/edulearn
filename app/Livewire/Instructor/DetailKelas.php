@@ -152,9 +152,9 @@ class DetailKelas extends Component
                 $sizeKB = round($this->material_file->getSize() / 1024);
                 $filename = time() . '_' . $originalName;
 
-                $this->material_file->move(public_path('materials'), $filename);
+                $this->material_file->storeAs('materials', $filename, 'public');
 
-                $material->file_path = 'materials/' . $filename;
+                $material->file_path = 'storage/materials/' . $filename;
                 $material->file_name = $originalName;
                 $material->file_size = $sizeKB;
             }

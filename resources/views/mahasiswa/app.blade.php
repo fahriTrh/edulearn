@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Dashboard') - EduLearn</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
+
 <body class="bg-gray-50 text-gray-900 antialiased">
     <div class="flex min-h-screen">
         <!-- Sidebar -->
@@ -18,38 +20,47 @@
                     Mahasiswa
                 </span>
             </div>
-        
+
             <!-- Enroll Class Button -->
             <div class="px-6 py-4 border-b border-white/20">
-                <button onclick="window.dispatchEvent(new CustomEvent('open-enroll-modal'))" 
-                        class="w-full flex items-center justify-center gap-3 px-4 py-3 bg-white/20 hover:bg-white/30 rounded-lg font-semibold transition-all duration-300 border-2 border-white/30 hover:border-white/50">
+                <button onclick="window.dispatchEvent(new CustomEvent('open-enroll-modal'))"
+                    class="w-full flex items-center justify-center gap-3 px-4 py-3 bg-white/20 hover:bg-white/30 rounded-lg font-semibold transition-all duration-300 border-2 border-white/30 hover:border-white/50">
                     <x-heroicon-s-plus-circle class="w-6 h-6" />
                     <span>Daftar Kelas</span>
                 </button>
             </div>
-        
+
             <!-- Navigation Menu -->
             <nav class="py-8">
                 <a href="{{ route('mahasiswa.dashboard') }}" wire:navigate class="flex items-center gap-4 px-6 py-4 border-l-4 transition-all duration-300 {{ request()->routeIs('mahasiswa.dashboard') ? 'bg-white/15 border-white' : 'border-transparent hover:bg-white/10 hover:border-white' }}">
                     <x-heroicon-s-squares-2x2 class="w-6 h-6" />
                     <span class="font-medium">Dashboard</span>
                 </a>
-        
+
                 <a href="{{ route('mahasiswa.kursus') }}" wire:navigate class="flex items-center gap-4 px-6 py-4 border-l-4 transition-all duration-300 {{ request()->routeIs('mahasiswa.kursus') ? 'bg-white/15 border-white' : 'border-transparent hover:bg-white/10 hover:border-white' }}">
                     <x-heroicon-s-academic-cap class="w-6 h-6" />
                     <span class="font-medium">Kursus Saya</span>
                 </a>
-        
+
                 <a href="{{ route('mahasiswa.tugas') }}" wire:navigate class="flex items-center gap-4 px-6 py-4 border-l-4 transition-all duration-300 {{ request()->routeIs('mahasiswa.tugas') ? 'bg-white/15 border-white' : 'border-transparent hover:bg-white/10 hover:border-white' }}">
                     <x-heroicon-s-document-text class="w-6 h-6" />
                     <span class="font-medium">Tugas</span>
                 </a>
-        
+
                 <a href="{{ route('mahasiswa.nilai') }}" wire:navigate class="flex items-center gap-4 px-6 py-4 border-l-4 transition-all duration-300 {{ request()->routeIs('mahasiswa.nilai') ? 'bg-white/15 border-white' : 'border-transparent hover:bg-white/10 hover:border-white' }}">
                     <x-heroicon-s-chart-bar class="w-6 h-6" />
                     <span class="font-medium">Nilai</span>
                 </a>
-        
+
+
+                <!-- MENU SERTIFIKAT BARU - Tambahkan setelah menu Nilai -->
+                <a href="{{ route('sertifikat.index') }}" wire:navigate class="flex items-center gap-4 px-6 py-4 border-l-4 transition-all duration-300 {{ request()->routeIs('sertifikat*') ? 'bg-white/15 border-white' : 'border-transparent hover:bg-white/10 hover:border-white' }}">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
+                    </svg>
+                    <span class="font-medium">Sertifikat</span>
+                </a>
+
                 <form action="{{ route('logout') }}" method="POST" class="w-full">
                     @csrf
                     <button type="submit" class="w-full flex items-center gap-4 px-6 py-4 border-l-4 transition-all duration-300 border-transparent hover:bg-white/10 hover:border-white">
@@ -59,7 +70,7 @@
                 </form>
             </nav>
         </aside>
-        
+
         <!-- Mobile Sidebar Overlay -->
         <div class="fixed inset-0 bg-black/50 z-20 lg:hidden hidden" id="sidebar-overlay"></div>
 
@@ -74,18 +85,17 @@
                         <button class="lg:hidden text-gray-600 hover:text-gray-900" id="mobile-menu-btn">
                             <x-heroicon-s-bars-3 class="w-6 h-6" />
                         </button>
-            
+
                         <!-- Search Bar -->
                         <div class="flex items-center bg-gray-100 rounded-full px-4 py-2 flex-1 max-w-md">
                             <x-heroicon-s-magnifying-glass class="w-5 h-5 text-gray-500" />
-                            <input 
-                                type="text" 
-                                placeholder="Cari kursus, materi, atau tugas..." 
-                                class="bg-transparent border-none outline-none w-full ml-2 text-sm"
-                            >
+                            <input
+                                type="text"
+                                placeholder="Cari kursus, materi, atau tugas..."
+                                class="bg-transparent border-none outline-none w-full ml-2 text-sm">
                         </div>
                     </div>
-            
+
                     <!-- User Section -->
                     <div class="flex items-center gap-3 lg:gap-4">
                         <!-- Notification Bell -->
@@ -95,7 +105,7 @@
                             </button>
                             <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
                         </div>
-            
+
                         <!-- User Info -->
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 bg-gradient-to-br from-purple-600 to-purple-800 rounded-full flex items-center justify-center text-white font-bold">
@@ -109,18 +119,18 @@
                     </div>
                 </div>
             </header>
-            
+
             @push('scripts')
             <script>
                 // Mobile menu toggle
                 document.getElementById('mobile-menu-btn')?.addEventListener('click', function() {
                     const sidebar = document.getElementById('sidebar');
                     const overlay = document.getElementById('sidebar-overlay');
-                    
+
                     sidebar.classList.toggle('-translate-x-full');
                     overlay.classList.toggle('hidden');
                 });
-            
+
                 // Close sidebar when clicking overlay
                 document.getElementById('sidebar-overlay')?.addEventListener('click', function() {
                     const sidebar = document.getElementById('sidebar');
@@ -133,9 +143,9 @@
             <!-- Page Content -->
             <main class="p-4 lg:p-8">
                 @hasSection('content')
-                    @yield('content')
+                @yield('content')
                 @else
-                    {{ $slot ?? '' }}
+                {{ $slot ?? '' }}
                 @endif
             </main>
         </div>
@@ -160,11 +170,11 @@
                 }
             }
         });
-
     </script>
     @endpush
 
     @stack('scripts')
     @livewireScripts
 </body>
+
 </html>
