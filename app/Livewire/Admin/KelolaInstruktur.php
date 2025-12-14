@@ -215,7 +215,8 @@ class KelolaInstruktur extends Component
         $this->admin_name = Auth::user()->name;
         $this->sub_title = 'Manajemen data instruktur';
 
-        $query = Instructor::with('user');
+        $query = Instructor::with('user')
+            ->withCount(['courses', 'enrollments']);
 
         if ($this->statusFilter !== 'all') {
             $query->whereHas('user', function ($q) {
@@ -245,9 +246,9 @@ class KelolaInstruktur extends Component
                 'name' => $instr->user->name,
                 'email' => $instr->user->email,
                 'specialty' => $instr->specialization,
-                'courses' => $instr->total_courses,
-                'students' => $instr->total_students,
-                'rating' => $instr->rating,
+                'courses' => $instr->courses_count,
+                'students' => $instr->enrollments_count,
+                'rating' => 0, // Placeholder for future rating implementation
                 'status' => $instr->user->status,
                 'bio' => $instr->description,
             ];

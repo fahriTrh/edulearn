@@ -1,4 +1,4 @@
-<div>
+<div x-data="{ showModal: @entangle('showModal') }">
     @if (session()->has('success'))
         <div class="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
             {{ session('success') }}
@@ -43,7 +43,7 @@
             <option value="inactive">Tidak Aktif</option>
             <option value="suspended">Suspended</option>
         </select>
-        <button wire:click="openModal" class="w-full md:w-auto p-3 bg-gradient-to-br from-purple-600 to-purple-800 text-white rounded-lg cursor-pointer font-semibold flex items-center justify-center gap-2 transition-all hover:-translate-y-0.5 hover:shadow-lg">
+        <button @click="showModal = true; $wire.resetForm()" class="w-full md:w-auto p-3 bg-linear-to-br from-purple-600 to-purple-800 text-white rounded-lg cursor-pointer font-semibold flex items-center justify-center gap-2 transition-all hover:-translate-y-0.5 hover:shadow-lg">
             <x-heroicon-s-plus-circle class="w-5 h-5" />
             <span>Tambah Mahasiswa</span>
         </button>
@@ -67,7 +67,7 @@
                     <tr class="hover:bg-gray-50">
                         <td class="p-4 border-b border-gray-200">
                             <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-600 to-purple-800 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                                <div class="w-10 h-10 rounded-full bg-linear-to-br from-purple-600 to-purple-800 flex items-center justify-center text-white font-bold text-sm shrink-0">
                                     {{ strtoupper(substr($user['name'], 0, 2)) }}
                                 </div>
                                 <div>
@@ -114,12 +114,11 @@
     </div>
 
     {{-- Add/Edit User Modal --}}
-    @if($showModal)
-    <div class="fixed top-0 left-0 w-full h-full bg-black/50 z-[1000] flex items-center justify-center p-4">
-        <div class="bg-white p-8 rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div x-show="showModal" style="display: none" class="fixed top-0 left-0 w-full h-full bg-black/50 z-1000 flex items-center justify-center p-4">
+        <div class="bg-white p-8 rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" @click.away="showModal = false">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-semibold">{{ $editingId ? 'Edit Mahasiswa' : 'Tambah Mahasiswa Baru' }}</h2>
-                <button wire:click="closeModal" class="text-gray-500 hover:text-gray-800">
+                <button @click="showModal = false" class="text-gray-500 hover:text-gray-800">
                     <x-heroicon-s-x-mark class="w-6 h-6" />
                 </button>
             </div>
@@ -148,12 +147,11 @@
                     </select>
                     @error('status') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                 </div>
-                <button type="submit" class="w-full p-3 bg-gradient-to-br from-purple-600 to-purple-800 text-white rounded-lg cursor-pointer font-semibold text-base hover:opacity-90 hover:-translate-y-0.5">
+                <button type="submit" class="w-full p-3 bg-linear-to-br from-purple-600 to-purple-800 text-white rounded-lg cursor-pointer font-semibold text-base hover:opacity-90 hover:-translate-y-0.5">
                     {{ $editingId ? 'Update' : 'Tambah Mahasiswa' }}
                 </button>
             </form>
         </div>
     </div>
-    @endif
 </div>
 
