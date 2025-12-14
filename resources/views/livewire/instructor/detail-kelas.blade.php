@@ -1,25 +1,32 @@
-<div class="min-h-screen bg-white -mx-4 lg:-mx-8 -mt-4 lg:-mt-8" x-data="{ 
-    activeTab: 'stream', 
+<div class="min-h-screen bg-white -mx-4 lg:-mx-8 -mt-4 lg:-mt-8" x-data='{ 
+    activeTab: "stream", 
     postModal: false, 
     materialModal: false,
     assignmentModal: false,
     studentModal: false,
     replyModal: false,
+    materialDetailModal: false,
+    assignmentDetailModal: false,
+    assignments: @json($assignmentsData),
+    selectedAssignment: null,
     
     init() {
-        Livewire.on('close-post-modal', () => { this.postModal = false });
-        Livewire.on('close-material-modal', () => { this.materialModal = false });
-        Livewire.on('close-assignment-modal', () => { this.assignmentModal = false });
-        Livewire.on('close-student-modal', () => { this.studentModal = false });
-        Livewire.on('close-reply-modal', () => { this.replyModal = false });
+        Livewire.on("close-post-modal", () => { this.postModal = false });
+        Livewire.on("close-material-modal", () => { this.materialModal = false });
+        Livewire.on("close-assignment-modal", () => { this.assignmentModal = false });
+        Livewire.on("close-student-modal", () => { this.studentModal = false });
+        Livewire.on("close-reply-modal", () => { this.replyModal = false });
+        // Detail modals
+        Livewire.on("open-material-detail", () => { this.materialDetailModal = true });
+        Livewire.on("open-assignment-detail", () => { this.assignmentDetailModal = true });
 
-        Livewire.on('open-post-modal', () => { this.postModal = true });
+        Livewire.on("open-post-modal", () => { this.postModal = true });
         
         // Listen for open events if triggered from backend, though mostly client-side now
-        Livewire.on('open-material-modal', () => { this.materialModal = true });
-        Livewire.on('open-assignment-modal', () => { this.assignmentModal = true });
+        Livewire.on("open-material-modal", () => { this.materialModal = true });
+        Livewire.on("open-assignment-modal", () => { this.assignmentModal = true });
     }
-}">
+}'>
     <!-- Global Notifications -->
     @if (session()->has('success'))
         <div class="fixed top-4 right-4 z-50 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg shadow-lg" x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)">
@@ -288,7 +295,7 @@
                         @php $lastDeadline = $deadlineDate; @endphp
                     @endif
 
-                    <div class="group bg-white border border-gray-200 rounded-lg p-4 hover:border-indigo-300 transition-all flex items-center gap-4">
+                    <div class="group bg-white border border-gray-200 rounded-lg p-4 hover:border-indigo-300 transition-all flex items-center gap-4 cursor-pointer" @click="selectedAssignment = assignments.find(a => a.id === {{ $assignment->id }}); assignmentDetailModal = true">
                         <div class="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
                             <x-heroicon-s-clipboard-document class="w-5 h-5" />
                         </div>
@@ -299,10 +306,39 @@
                             </div>
                         </div>
                         <!-- Delete/Edit Actions -->
-                        <div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                             <button class="text-red-500 hover:text-red-700 p-2" wire:confirm="Hapus tugas ini?" wire:click="deleteAssignment({{ $assignment->id }})" title="Hapus">
-                                <x-heroicon-o-trash class="w-5 h-5" />
-                            </button>
+                        <!-- Delete/Edit Actions -->
+                        <div class="flex items-center gap-2" x-data="{ open: false, rowHover: false }" @mouseenter="rowHover = true" @mouseleave="rowHover = false" @click.stop>
+                             <div class="relative">
+                                <button 
+                                    @click="open = !open" 
+                                    @click.away="open = false" 
+                                    class="p-2 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-opacity"
+                                    :class="{ 'opacity-100': open, 'opacity-0 group-hover:opacity-100': !open }"
+                                >
+                                    <x-heroicon-m-ellipsis-vertical class="w-5 h-5" />
+                                </button>
+                                <div 
+                                    x-show="open" 
+                                    x-cloak
+                                    x-transition.origin.top.right 
+                                    class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 z-10 py-1" 
+                                >
+                                    <button 
+                                        wire:click="editAssignment({{ $assignment->id }})" 
+                                        @click="open = false" 
+                                        class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                                    >
+                                        <x-heroicon-s-pencil class="w-4 h-4" /> Edit
+                                    </button>
+                                    <button 
+                                        wire:confirm="Hapus tugas ini?" 
+                                        wire:click="deleteAssignment({{ $assignment->id }})" 
+                                        class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                                    >
+                                        <x-heroicon-s-trash class="w-4 h-4" /> Hapus
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                  @endforeach
@@ -316,7 +352,7 @@
                         Materi Referensi
                     </h3>
                     @foreach($class->materials as $material)
-                        <div class="group bg-white border border-gray-200 rounded-lg p-4 hover:border-gray-300 transition-all flex items-start gap-4">
+                        <div class="group bg-white border border-gray-200 rounded-lg p-4 hover:border-gray-300 transition-all flex items-start gap-4 cursor-pointer" wire:click="viewMaterial({{ $material->id }})">
                             <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 shrink-0">
                                 <x-heroicon-s-document-text class="w-5 h-5" />
                             </div>
@@ -324,16 +360,44 @@
                                 <h4 class="font-medium text-gray-800">{{ $material->title }}</h4>
                                 <p class="text-sm text-gray-500 mt-1 mb-2">{{ Str::limit($material->description, 100) }}</p>
                                 @if($material->type === 'link')
-                                    <a href="{{ $material->link }}" target="_blank" class="text-xs text-blue-600 hover:underline flex items-center gap-1">
+                                    <a href="{{ $material->link }}" target="_blank" @click.stop class="text-xs text-blue-600 hover:underline flex items-center gap-1">
                                         <x-heroicon-s-link class="w-3 h-3" /> Buka Link
                                     </a>
                                 @endif
                             </div>
-                             <div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button class="text-red-500 hover:text-red-700 p-2" wire:confirm="Hapus materi ini?" wire:click="deleteMaterial({{ $material->id }})">
-                                    <x-heroicon-o-trash class="w-5 h-5" />
+                        <div class="flex items-center gap-2" x-data="{ open: false }" @click.stop>
+                             <div class="relative">
+                                <button 
+                                    @click="open = !open" 
+                                    @click.away="open = false" 
+                                    class="p-2 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-opacity"
+                                    :class="{ 'opacity-100': open, 'opacity-0 group-hover:opacity-100': !open }"
+                                >
+                                    <x-heroicon-m-ellipsis-vertical class="w-5 h-5" />
                                 </button>
+                                <div 
+                                    x-show="open" 
+                                    x-cloak
+                                    x-transition.origin.top.right 
+                                    class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 z-10 py-1" 
+                                >
+                                    <button 
+                                        wire:click="editMaterial({{ $material->id }})" 
+                                        @click="open = false" 
+                                        class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                                    >
+                                        <x-heroicon-s-pencil class="w-4 h-4" /> Edit
+                                    </button>
+                                    <button 
+                                        wire:confirm="Hapus materi ini?" 
+                                        wire:click="deleteMaterial({{ $material->id }})" 
+                                        class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                                    >
+                                        <x-heroicon-s-trash class="w-4 h-4" /> Hapus
+                                    </button>
+                                </div>
                             </div>
+                        </div>
                         </div>
                     @endforeach
                 </div>
@@ -407,7 +471,7 @@
                 class="relative z-50 inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl w-full"
             >
                 <div class="bg-white p-6">
-                    <h2 class="text-2xl font-semibold mb-6">Tambah Materi</h2>
+                    <h2 class="text-2xl font-semibold mb-6">{{ $editingMaterialId ? 'Edit Materi' : 'Tambah Materi' }}</h2>
                     <form wire:submit="saveMaterial">
                         <div class="mb-6">
                             <label class="block mb-2 font-semibold">Judul</label>
@@ -443,10 +507,242 @@
                         </div>
                         <div class="flex gap-4">
                             <button type="button" @click="materialModal = false" class="flex-1 p-3 bg-gray-200 text-gray-700 rounded-lg">Batal</button>
-                            <button type="submit" class="flex-1 p-3 bg-indigo-600 text-white rounded-lg">Simpan</button>
+                            <button type="submit" class="flex-1 p-3 bg-indigo-600 text-white rounded-lg">{{ $editingMaterialId ? 'Simpan Perubahan' : 'Simpan' }}</button>
                         </div>
                     </form>
                 </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    {{-- Detail Material Modal --}}
+    <div 
+        x-show="materialDetailModal" 
+        x-cloak 
+        class="fixed inset-0 z-50 overflow-y-auto"
+        aria-labelledby="modal-title" 
+        role="dialog" 
+        aria-modal="true"
+    >
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div x-show="materialDetailModal" x-transition.opacity class="fixed inset-0 bg-black/35 transition-opacity" @click="materialDetailModal = false"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div 
+                x-show="materialDetailModal" 
+                x-transition.scale 
+                class="relative z-50 inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl w-full"
+            >
+                @if($viewingMaterial)
+                <div class="bg-white p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <h2 class="text-2xl font-semibold text-gray-900">{{ $viewingMaterial->title }}</h2>
+                        <button @click="materialDetailModal = false" class="text-gray-400 hover:text-gray-500">
+                            <x-heroicon-s-x-mark class="w-6 h-6" />
+                        </button>
+                    </div>
+                    
+                    <div class="prose max-w-none text-gray-600 mb-6">
+                        <p>{{ $viewingMaterial->description }}</p>
+                    </div>
+
+                    <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center border border-gray-200 shadow-sm text-indigo-600">
+                                @if($viewingMaterial->type === 'pdf')
+                                    <x-heroicon-s-document-text class="w-5 h-5" />
+                                @elseif($viewingMaterial->type === 'video')
+                                    <x-heroicon-s-video-camera class="w-5 h-5" />
+                                @elseif($viewingMaterial->type === 'link')
+                                    <x-heroicon-s-link class="w-5 h-5" />
+                                @else
+                                    <x-heroicon-s-document class="w-5 h-5" />
+                                @endif
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="font-medium text-gray-900">
+                                    {{ $viewingMaterial->file_name ?? $viewingMaterial->file_url ?? 'Materi' }}
+                                </h4>
+                                @if($viewingMaterial->file_size)
+                                    <p class="text-xs text-gray-500">{{ $viewingMaterial->file_size }} KB</p>
+                                @endif
+                            </div>
+                            @if($viewingMaterial->type === 'link')
+                                <a href="{{ $viewingMaterial->file_url }}" target="_blank" class="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors">
+                                    Buka Link
+                                </a>
+                            @elseif($viewingMaterial->file_path)
+                                <a href="{{ asset($viewingMaterial->file_path) }}" target="_blank" class="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors">
+                                    Download
+                                </a>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+                @endif
+            </div>
+        </div>
+    </div>
+
+    {{-- Detail Assignment Modal --}}
+    <div 
+        x-show="assignmentDetailModal" 
+        x-cloak 
+        class="fixed inset-0 z-50 overflow-y-auto"
+        aria-labelledby="modal-title" 
+        role="dialog" 
+        aria-modal="true"
+    >
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div x-show="assignmentDetailModal" x-transition.opacity class="fixed inset-0 bg-black/35 transition-opacity" @click="assignmentDetailModal = false"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div 
+                x-show="assignmentDetailModal" 
+                x-transition.scale 
+                class="relative z-50 inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl w-full"
+            >
+                <template x-if="selectedAssignment">
+                <div class="bg-white">
+                    <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600">
+                                <x-heroicon-s-clipboard-document-list class="w-5 h-5" />
+                            </div>
+                            <div>
+                                <h2 class="text-xl font-semibold text-gray-900" x-text="selectedAssignment.title"></h2>
+                                <p class="text-sm text-gray-500">Tenggat: <span x-text="selectedAssignment.deadline_human"></span></p>
+                            </div>
+                        </div>
+                        <button @click="assignmentDetailModal = false" class="text-gray-400 hover:text-gray-500">
+                            <x-heroicon-s-x-mark class="w-6 h-6" />
+                        </button>
+                    </div>
+                    
+                    <div class="p-6">
+                        <div class="prose max-w-none text-gray-600 mb-8">
+                            <p class="whitespace-pre-line" x-text="selectedAssignment.description"></p>
+                        </div>
+
+                        <template x-if="selectedAssignment.instructions">
+                            <div class="bg-gray-50 rounded-lg p-4 border border-gray-200 mb-6">
+                                <h4 class="text-sm font-semibold text-gray-700 mb-3">Lampiran / Instruksi</h4>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center border border-gray-200 shadow-sm text-indigo-600">
+                                        <template x-if="selectedAssignment.submission_type === 'link'">
+                                            <x-heroicon-s-link class="w-5 h-5" />
+                                        </template>
+                                        <template x-if="selectedAssignment.submission_type !== 'link'">
+                                            <x-heroicon-s-document class="w-5 h-5" />
+                                        </template>
+                                    </div>
+                                    <div class="flex-1">
+                                         <h4 class="font-medium text-gray-900" x-text="selectedAssignment.instructions.split('/').pop()"></h4>
+                                    </div>
+                                    <template x-if="selectedAssignment.submission_type === 'link'">
+                                        <a :href="selectedAssignment.instructions" target="_blank" class="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors">
+                                            Buka Link
+                                        </a>
+                                    </template>
+                                    <template x-if="selectedAssignment.submission_type !== 'link'">
+                                         <a :href="'/' + selectedAssignment.instructions" target="_blank" class="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors">
+                                            Download
+                                        </a>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+
+                        {{-- Student Submissions List --}}
+                        <div class="mt-8 border-t border-gray-100 pt-6">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Pengumpulan Tugas (<span x-text="selectedAssignment.submissions.length"></span> Siswa)</h3>
+                            <div class="overflow-x-auto border border-gray-200 rounded-lg">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mahasiswa</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nilai</th>
+                                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200">
+                                        <template x-for="submission in selectedAssignment.submissions" :key="submission.student_id">
+                                        <tr class="hover:bg-gray-50">
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="flex items-center">
+                                                    <div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold shrink-0 mr-3" x-text="submission.avatar_initial">
+                                                    </div>
+                                                    <div>
+                                                        <div class="text-sm font-medium text-gray-900" x-text="submission.name"></div>
+                                                        <div class="text-xs text-gray-500" x-text="submission.email"></div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <template x-if="submission.status === 'graded'">
+                                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                                        Dinilai
+                                                    </span>
+                                                </template>
+                                                <template x-if="submission.status === 'submitted'">
+                                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                                        Diserahkan
+                                                    </span>
+                                                </template>
+                                                <template x-if="submission.status !== 'graded' && submission.status !== 'submitted'">
+                                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                                                        Belum
+                                                    </span>
+                                                </template>
+                                                <template x-if="submission.submitted_at_human">
+                                                    <div class="text-xs text-gray-500 mt-1" x-text="submission.submitted_at_human">
+                                                    </div>
+                                                </template>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                <template x-if="submission.grade">
+                                                    <span><span class="font-bold text-gray-900" x-text="submission.grade"></span> / 100</span>
+                                                </template>
+                                                <template x-if="!submission.grade">
+                                                    <span class="text-gray-400">-</span>
+                                                </template>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                <template x-if="submission.status !== 'missing'">
+                                                    <div>
+                                                        <button class="text-indigo-600 hover:text-indigo-900 p-2 hover:bg-indigo-50 rounded-lg transition-colors" title="Beri Nilai">
+                                                            <x-heroicon-s-pencil class="w-4 h-4" />
+                                                        </button>
+                                                        <template x-if="submission.file_path">
+                                                            <a :href="'/' + submission.file_path" target="_blank" class="text-gray-400 hover:text-gray-600 p-2 hover:bg-gray-100 rounded-lg inline-block ml-1" title="Download File">
+                                                                <x-heroicon-s-document-arrow-down class="w-4 h-4" />
+                                                            </a>
+                                                        </template>
+                                                    </div>
+                                                </template>
+                                                <template x-if="submission.status === 'missing'">
+                                                     <span class="text-gray-400 text-xs italic">Belum mengumpulkan</span>
+                                                </template>
+                                            </td>
+                                        </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between items-center bg-indigo-50 px-4 py-3 rounded-lg">
+                            <div>
+                                <span class="text-sm font-medium text-indigo-900">Bobot Penilaian</span>
+                            </div>
+                            <div>
+                                <span class="text-lg font-bold text-indigo-700"><span x-text="selectedAssignment.weight_percentage"></span>%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </template>
             </div>
         </div>
     </div>
@@ -469,7 +765,7 @@
                 class="relative z-50 inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl w-full"
             >
                 <div class="bg-white p-6">
-                     <h2 class="text-2xl font-semibold mb-6">Tambah Tugas</h2>
+                     <h2 class="text-2xl font-semibold mb-6">{{ $editingAssignmentId ? 'Edit Tugas' : 'Tambah Tugas' }}</h2>
                     <form wire:submit="saveAssignment">
                         <div class="mb-6">
                             <label class="block mb-2 font-semibold">Judul</label>
@@ -478,6 +774,33 @@
                         <div class="mb-6">
                             <label class="block mb-2 font-semibold">Deskripsi</label>
                             <textarea wire:model="assignment_description" required class="w-full p-3 border-2 border-gray-200 rounded-lg"></textarea>
+                        </div>
+                        <div class="mb-6">
+                            <label class="block mb-2 font-semibold">Tipe Pengumpulan</label>
+                            <select wire:model.live="assignment_instruction_type" class="w-full p-3 border-2 border-gray-200 rounded-lg">
+                                <option value="text">Teks (Esai)</option>
+                                <option value="file">File Upload</option>
+                                <option value="link">Tautan (Link)</option>
+                            </select>
+                            <p class="text-xs text-gray-500 mt-1">
+                                <span x-show="$wire.assignment_instruction_type === 'text'">Siswa menulis jawaban langsung di aplikasi.</span>
+                                <span x-show="$wire.assignment_instruction_type === 'file'">Siswa mengunggah file. Anda dapat melampirkan soal/instruksi file.</span>
+                                <span x-show="$wire.assignment_instruction_type === 'link'">Siswa mengumpulkan link. Anda dapat melampirkan link sumber.</span>
+                            </p>
+                        </div>
+
+                        <!-- Instruction File Upload -->
+                        <div class="mb-6" x-show="$wire.assignment_instruction_type === 'file'">
+                            <label class="block mb-2 font-semibold">Lampiran File (Instruksi/Soal)</label>
+                            <input type="file" wire:model="assignment_instruction_file" class="w-full p-3 border-2 border-gray-200 rounded-lg">
+                            @error('assignment_instruction_file') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
+
+                        <!-- Instruction Link Input -->
+                        <div class="mb-6" x-show="$wire.assignment_instruction_type === 'link'">
+                            <label class="block mb-2 font-semibold">Link Sumber/Instruksi</label>
+                            <input type="url" wire:model="assignment_instruction_link" class="w-full p-3 border-2 border-gray-200 rounded-lg" placeholder="https://...">
+                            @error('assignment_instruction_link') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                         </div>
                         <div class="mb-6">
                             <label class="block mb-2 font-semibold">Deadline</label>
@@ -489,7 +812,7 @@
                         </div>
                         <div class="flex gap-4">
                             <button type="button" @click="assignmentModal = false" class="flex-1 p-3 bg-gray-200 text-gray-700 rounded-lg">Batal</button>
-                            <button type="submit" class="flex-1 p-3 bg-green-600 text-white rounded-lg">Simpan</button>
+                            <button type="submit" class="flex-1 p-3 bg-green-600 text-white rounded-lg">{{ $editingAssignmentId ? 'Simpan Perubahan' : 'Simpan' }}</button>
                         </div>
                     </form>
                 </div>
@@ -601,5 +924,4 @@
                 </div>
             </div>
         </div>
-    </div>
 </div>

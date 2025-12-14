@@ -452,6 +452,7 @@ class DetailKursus extends Component
                     'id' => $assignment->id,
                     'title' => $assignment->title,
                     'description' => $assignment->description,
+                    'instructions' => $assignment->instructions,
                     'deadline' => $deadlineDisplay,
                     'deadline_raw' => $assignment->deadline,
                     'deadline' => $deadlineDisplay,

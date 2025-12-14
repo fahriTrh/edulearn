@@ -532,6 +532,37 @@
                          x-text="selectedAssignment?.description">
                     </div>
 
+                    <!-- Instructions / Attachment -->
+                    <template x-if="selectedAssignment?.instructions">
+                        <div class="bg-white rounded-lg p-4 border border-gray-200 mb-6 shadow-sm">
+                            <h4 class="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                                <x-heroicon-o-paper-clip class="w-4 h-4" />
+                                Lampiran / Instruksi
+                            </h4>
+                            <div class="flex items-center gap-3 bg-gray-50 p-3 rounded-lg border border-gray-100">
+                                <div class="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center border border-indigo-100 text-indigo-600 shrink-0">
+                                    <x-heroicon-s-document-text class="w-5 h-5" />
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                     <h4 class="font-medium text-gray-900 truncate" x-text="selectedAssignment.instructions.split('/').pop()"></h4>
+                                     <p class="text-xs text-gray-500">Klik tombol di samping untuk membuka/mengunduh</p>
+                                </div>
+                                <template x-if="selectedAssignment.instructions.match(/^http/i)">
+                                    <a :href="selectedAssignment.instructions" target="_blank" class="shrink-0 px-4 py-2 bg-white border border-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 hover:text-indigo-600 transition-colors shadow-sm flex items-center gap-2">
+                                        <x-heroicon-s-link class="w-4 h-4" />
+                                        <span>Buka Link</span>
+                                    </a>
+                                </template>
+                                <template x-if="!selectedAssignment.instructions.match(/^http/i)">
+                                    <a :href="'/' + selectedAssignment.instructions" target="_blank" class="shrink-0 px-4 py-2 bg-white border border-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 hover:text-indigo-600 transition-colors shadow-sm flex items-center gap-2">
+                                        <x-heroicon-s-arrow-down-tray class="w-4 h-4" />
+                                        <span>Download</span>
+                                    </a>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+
                     <div class="mb-6 flex items-center gap-2 text-sm text-gray-600 bg-blue-50 p-3 rounded-lg border border-blue-100">
                         <x-heroicon-s-clock class="w-5 h-5 text-blue-600" />
                         <span class="font-medium text-blue-900">Tenggat Waktu:</span>

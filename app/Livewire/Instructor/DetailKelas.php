@@ -25,6 +25,7 @@ class DetailKelas extends Component
     public $class;
     public $activeTab = 'classwork'; // 'stream', 'classwork', 'people'
     public $isAdmin = false;
+    public $assignmentsData = [];
 
     // Material modal
     public $showMaterialModal = false;
@@ -34,6 +35,8 @@ class DetailKelas extends Component
     public $material_description = '';
     public $material_file;
     public $material_link = '';
+    public $viewingMaterial = null; // For detail modal
+    public $assignmentSubmissions = []; // For grading interface
 
     // Assignment modal
     public $showAssignmentModal = false;
@@ -44,6 +47,9 @@ class DetailKelas extends Component
     public $assignment_instruction_link = '';
     public $assignment_deadline = '';
     public $assignment_weight = 0;
+
+    public $editingAssignmentId = null;
+    public $viewingAssignment = null; // For detail modal
 
     // Student modal
     public $showStudentModal = false;
@@ -107,6 +113,7 @@ class DetailKelas extends Component
     {
         $this->resetMaterialForm();
         $this->showMaterialModal = true;
+        $this->dispatch('open-material-modal');
     }
 
     public function closeMaterialModal()
@@ -134,6 +141,7 @@ class DetailKelas extends Component
         $this->material_description = $material->description ?? '';
         $this->material_link = $material->file_url ?? '';
         $this->showMaterialModal = true;
+        $this->dispatch('open-material-modal');
     }
 
     public function saveMaterial()
@@ -275,11 +283,18 @@ class DetailKelas extends Component
         }
     }
 
+    public function viewMaterial($id)
+    {
+        $this->viewingMaterial = Material::findOrFail($id);
+        $this->dispatch('open-material-detail');
+    }
+
     // Assignment methods
     public function openAssignmentModal()
     {
         $this->resetAssignmentForm();
         $this->showAssignmentModal = true;
+        $this->dispatch('open-assignment-modal');
     }
 
     public function closeAssignmentModal()
@@ -297,6 +312,7 @@ class DetailKelas extends Component
         $this->assignment_instruction_link = '';
         $this->assignment_deadline = '';
         $this->assignment_weight = 0;
+        $this->editingAssignmentId = null;
     }
 
     public function saveAssignment()
@@ -312,39 +328,116 @@ class DetailKelas extends Component
         ]);
 
         try {
-            $data = [
-                'class_id' => $this->classId,
-                'created_by' => Auth::id(),
-                'title' => $this->assignment_title,
-                'description' => $this->assignment_description,
-                'deadline' => $this->assignment_deadline,
-                'weight_percentage' => $this->assignment_weight,
-                'submission_type' => $this->assignment_instruction_type,
-                'status' => 'published',
-            ];
+            if ($this->editingAssignmentId) {
+                $assignment = Assignment::where('id', $this->editingAssignmentId)
+                    ->where('class_id', $this->classId)
+                    ->firstOrFail();
 
-            if ($this->assignment_instruction_type === 'file' && $this->assignment_instruction_file) {
-                $filename = time() . '_' . uniqid() . '.' . $this->assignment_instruction_file->getClientOriginalExtension();
-                $destinationPath = public_path('assignments');
-                if (!file_exists($destinationPath)) {
-                    mkdir($destinationPath, 0777, true);
+                $data = [
+                    'title' => $this->assignment_title,
+                    'description' => $this->assignment_description,
+                    'deadline' => $this->assignment_deadline,
+                    'weight_percentage' => $this->assignment_weight,
+                    'submission_type' => $this->assignment_instruction_type,
+                ];
+
+                // Handle instructions update
+                if ($this->assignment_instruction_type === 'file') {
+                    if ($this->assignment_instruction_file) {
+                        // Delete old file if exists
+                        if ($assignment->instructions && file_exists(public_path($assignment->instructions)) && !filter_var($assignment->instructions, FILTER_VALIDATE_URL)) {
+                            @unlink(public_path($assignment->instructions));
+                        }
+
+                        $filename = time() . '_' . uniqid() . '.' . $this->assignment_instruction_file->getClientOriginalExtension();
+                        $destinationPath = public_path('assignments');
+                        if (!file_exists($destinationPath)) {
+                            mkdir($destinationPath, 0777, true);
+                        }
+                        $this->assignment_instruction_file->move($destinationPath, $filename);
+                        $data['instructions'] = 'assignments/' . $filename;
+                    }
+                    // If no new file uploaded, keep existing (unless type changed, handled by logic below?)
+                    // Actually if type changes to file, they MUST upload a file? 
+                    // Or if they keep 'file' type, they can keep existing.
+                    elseif ($assignment->submission_type !== 'file' || empty($assignment->instructions)) {
+                        // If switching TO file but no file uploaded, or existing was empty
+                        // Logic issue: how to know if keeping existing file?
+                        // Usually livewire clears file input. 
+                        // We assume if file input is empty, we keep existing IF type hasn't changed.
+                        if ($assignment->submission_type !== 'file') {
+                            // If switched to file but didn't upload
+                            $this->addError('assignment_instruction_file', 'File is required when switching to File type.');
+                            return;
+                        }
+                        // Else keep existing $assignment->instructions
+                    }
+                } elseif ($this->assignment_instruction_type === 'link') {
+                    $data['instructions'] = $this->assignment_instruction_link;
+                } else {
+                    $data['instructions'] = null;
                 }
-                $this->assignment_instruction_file->move($destinationPath, $filename);
-                $data['instructions'] = 'assignments/' . $filename;
-            } elseif ($this->assignment_instruction_type === 'link') {
-                $data['instructions'] = $this->assignment_instruction_link;
+
+                $assignment->update($data);
+                session()->flash('success', 'Tugas berhasil diperbarui!');
             } else {
-                $data['instructions'] = $this->assignment_description;
+                // Create Logic
+                $data = [
+                    'class_id' => $this->classId,
+                    'created_by' => Auth::id(),
+                    'title' => $this->assignment_title,
+                    'description' => $this->assignment_description,
+                    'deadline' => $this->assignment_deadline,
+                    'weight_percentage' => $this->assignment_weight,
+                    'submission_type' => $this->assignment_instruction_type,
+                    'status' => 'published',
+                ];
+
+                if ($this->assignment_instruction_type === 'file' && $this->assignment_instruction_file) {
+                    $filename = time() . '_' . uniqid() . '.' . $this->assignment_instruction_file->getClientOriginalExtension();
+                    $destinationPath = public_path('assignments');
+                    if (!file_exists($destinationPath)) {
+                        mkdir($destinationPath, 0777, true);
+                    }
+                    $this->assignment_instruction_file->move($destinationPath, $filename);
+                    $data['instructions'] = 'assignments/' . $filename;
+                } elseif ($this->assignment_instruction_type === 'link') {
+                    $data['instructions'] = $this->assignment_instruction_link;
+                } else {
+                    $data['instructions'] = null;
+                }
+
+                Assignment::create($data);
+                session()->flash('success', 'Tugas baru berhasil dibuat!');
             }
 
-            Assignment::create($data);
             $this->loadClass();
-            session()->flash('success', 'Tugas baru berhasil dibuat!');
             $this->closeAssignmentModal();
         } catch (\Exception $e) {
-            Log::error('Gagal menambahkan tugas: ' . $e->getMessage());
-            session()->flash('error', 'Terjadi kesalahan saat menambahkan tugas.');
+            Log::error('Gagal menyimpan tugas: ' . $e->getMessage());
+            session()->flash('error', 'Terjadi kesalahan saat menyimpan tugas.');
         }
+    }
+
+    public function editAssignment($id)
+    {
+        $assignment = Assignment::where('id', $id)->where('class_id', $this->classId)->firstOrFail();
+        $this->editingAssignmentId = $id;
+        $this->assignment_title = $assignment->title;
+        $this->assignment_description = $assignment->description;
+        $this->assignment_deadline = \Carbon\Carbon::parse($assignment->deadline)->format('Y-m-d\TH:i');
+        $this->assignment_weight = $assignment->weight_percentage;
+        $this->assignment_instruction_type = $assignment->submission_type;
+
+        if ($assignment->submission_type === 'link') {
+            $this->assignment_instruction_link = $assignment->instructions;
+        } elseif ($assignment->submission_type === 'text') {
+            // Instruction is description? or stored in instructions?
+            // CREATE logic: data['instructions'] = description.
+        }
+
+        $this->showAssignmentModal = true;
+        $this->dispatch('open-assignment-modal');
     }
 
     public function updateNilaiTugas($submissionId, $grade)
@@ -370,6 +463,30 @@ class DetailKelas extends Component
         $this->loadClass();
         $this->calculateUpcomingAssignments();
         session()->flash('success', 'Tugas berhasil dihapus.');
+    }
+
+    public function viewAssignment($id)
+    {
+        $this->viewingAssignment = Assignment::with(['submissions.user'])->findOrFail($id);
+
+        // Prepare submissions data for all students
+        $this->assignmentSubmissions = $this->class->students->map(function ($student) use ($id) {
+            $submission = $this->viewingAssignment->submissions->where('user_id', $student->id)->first();
+
+            return [
+                'student_id' => $student->id,
+                'name' => $student->name,
+                'email' => $student->email,
+                'avatar_initial' => substr($student->name, 0, 1),
+                'status' => $submission ? ($submission->grade ? 'graded' : 'submitted') : 'missing',
+                'submitted_at' => $submission ? $submission->created_at : null,
+                'grade' => $submission ? $submission->grade : null,
+                'file_path' => $submission ? $submission->file_path : null,
+                'submission_id' => $submission ? $submission->id : null,
+            ];
+        })->values()->toArray();
+
+        $this->dispatch('open-assignment-detail');
     }
 
     // Student methods
@@ -687,6 +804,9 @@ class DetailKelas extends Component
             )
             ->get();
 
+        // Calculate assignments data for client-side rendering
+        $this->assignmentsData = $this->getAssignmentsDataProperty();
+
         // Get posts (pinned first, then by date)
         $posts = Post::where('class_id', $this->classId)
             ->with(['user', 'replies.user'])
@@ -738,6 +858,7 @@ class DetailKelas extends Component
             'mahasiswa' => $mahasiswa,
             'formatted_assignments' => $formatted_assignments,
             'posts' => $posts,
+            'assignmentsData' => $this->getAssignmentsDataProperty(),
         ]);
 
         return $view->layout($this->isAdmin ? 'admin.app' : 'dosen.app', [
@@ -746,5 +867,41 @@ class DetailKelas extends Component
             'instructor_name' => $instructor_name,
             'admin_name' => $this->isAdmin ? Auth::user()->name : null, // Add admin_name for admin layout
         ]);
+    }
+
+    public function getAssignmentsDataProperty()
+    {
+        return $this->class->assignments->map(function ($assignment) {
+            $submissions = $assignment->submissions;
+
+            $studentSubmissions = $this->class->students->map(function ($student) use ($submissions) {
+                $submission = $submissions->where('user_id', $student->id)->first();
+
+                return [
+                    'student_id' => $student->id,
+                    'name' => $student->name,
+                    'email' => $student->email,
+                    'avatar_initial' => substr($student->name, 0, 1),
+                    'status' => $submission ? ($submission->grade ? 'graded' : 'submitted') : 'missing',
+                    'submitted_at' => $submission ? $submission->created_at->format('Y-m-d H:i:s') : null,
+                    'submitted_at_human' => $submission ? $submission->created_at->locale('id')->diffForHumans() : null,
+                    'grade' => $submission ? $submission->grade : null,
+                    'file_path' => $submission ? $submission->file_path : null,
+                    'submission_id' => $submission ? $submission->id : null,
+                ];
+            })->values()->toArray();
+
+            return [
+                'id' => $assignment->id,
+                'title' => $assignment->title,
+                'description' => $assignment->description,
+                'deadline' => $assignment->deadline ? $assignment->deadline->format('Y-m-d H:i:s') : null,
+                'deadline_human' => $assignment->deadline ? $assignment->deadline->locale('id')->isoFormat('dddd, D MMMM Y HH:mm') : null,
+                'weight_percentage' => $assignment->weight_percentage,
+                'submission_type' => $assignment->submission_type,
+                'instructions' => $assignment->instructions, // path or link
+                'submissions' => $studentSubmissions,
+            ];
+        })->values()->toArray();
     }
 }
