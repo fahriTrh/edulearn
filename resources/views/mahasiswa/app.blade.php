@@ -9,7 +9,7 @@
 <body class="bg-gray-50 text-gray-900 antialiased">
     <div class="flex min-h-screen">
         <!-- Sidebar -->
-        <aside class="w-64 bg-gradient-to-br from-purple-600 to-purple-800 text-white fixed h-screen overflow-y-auto transition-all duration-300 z-30 -translate-x-full lg:translate-x-0" id="sidebar">
+        <aside class="w-64 bg-linear-to-br from-purple-600 to-purple-800 text-white fixed h-screen overflow-y-auto transition-all duration-300 z-30 -translate-x-full lg:translate-x-0" id="sidebar">
             <!-- Logo Section -->
             <div class="px-6 py-8 border-b border-white/20">
                 <h1 class="text-3xl font-bold">EduLearn</h1>
@@ -74,16 +74,6 @@
                         <button class="lg:hidden text-gray-600 hover:text-gray-900" id="mobile-menu-btn">
                             <x-heroicon-s-bars-3 class="w-6 h-6" />
                         </button>
-            
-                        <!-- Search Bar -->
-                        <div class="flex items-center bg-gray-100 rounded-full px-4 py-2 flex-1 max-w-md">
-                            <x-heroicon-s-magnifying-glass class="w-5 h-5 text-gray-500" />
-                            <input 
-                                type="text" 
-                                placeholder="Cari kursus, materi, atau tugas..." 
-                                class="bg-transparent border-none outline-none w-full ml-2 text-sm"
-                            >
-                        </div>
                     </div>
             
                     <!-- User Section -->
@@ -98,7 +88,7 @@
             
                         <!-- User Info -->
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-gradient-to-br from-purple-600 to-purple-800 rounded-full flex items-center justify-center text-white font-bold">
+                            <div class="w-10 h-10 bg-linear-to-br from-purple-600 to-purple-800 rounded-full flex items-center justify-center text-white font-bold">
                                 {{ strtoupper(substr(Auth::user()->name ?? 'AM', 0, 2)) }}
                             </div>
                             <div class="hidden md:block">

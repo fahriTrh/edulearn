@@ -24,22 +24,27 @@ class DetailKursus extends Component
 
     public $classId;
     public $class;
-    public $activeTab = 'classwork'; // 'stream', 'classwork', 'people'
+    // activeTab is handled by Alpine.js now
 
     // Post properties
     public $post_type = 'discussion';
     public $post_title = '';
     public $post_content = '';
-    public $showPostModal = false;
     public $reply_content = [];
 
-    // Assignment submission modal
-    public $showSubmissionModal = false;
+    // Assignment submission modal properties
     public $selectedAssignmentId = null;
     public $selectedAssignment = null;
     public $submission_text = '';
     public $submission_file;
     public $submission_link = '';
+
+    public $isSubmitted = false;
+
+    // Edit/Delete State
+    public $editingPostId = null;
+    public $editingReplyId = null;
+    public $reply_content_edit = '';
 
     public function mount($id)
     {
@@ -59,11 +64,6 @@ class DetailKursus extends Component
             ->firstOrFail();
     }
 
-    public function switchTab($tab)
-    {
-        $this->activeTab = $tab;
-    }
-
     public function markMaterialComplete($materialId)
     {
         $user = Auth::user();
@@ -80,11 +80,19 @@ class DetailKursus extends Component
         );
 
         session()->flash('success', 'Materi ditandai sebagai selesai!');
+        // No need to reload class if we just update UI state, but re-render is fine
     }
 
-    public function openSubmissionModal($assignmentId)
+    public function getAssignmentDetails($assignmentId)
     {
+        // Clear previous data immediately to show loading state
+        $this->selectedAssignment = null;
         $this->selectedAssignmentId = $assignmentId;
+        $this->submission_text = '';
+        $this->submission_link = '';
+        $this->submission_file = null;
+        $this->isSubmitted = false;
+
         $this->selectedAssignment = Assignment::findOrFail($assignmentId);
 
         // Check if already submitted
@@ -95,23 +103,35 @@ class DetailKursus extends Component
         if ($existingSubmission) {
             $this->submission_text = $existingSubmission->submission_text ?? '';
             $this->submission_link = $existingSubmission->submission_link ?? '';
+            $this->isSubmitted = true;
         } else {
-            $this->submission_text = '';
-            $this->submission_link = '';
+            $this->isSubmitted = false; // Ensure explicit false
         }
 
-        $this->submission_file = null;
-        $this->showSubmissionModal = true;
+        // The modal visibility will be handled by Alpine
     }
 
-    public function closeSubmissionModal()
+    public function cancelSubmission()
     {
-        $this->showSubmissionModal = false;
-        $this->selectedAssignmentId = null;
-        $this->selectedAssignment = null;
-        $this->submission_text = '';
-        $this->submission_file = null;
-        $this->submission_link = '';
+        $submission = AssignmentSubmission::where('assignment_id', $this->selectedAssignmentId)
+            ->where('user_id', Auth::id())
+            ->first();
+
+        if ($submission) {
+            // Optional: Delete file if exists on disk
+            if ($submission->file_path && file_exists(public_path($submission->file_path))) {
+                @unlink(public_path($submission->file_path));
+            }
+
+            $submission->delete();
+
+            $this->isSubmitted = false;
+            $this->submission_text = '';
+            $this->submission_link = '';
+
+            session()->flash('success', 'Pengiriman dibatalkan.');
+            $this->loadClass(); // Refresh main list
+        }
     }
 
     public function submitAssignment()
@@ -186,34 +206,133 @@ class DetailKursus extends Component
             );
 
             session()->flash('success', 'Tugas berhasil dikumpulkan!');
-            $this->closeSubmissionModal();
-            $this->loadClass();
+            $this->dispatch('close-submission-modal'); // Dispatch event for Alpine
+            $this->loadClass(); // Refresh data
         } catch (\Exception $e) {
             Log::error('Gagal submit tugas: ' . $e->getMessage());
             session()->flash('error', 'Terjadi kesalahan saat mengumpulkan tugas.');
         }
     }
 
-    // Post methods
-    public function openPostModal()
+    public function markAsDone()
     {
-        $this->post_type = 'discussion';
-        $this->post_title = '';
-        $this->post_content = '';
-        $this->showPostModal = true;
+        $assignment = Assignment::findOrFail($this->selectedAssignmentId);
+        $user = Auth::user();
+
+        // Check if late
+        $isLate = now() > $assignment->deadline;
+
+        try {
+            AssignmentSubmission::updateOrCreate(
+                [
+                    'assignment_id' => $assignment->id,
+                    'user_id' => $user->id,
+                ],
+                [
+                    'submission_text' => 'Ditandai selesai oleh siswa',
+                    'file_path' => null,
+                    'file_name' => null,
+                    'file_size' => null,
+                    'submission_link' => null,
+                    'submitted_at' => now(),
+                    'is_late' => $isLate,
+                    'status' => 'submitted',
+                ]
+            );
+
+            session()->flash('success', 'Tugas ditandai selesai!');
+            $this->dispatch('close-submission-modal');
+            $this->loadClass();
+        } catch (\Exception $e) {
+            Log::error('Gagal menandai selesai: ' . $e->getMessage());
+            session()->flash('error', 'Gagal menandai selesai.');
+        }
     }
 
-    public function closePostModal()
+    // Post methods
+    public function editPost($postId)
     {
-        $this->showPostModal = false;
-        $this->post_title = '';
+        $post = Post::where('id', $postId)->where('user_id', Auth::id())->firstOrFail();
+        $this->editingPostId = $post->id;
+        $this->post_content = $post->content;
+        $this->post_title = $post->title;
+        $this->dispatch('open-post-modal');
+    }
+
+    public function updatePost()
+    {
+        $this->validate([
+            'post_content' => 'required|string',
+        ]);
+
+        $post = Post::where('id', $this->editingPostId)->where('user_id', Auth::id())->firstOrFail();
+
+        $post->update([
+            'content' => $this->post_content,
+        ]);
+
+        $this->editingPostId = null;
         $this->post_content = '';
+        $this->post_title = '';
+
+        $this->loadClass();
+        $this->dispatch('close-post-modal');
+        session()->flash('success', 'Postingan diperbarui!');
+    }
+
+    public function deletePost($postId)
+    {
+        $post = Post::where('id', $postId)->where('user_id', Auth::id())->firstOrFail();
+        $post->delete();
+        $this->loadClass();
+        session()->flash('success', 'Postingan dihapus.');
+    }
+
+    public function editReply($replyId)
+    {
+        $reply = \App\Models\PostReply::where('id', $replyId)->where('user_id', Auth::id())->firstOrFail();
+        $this->editingReplyId = $reply->id;
+        $this->reply_content_edit = $reply->content;
+        $this->dispatch('open-reply-modal');
+    }
+
+    public function updateReply()
+    {
+        $this->validate([
+            'reply_content_edit' => 'required|string',
+        ]);
+
+        $reply = \App\Models\PostReply::where('id', $this->editingReplyId)->where('user_id', Auth::id())->firstOrFail();
+
+        $reply->update([
+            'content' => $this->reply_content_edit,
+        ]);
+
+        $this->editingReplyId = null;
+        $this->reply_content_edit = '';
+
+        $this->loadClass();
+        $this->dispatch('close-reply-modal');
+        session()->flash('success', 'Komentar diperbarui!');
+    }
+
+    public function deleteReply($replyId)
+    {
+        $reply = \App\Models\PostReply::where('id', $replyId)->where('user_id', Auth::id())->firstOrFail();
+        $reply->delete();
+        $this->loadClass();
+        session()->flash('success', 'Komentar dihapus.');
     }
 
     public function createPost()
     {
+        if ($this->editingPostId) {
+            $this->updatePost();
+            return;
+        }
+
         $this->validate([
-            'post_title' => 'required|string|max:255',
+            'post_title' => 'nullable|string|max:255',
             'post_content' => 'required|string',
         ]);
 
@@ -222,12 +341,14 @@ class DetailKursus extends Component
                 'class_id' => $this->classId,
                 'user_id' => Auth::id(),
                 'type' => 'discussion',
-                'title' => $this->post_title,
+                'title' => $this->post_title ?: 'Postingan Baru', // Default title if empty
                 'content' => $this->post_content,
             ]);
 
             session()->flash('success', 'Diskusi berhasil dibuat!');
-            $this->closePostModal();
+            $this->post_title = '';
+            $this->post_content = '';
+            $this->dispatch('close-post-modal'); // Dispatch event for Alpine
         } catch (\Exception $e) {
             Log::error('Gagal membuat post: ' . $e->getMessage());
             session()->flash('error', 'Terjadi kesalahan saat membuat diskusi.');
@@ -259,77 +380,73 @@ class DetailKursus extends Component
     {
         $user = Auth::user();
 
-        // Batch fetch completion helpers for this single class
+        // 1. Fetch Completion Helper (For Classwork)
         $completedMaterialIds = MaterialCompletion::where('user_id', $user->id)
             ->whereIn('material_id', $this->class->materials->pluck('id'))
             ->where('is_completed', true)
             ->pluck('material_id')
             ->toArray();
 
-        // Batch fetch assignment submissions for this single class
+        // 2. Fetch Submissions (For Classwork and Upcoming)
         $submissions = AssignmentSubmission::where('user_id', $user->id)
             ->whereIn('assignment_id', $this->class->assignments->pluck('id'))
             ->get()
             ->keyBy('assignment_id');
 
-        // Format materials (only published)
-        $materials = $this->class->materials->where('is_published', true)->map(function ($item) use ($user, $completedMaterialIds) {
-            // Check in_array (O(N) but N is small per class, and in_array is fast enough for <100, can use hash map if bigger)
-            // Or better, flip the array once if we care, but toArray() is list of IDs.
-            // For optimal perf, flip it:
-            // But here let's just use in_array which is fast enough for typical class size.
+        // 3. Format Materials (Classwork)
+        $materials = $this->class->materials->where('is_published', true)->map(function ($item) use ($completedMaterialIds) {
             $isCompleted = in_array($item->id, $completedMaterialIds);
 
-            if ($item->type === 'link') {
-                return [
-                    'id' => $item->id,
-                    'title' => $item->title,
-                    'type' => $item->type,
-                    'link' => $item->file_url,
-                    'fileUrl' => null,
-                    'uploadDate' => $item->created_at->format('Y-m-d'),
-                    'description' => $item->description ?? '',
-                    'is_completed' => $isCompleted,
-                ];
-            } else {
-                return [
-                    'id' => $item->id,
-                    'title' => $item->title,
-                    'type' => $item->type,
-                    'fileUrl' => asset($item->file_path),
-                    'link' => null,
-                    'uploadDate' => $item->created_at->format('Y-m-d'),
-                    'description' => $item->description ?? '',
-                    'is_completed' => $isCompleted,
-                ];
-            }
+            $fileUrl = $item->type !== 'link' ? asset($item->file_path) : null;
+            $link = $item->type === 'link' ? $item->file_url : null;
+
+            return [
+                'id' => $item->id,
+                'title' => $item->title,
+                'type' => $item->type,
+                'link' => $link,
+                'fileUrl' => $fileUrl,
+                'uploadDate' => $item->created_at->format('Y-m-d'),
+                'description' => $item->description ?? '',
+                'is_completed' => $isCompleted,
+            ];
         });
 
-        // Format assignments with submission status
+        // 4. Format Assignments (Classwork & Upcoming)
         $assignments = Assignment::where('class_id', $this->classId)
             ->where('status', 'published')
+            ->orderBy('deadline', 'asc')
             ->get()
-            ->map(function ($assignment) use ($user, $submissions) {
-                // Lookup in keyed collection
+            ->map(function ($assignment) use ($submissions) {
                 $submission = $submissions->get($assignment->id);
-
-                // Calculate days left properly (rounded, not float)
                 $deadline = \Carbon\Carbon::parse($assignment->deadline);
-                $now = now();
-                // Calculate days difference: positive = days left, negative = days overdue
-                $daysLeft = (int) floor($now->diffInDays($deadline, false));
+                $now = now()->startOfDay(); // Use start of day for accurate day diff
+                $deadlineDate = $deadline->copy()->startOfDay();
+
+                $diffDays = (int)$now->diffInDays($deadlineDate, false);
 
                 // Format deadline display
                 $deadlineDisplay = '';
-                if ($daysLeft < 0) {
-                    $deadlineDisplay = 'Terlambat ' . abs($daysLeft) . ' hari, ' . $deadline->format('H:i');
-                } elseif ($daysLeft == 0) {
+
+                if ($diffDays == 0) {
                     $deadlineDisplay = 'Hari ini, ' . $deadline->format('H:i');
-                } elseif ($daysLeft == 1) {
+                } elseif ($diffDays == 1) {
                     $deadlineDisplay = 'Besok, ' . $deadline->format('H:i');
+                } elseif ($diffDays == -1) {
+                    $deadlineDisplay = 'Kemarin, ' . $deadline->format('H:i');
+                } elseif ($diffDays == -2) {
+                    $deadlineDisplay = '2 hari lalu, ' . $deadline->format('H:i');
+                } elseif ($diffDays == -3) {
+                    $deadlineDisplay = '3 hari lalu, ' . $deadline->format('H:i');
+                } elseif ($diffDays < -3) {
+                    $deadlineDisplay = $deadline->locale('id')->translatedFormat('d M Y, H:i');
                 } else {
-                    $deadlineDisplay = $daysLeft . ' hari lagi, ' . $deadline->format('H:i');
+                    $deadlineDisplay = $diffDays . ' hari lagi, ' . $deadline->format('H:i');
                 }
+
+                // Determine logic for "Late" check (UI purpose)
+                // If submitted late OR not submitted and passed deadline
+                $isLateLogic = $submission ? $submission->is_late : ($diffDays < 0);
 
                 return [
                     'id' => $assignment->id,
@@ -337,35 +454,27 @@ class DetailKursus extends Component
                     'description' => $assignment->description,
                     'deadline' => $deadlineDisplay,
                     'deadline_raw' => $assignment->deadline,
-                    'deadline_date' => $deadline->format('d M Y'),
+                    'deadline' => $deadlineDisplay,
+                    'deadline_raw' => $assignment->deadline,
+                    'deadline_date' => $deadline->locale('id')->translatedFormat('l, d F Y'),
                     'deadline_time' => $deadline->format('H:i'),
-                    'days_left' => $daysLeft,
+                    'days_left' => $diffDays,
                     'weight' => $assignment->weight_percentage,
                     'status' => $assignment->status,
                     'submission_type' => $assignment->submission_type,
                     'has_submission' => $submission !== null,
-                    'submission' => $submission ? [
-                        'id' => $submission->id,
-                        'submitted_at' => $submission->submitted_at,
-                        'score' => $submission->score,
-                        'feedback' => $submission->feedback,
-                        'status' => $submission->status,
-                        'file_path' => $submission->file_path,
-                        'file_name' => $submission->file_name,
-                        'submission_text' => $submission->submission_text,
-                        'submission_link' => $submission->submission_link,
-                    ] : null,
-                    'is_late' => $submission ? $submission->is_late : ($daysLeft < 0),
+                    'submission' => $submission,
+                    'is_late' => $isLateLogic,
                 ];
             });
 
-        // Get classmates
+        // 5. Get Classmates (People)
         $classmates = $this->class->students()
             ->where('users.id', '!=', $user->id)
             ->select('users.id', 'users.name', 'users.nim', 'users.email')
             ->get();
 
-        // Get posts (pinned first, then by date)
+        // 6. Get Posts (Stream)
         $posts = Post::where('class_id', $this->classId)
             ->with(['user', 'replies.user'])
             ->orderBy('is_pinned', 'desc')
@@ -384,7 +493,8 @@ class DetailKursus extends Component
                         'initial' => substr($post->user->name, 0, 1),
                     ],
                     'created_at' => $post->created_at->format('Y-m-d H:i:s'),
-                    'created_at_carbon' => $post->created_at,
+                    'created_at_human' => $post->created_at->locale('id')->diffForHumans(),
+                    'is_edited' => $post->created_at != $post->updated_at,
                     'replies' => $post->replies->map(function ($reply) {
                         return [
                             'id' => $reply->id,
@@ -394,19 +504,20 @@ class DetailKursus extends Component
                                 'name' => $reply->user->name,
                                 'initial' => substr($reply->user->name, 0, 1),
                             ],
-                            'created_at' => $reply->created_at->format('Y-m-d H:i:s'),
-                            'created_at_carbon' => $reply->created_at,
+                            'created_at_human' => $reply->created_at->locale('id')->diffForHumans(),
+                            'is_edited' => $reply->created_at != $reply->updated_at,
                         ];
                     }),
                 ];
             });
 
+        // 7. Get Upcoming Deadlines (Stream Sidebar)
+        $upcomingAssignments = $assignments->filter(function ($a) {
+            return !$a['has_submission'] && $a['days_left'] >= 0;
+        })->sortBy('days_left')->take(5);
+
         $title = $this->class->title;
         $sub_title = $this->class->description ?? '';
-
-        // Fetch student name directly from database
-        $dbUser = User::find(Auth::id());
-        $student_name = $dbUser && $dbUser->name ? $dbUser->name : 'Student';
 
         /** @var \Illuminate\View\View|mixed $view */
         $view = view('livewire.student.detail-kursus', [
@@ -414,6 +525,7 @@ class DetailKursus extends Component
             'assignments' => $assignments,
             'classmates' => $classmates,
             'posts' => $posts,
+            'upcomingAssignments' => $upcomingAssignments,
         ]);
 
         return $view->layoutData([

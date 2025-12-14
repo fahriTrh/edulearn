@@ -9,7 +9,7 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div class="bg-white p-6 md:p-8 rounded-xl shadow-sm border-l-4 border-purple-600">
             <div class="text-gray-600 text-sm mb-2">Rata-rata Nilai</div>
-            <div class="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent mb-2">
+            <div class="text-4xl md:text-5xl font-bold bg-linear-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent mb-2">
                 {{ $avgGrade }}
             </div>
             <div class="flex items-center gap-1 text-green-500 text-sm">
@@ -20,7 +20,7 @@
 
         <div class="bg-white p-6 md:p-8 rounded-xl shadow-sm border-l-4 border-purple-600">
             <div class="text-gray-600 text-sm mb-2">Sertifikat</div>
-            <div class="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent mb-2">
+            <div class="text-4xl md:text-5xl font-bold bg-linear-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent mb-2">
                 {{ $totalCertificates }}
             </div>
             <div class="flex items-center gap-1 text-green-500 text-sm">
@@ -31,7 +31,7 @@
 
         <div class="bg-white p-6 md:p-8 rounded-xl shadow-sm border-l-4 border-purple-600">
             <div class="text-gray-600 text-sm mb-2">Kursus Aktif</div>
-            <div class="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent mb-2">
+            <div class="text-4xl md:text-5xl font-bold bg-linear-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent mb-2">
                 {{ $activeCourses }}
             </div>
             <div class="flex items-center gap-1 text-green-500 text-sm">
@@ -42,7 +42,7 @@
 
         <div class="bg-white p-6 md:p-8 rounded-xl shadow-sm border-l-4 border-purple-600">
             <div class="text-gray-600 text-sm mb-2">Predikat A</div>
-            <div class="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent mb-2">
+            <div class="text-4xl md:text-5xl font-bold bg-linear-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent mb-2">
                 {{ $gradeACertificates }}
             </div>
             <div class="flex items-center gap-1 text-green-500 text-sm">
@@ -102,7 +102,7 @@
                                             Detail
                                         </button>
                                         @if($course['has_certificate'])
-                                            <button class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-800 text-white rounded-lg font-semibold hover:opacity-90 transition-opacity">
+                                            <button class="flex items-center gap-2 px-4 py-2 bg-linear-to-r from-purple-600 to-purple-800 text-white rounded-lg font-semibold hover:opacity-90 transition-opacity">
                                                 <x-heroicon-s-trophy class="w-5 h-5" />
                                                 Sertifikat
                                             </button>
@@ -170,7 +170,7 @@
                                 Detail
                             </button>
                             @if($course['has_certificate'])
-                                <button class="flex items-center justify-center gap-2 flex-1 px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-800 text-white rounded-lg font-semibold hover:opacity-90 transition-opacity">
+                                <button class="flex items-center justify-center gap-2 flex-1 px-4 py-2 bg-linear-to-r from-purple-600 to-purple-800 text-white rounded-lg font-semibold hover:opacity-90 transition-opacity">
                                     <x-heroicon-s-trophy class="w-5 h-5" />
                                     Sertifikat
                                 </button>

@@ -48,19 +48,19 @@
 
     <!-- Filter Section -->
     <div class="bg-white p-4 md:p-6 rounded-xl shadow-sm mb-8 flex flex-wrap gap-3">
-        <button wire:click="filterAssignments('all')" class="px-5 py-2 rounded-full font-medium transition-all {{ $filter === 'all' ? 'bg-gradient-to-r from-purple-600 to-purple-800 text-white' : 'border-2 border-gray-200 text-gray-600 hover:border-purple-600 hover:text-purple-600' }}">
+        <button wire:click="filterAssignments('all')" class="px-5 py-2 rounded-full font-medium transition-all {{ $filter === 'all' ? 'bg-linear-to-r from-purple-600 to-purple-800 text-white' : 'border-2 border-gray-200 text-gray-600 hover:border-purple-600 hover:text-purple-600' }}">
             Semua
         </button>
-        <button wire:click="filterAssignments('urgent')" class="px-5 py-2 rounded-full font-medium transition-all {{ $filter === 'urgent' ? 'bg-gradient-to-r from-purple-600 to-purple-800 text-white' : 'border-2 border-gray-200 text-gray-600 hover:border-purple-600 hover:text-purple-600' }}">
+        <button wire:click="filterAssignments('urgent')" class="px-5 py-2 rounded-full font-medium transition-all {{ $filter === 'urgent' ? 'bg-linear-to-r from-purple-600 to-purple-800 text-white' : 'border-2 border-gray-200 text-gray-600 hover:border-purple-600 hover:text-purple-600' }}">
             Mendesak
         </button>
-        <button wire:click="filterAssignments('pending')" class="px-5 py-2 rounded-full font-medium transition-all {{ $filter === 'pending' ? 'bg-gradient-to-r from-purple-600 to-purple-800 text-white' : 'border-2 border-gray-200 text-gray-600 hover:border-purple-600 hover:text-purple-600' }}">
+        <button wire:click="filterAssignments('pending')" class="px-5 py-2 rounded-full font-medium transition-all {{ $filter === 'pending' ? 'bg-linear-to-r from-purple-600 to-purple-800 text-white' : 'border-2 border-gray-200 text-gray-600 hover:border-purple-600 hover:text-purple-600' }}">
             Pending
         </button>
-        <button wire:click="filterAssignments('submitted')" class="px-5 py-2 rounded-full font-medium transition-all {{ $filter === 'submitted' ? 'bg-gradient-to-r from-purple-600 to-purple-800 text-white' : 'border-2 border-gray-200 text-gray-600 hover:border-purple-600 hover:text-purple-600' }}">
+        <button wire:click="filterAssignments('submitted')" class="px-5 py-2 rounded-full font-medium transition-all {{ $filter === 'submitted' ? 'bg-linear-to-r from-purple-600 to-purple-800 text-white' : 'border-2 border-gray-200 text-gray-600 hover:border-purple-600 hover:text-purple-600' }}">
             Terkirim
         </button>
-        <button wire:click="filterAssignments('graded')" class="px-5 py-2 rounded-full font-medium transition-all {{ $filter === 'graded' ? 'bg-gradient-to-r from-purple-600 to-purple-800 text-white' : 'border-2 border-gray-200 text-gray-600 hover:border-purple-600 hover:text-purple-600' }}">
+        <button wire:click="filterAssignments('graded')" class="px-5 py-2 rounded-full font-medium transition-all {{ $filter === 'graded' ? 'bg-linear-to-r from-purple-600 to-purple-800 text-white' : 'border-2 border-gray-200 text-gray-600 hover:border-purple-600 hover:text-purple-600' }}">
             Dinilai
         </button>
     </div>
@@ -113,7 +113,7 @@
                 </div>
                 <div class="flex gap-2">
                     @if($assignment['status'] === 'graded')
-                        <div class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-800 text-white rounded-full font-semibold">
+                        <div class="flex items-center gap-2 px-4 py-2 bg-linear-to-r from-purple-600 to-purple-800 text-white rounded-full font-semibold">
                             <x-heroicon-s-trophy class="w-5 h-5" />
                             <span>Nilai: {{ $assignment['score'] }}/100</span>
                         </div>
@@ -129,7 +129,7 @@
                             Lihat Kiriman
                         </button>
                     @else
-                        <button class="flex-1 sm:flex-initial px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-800 text-white rounded-lg font-semibold hover:opacity-90 transition-opacity">
+                        <button class="flex-1 sm:flex-initial px-4 py-2 bg-linear-to-r from-purple-600 to-purple-800 text-white rounded-lg font-semibold hover:opacity-90 transition-opacity">
                             Upload Tugas
                         </button>
                         <button class="flex-1 sm:flex-initial px-4 py-2 bg-gray-100 text-purple-600 rounded-lg font-semibold hover:bg-gray-200 transition-colors">
