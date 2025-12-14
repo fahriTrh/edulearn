@@ -26,7 +26,7 @@ class KursusSaya extends Component
 
         // Get enrolled classes with eager loading
         $enrolledClasses = $user->classes()
-            ->with(['instructor', 'materials', 'assignments', 'students'])
+            ->with(['instructor.user', 'materials', 'assignments', 'students'])
             ->get();
 
         // Batch fetch all material completions for this user
@@ -156,7 +156,7 @@ class KursusSaya extends Component
                 'title' => $class->title,
                 'code' => $class->code,
                 'description' => $class->description,
-                'instructor' => $class->instructor->name ?? 'N/A',
+                'instructor' => $class->instructor->user->name ?? 'N/A',
                 'materials_count' => $totalMaterials,
                 'assignments_count' => $totalAssignments,
                 'students_count' => $class->students->count(),

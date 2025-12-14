@@ -55,7 +55,7 @@ class DetailKursus extends Component
             ->whereHas('students', function ($query) use ($user) {
                 $query->where('users.id', $user->id);
             })
-            ->with(['instructor', 'materials', 'assignments', 'students'])
+            ->with(['instructor.user', 'materials', 'assignments', 'students'])
             ->firstOrFail();
     }
 

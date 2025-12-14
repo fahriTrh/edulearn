@@ -66,7 +66,7 @@
             <div class="space-y-4">
                 @forelse($coursesInProgress as $course)
                 <a href="{{ route('mahasiswa.detail-kursus', $course['id']) }}" wire:navigate class="flex gap-4 p-4 border border-gray-200 rounded-xl hover:border-indigo-600 hover:shadow-md transition-all cursor-pointer">
-                    <div class="w-20 h-20 bg-gradient-to-br from-indigo-600 to-purple-700 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <div class="w-20 h-20 bg-linear-to-br from-indigo-600 to-purple-700 rounded-lg flex items-center justify-center shrink-0">
                         @if($course['cover_image'])
                             <img src="{{ $course['cover_image'] }}" alt="{{ $course['title'] }}" class="w-full h-full object-cover rounded-lg">
                         @else
@@ -77,7 +77,7 @@
                         <h3 class="font-semibold text-gray-900 mb-1">{{ $course['title'] }}</h3>
                         <p class="text-gray-600 text-sm mb-3">Dosen: {{ $course['instructor'] }} • {{ $course['materials_count'] }} Materi</p>
                         <div class="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-                            <div class="h-full bg-gradient-to-r from-indigo-600 to-purple-700 rounded-full transition-all duration-300" style="width: {{ $course['progress'] }}%"></div>
+                            <div class="h-full bg-linear-to-r from-indigo-600 to-purple-700 rounded-full transition-all duration-300" style="width: {{ $course['progress'] }}%"></div>
                         </div>
                         <p class="text-indigo-600 text-sm font-medium mt-2">{{ $course['progress'] }}% selesai</p>
                     </div>

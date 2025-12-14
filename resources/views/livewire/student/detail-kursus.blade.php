@@ -150,7 +150,7 @@
             <div class="space-y-2">
                 @forelse($materials as $material)
                 <div class="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg group">
-                    <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center shrink-0">
                         <x-heroicon-s-document class="w-5 h-5 text-blue-600" />
                     </div>
                     <div class="flex-1 min-w-0">
@@ -194,7 +194,7 @@
             <div class="space-y-2">
                 @forelse($assignments as $assignment)
                 <div class="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg group">
-                    <div class="w-10 h-10 {{ $assignment['has_submission'] ? 'bg-green-100' : 'bg-orange-100' }} rounded-full flex items-center justify-center flex-shrink-0">
+                    <div class="w-10 h-10 {{ $assignment['has_submission'] ? 'bg-green-100' : 'bg-orange-100' }} rounded-full flex items-center justify-center shrink-0">
                         <x-heroicon-s-document-text class="w-5 h-5 {{ $assignment['has_submission'] ? 'text-green-600' : 'text-orange-600' }}" />
                     </div>
                     <div class="flex-1 min-w-0">
@@ -232,12 +232,12 @@
         <div class="bg-white rounded-lg border border-gray-200 p-6">
             <h3 class="text-sm font-medium text-gray-700 mb-3">Teacher</h3>
             <div class="flex items-center gap-3 p-3">
-                <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0">
-                    {{ $class->instructor ? substr($class->instructor->name, 0, 1) : 'T' }}
+                <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold shrink-0">
+                    {{ $class->instructor && $class->instructor->user ? substr($class->instructor->user->name, 0, 1) : 'T' }}
                 </div>
                 <div class="flex-1 min-w-0">
-                    <h4 class="text-sm font-medium text-gray-900 truncate">{{ $class->instructor->name ?? 'N/A' }}</h4>
-                    <p class="text-xs text-gray-500 truncate">{{ $class->instructor->email ?? '' }}</p>
+                    <h4 class="text-sm font-medium text-gray-900 truncate">{{ $class->instructor->user->name ?? 'N/A' }}</h4>
+                    <p class="text-xs text-gray-500 truncate">{{ $class->instructor->user->email ?? '' }}</p>
                 </div>
             </div>
         </div>
@@ -248,7 +248,7 @@
             <div class="space-y-2">
                 @forelse($classmates as $classmate)
                 <div class="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg">
-                    <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center text-xs font-medium flex-shrink-0">
+                    <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center text-xs font-medium shrink-0">
                         {{ substr($classmate->name, 0, 1) }}
                     </div>
                     <div class="flex-1 min-w-0">
