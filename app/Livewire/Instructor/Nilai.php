@@ -8,8 +8,13 @@ use App\Models\ClassModel;
 use App\Models\FinalGrade as FinalGradeModel;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\Eloquent\Builder;
+use Livewire\Attributes\Layout;
+use Livewire\Attributes\Title;
 use Livewire\Component;
 
+#[Layout('dosen.app')]
+#[Title('Nilai')]
 class Nilai extends Component
 {
     public $title = 'Nilai';
@@ -91,7 +96,7 @@ class Nilai extends Component
         ]);
 
         $submission = AssignmentSubmission::findOrFail($this->gradingSubmissionId);
-        
+
         $assignment = $submission->assignment;
         $class = ClassModel::where('id', $assignment->class_id)
             ->where('instructor_id', Auth::user()->instructor->id)
@@ -145,21 +150,31 @@ class Nilai extends Component
     {
         $class = ClassModel::where('id', $classId)
             ->where('instructor_id', Auth::user()->instructor->id)
-            ->with(['assignments', 'students'])
+            ->with(['students'])
             ->firstOrFail();
 
         $assignments = $class->assignments()->where('status', 'published')->get();
+        $assignmentIds = $assignments->pluck('id');
         $students = $class->students;
+        $studentIds = $students->pluck('id');
+
+        // Fetch ALL submissions for this class in one query
+        $allSubmissions = AssignmentSubmission::whereIn('assignment_id', $assignmentIds)
+            ->whereIn('user_id', $studentIds)
+            ->whereNotNull('score')
+            ->get()
+            ->groupBy('user_id'); // Group by student ID for easier lookup
 
         foreach ($students as $student) {
             $totalScore = 0;
             $totalWeight = 0;
 
+            // Get this student's submissions from the pre-fetched collection
+            $studentSubmissions = $allSubmissions->get($student->id, collect());
+
             foreach ($assignments as $assignment) {
-                $submission = AssignmentSubmission::where('assignment_id', $assignment->id)
-                    ->where('user_id', $student->id)
-                    ->whereNotNull('score')
-                    ->first();
+                // Find submission for this specific assignment from the student's submissions
+                $submission = $studentSubmissions->firstWhere('assignment_id', $assignment->id);
 
                 if ($submission && $submission->score !== null) {
                     $weight = $assignment->weight_percentage ?? 0;
@@ -264,7 +279,7 @@ class Nilai extends Component
             if ($this->selectedAssignmentId) {
                 $assignment = Assignment::with(['class', 'submissions.user'])
                     ->find($this->selectedAssignmentId);
-                
+
                 if ($assignment) {
                     $class = ClassModel::where('id', $assignment->class_id)
                         ->where('instructor_id', Auth::user()->instructor->id)
@@ -324,13 +339,17 @@ class Nilai extends Component
                     ->first();
 
                 if ($selectedClassDaftar && $this->viewMode === 'class') {
-                    $assignmentsList = $selectedClassDaftar->assignments()->where('status', 'published')->get();
-                    
+                    // Eager load submissions with user relation to avoid N+1 inside the loop
+                    $assignmentsList = $selectedClassDaftar->assignments()
+                        ->where('status', 'published')
+                        ->with(['submissions' => function (Builder $query) use ($selectedClassDaftar) {
+                            $query->whereIn('user_id', $selectedClassDaftar->students->pluck('id'));
+                        }])
+                        ->get();
+
                     $classGrades = $assignmentsList->map(function ($assignment) use ($selectedClassDaftar) {
-                        $submissions = AssignmentSubmission::where('assignment_id', $assignment->id)
-                            ->whereIn('user_id', $selectedClassDaftar->students->pluck('id'))
-                            ->with('user')
-                            ->get();
+                        // Use the relation that was just eager loaded
+                        $submissions = $assignment->submissions;
 
                         $gradedCount = $submissions->whereNotNull('score')->count();
                         $avgScore = $submissions->whereNotNull('score')->avg('score');
@@ -424,7 +443,8 @@ class Nilai extends Component
         $user = User::find(Auth::id());
         $instructor_name = $user && $user->name ? $user->name : 'Instructor';
 
-        return view('livewire.instructor.nilai', [
+        /** @var \Illuminate\View\View|mixed $view */
+        $view = view('livewire.instructor.nilai', [
             'classes' => $instructorClasses,
             // Tab 1
             'assignments' => $assignments,
@@ -439,7 +459,9 @@ class Nilai extends Component
             'finalGrades' => $finalGrades,
             'classSummary' => $classSummary,
             'selectedClassFinal' => $selectedClassFinal,
-        ])->layout('dosen.app', [
+        ]);
+
+        return $view->layoutData([
             'title' => $this->title,
             'sub_title' => $this->sub_title,
             'instructor_name' => $instructor_name,
