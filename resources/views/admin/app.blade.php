@@ -25,26 +25,26 @@
             </div>
         
             <nav class="py-8">
-                <a href="/dashboard-admin" wire:navigate
-                   class="flex items-center gap-4 px-6 py-4 border-l-4 transition-all duration-300 {{ Request::is('dashboard-admin') ? 'bg-white/15 border-white' : 'border-transparent hover:bg-white/10 hover:border-white' }}">
+                <a href="{{ route('admin.dashboard') }}" wire:navigate
+                   class="flex items-center gap-4 px-6 py-4 border-l-4 transition-all duration-300 {{ Request::routeIs('admin.dashboard') ? 'bg-white/15 border-white' : 'border-transparent hover:bg-white/10 hover:border-white' }}">
                     <x-heroicon-s-squares-2x2 class="w-6 h-6" />
                     <span class="font-medium">Dashboard</span>
                 </a>
         
-                <a href="/kelola-mahasiswa" wire:navigate
-                   class="flex items-center gap-4 px-6 py-4 border-l-4 transition-all duration-300 {{ Request::is('kelola-mahasiswa') ? 'bg-white/15 border-white' : 'border-transparent hover:bg-white/10 hover:border-white' }}">
+                <a href="{{ route('admin.mahasiswa') }}" wire:navigate
+                   class="flex items-center gap-4 px-6 py-4 border-l-4 transition-all duration-300 {{ Request::routeIs('admin.mahasiswa') ? 'bg-white/15 border-white' : 'border-transparent hover:bg-white/10 hover:border-white' }}">
                     <x-heroicon-s-users class="w-6 h-6" />
                     <span class="font-medium">Kelola Mahasiswa</span>
                 </a>
         
-                <a href="/kelola-instruktur" wire:navigate
-                   class="flex items-center gap-4 px-6 py-4 border-l-4 transition-all duration-300 {{ Request::is('kelola-instruktur') ? 'bg-white/15 border-white' : 'border-transparent hover:bg-white/10 hover:border-white' }}">
+                <a href="{{ route('admin.instruktur') }}" wire:navigate
+                   class="flex items-center gap-4 px-6 py-4 border-l-4 transition-all duration-300 {{ Request::routeIs('admin.instruktur') ? 'bg-white/15 border-white' : 'border-transparent hover:bg-white/10 hover:border-white' }}">
                     <x-heroicon-s-academic-cap class="w-6 h-6" />
                     <span class="font-medium">Kelola Dosen</span>
                 </a>
 
-                <a href="/kelola-kelas" wire:navigate
-                   class="flex items-center gap-4 px-6 py-4 border-l-4 transition-all duration-300 {{ Request::is('kelola-kelas') ? 'bg-white/15 border-white' : 'border-transparent hover:bg-white/10 hover:border-white' }}">
+                <a href="{{ route('admin.kelas') }}" wire:navigate
+                   class="flex items-center gap-4 px-6 py-4 border-l-4 transition-all duration-300 {{ Request::routeIs('admin.kelas') ? 'bg-white/15 border-white' : 'border-transparent hover:bg-white/10 hover:border-white' }}">
                     <x-heroicon-s-book-open class="w-6 h-6" />
                     <span class="font-medium">Kelola Kelas</span>
                 </a>
