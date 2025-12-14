@@ -23,83 +23,134 @@ class KursusSaya extends Component
     public function render()
     {
         $user = Auth::user();
-        
-        // Get enrolled classes
+
+        // Get enrolled classes with eager loading
         $enrolledClasses = $user->classes()
             ->with(['instructor', 'materials', 'assignments', 'students'])
             ->get();
 
-        // Calculate stats
+        // Batch fetch all material completions for this user
+        // We get all material IDs from the enrolled classes first to filter (optional but cleaner)
+        // Or simpler: just get all completions for this user. Given keyBy is useful.
+        // Let's filter by the materials in these classes to be precise.
+        $allMaterialIds = $enrolledClasses->flatMap(function ($class) {
+            return $class->materials->pluck('id');
+        });
+
+        $completedMaterialsMap = MaterialCompletion::where('user_id', $user->id)
+            ->whereIn('material_id', $allMaterialIds)
+            ->where('is_completed', true)
+            ->pluck('material_id', 'material_id') // Key by material_id for fast lookup O(1)
+            ->toArray();
+
+        // Batch fetch all assignment submissions for this user
+        $allAssignmentIds = $enrolledClasses->flatMap(function ($class) {
+            return $class->assignments->pluck('id');
+        });
+
+        $completedAssignmentsMap = AssignmentSubmission::where('user_id', $user->id)
+            ->whereIn('assignment_id', $allAssignmentIds)
+            ->whereNotNull('score')
+            ->pluck('assignment_id', 'assignment_id') // Key by assignment_id
+            ->toArray();
+
+        // Calculate stats using in-memory collections
         $totalCourses = $enrolledClasses->count();
         $activeCourses = $enrolledClasses->where('status', 'active')->count();
-        $completedCourses = $enrolledClasses->filter(function ($class) use ($user) {
+
+        // Helper to check completion
+        $isClassCompleted = function ($class) use ($completedMaterialsMap, $completedAssignmentsMap) {
             $totalMaterials = $class->materials->where('is_published', true)->count();
             $totalAssignments = $class->assignments->where('status', 'published')->count();
             $totalItems = $totalMaterials + $totalAssignments;
-            
-            $completedMaterials = MaterialCompletion::where('user_id', $user->id)
-                ->whereIn('material_id', $class->materials->pluck('id'))
-                ->where('is_completed', true)
-                ->count();
-            
-            $completedAssignments = AssignmentSubmission::where('user_id', $user->id)
-                ->whereIn('assignment_id', $class->assignments->pluck('id'))
-                ->whereNotNull('score')
-                ->count();
-            
-            $completedItems = $completedMaterials + $completedAssignments;
+
+            // Count completed materials for this class from the map
+            $classMaterialIds = $class->materials->pluck('id')->toArray();
+            $completedMaterialsCount = 0;
+            foreach ($classMaterialIds as $mid) {
+                if (isset($completedMaterialsMap[$mid])) {
+                    $completedMaterialsCount++;
+                }
+            }
+
+            // Count completed assignments for this class from the map
+            $classAssignmentIds = $class->assignments->pluck('id')->toArray();
+            $completedAssignmentsCount = 0;
+            foreach ($classAssignmentIds as $aid) {
+                if (isset($completedAssignmentsMap[$aid])) {
+                    $completedAssignmentsCount++;
+                }
+            }
+
+            $completedItems = $completedMaterialsCount + $completedAssignmentsCount;
             return $totalItems > 0 && $completedItems >= $totalItems;
+        };
+
+        $completedCourses = $enrolledClasses->filter(function ($class) use ($isClassCompleted) {
+            return $isClassCompleted($class);
         })->count();
-        
+
         $avgProgress = 0;
         if ($enrolledClasses->count() > 0) {
-            $totalProgress = $enrolledClasses->map(function ($class) use ($user) {
+            $totalProgress = $enrolledClasses->map(function ($class) use ($completedMaterialsMap, $completedAssignmentsMap) {
                 $totalMaterials = $class->materials->where('is_published', true)->count();
                 $totalAssignments = $class->assignments->where('status', 'published')->count();
                 $totalItems = $totalMaterials + $totalAssignments;
-                
-                $completedMaterials = MaterialCompletion::where('user_id', $user->id)
-                    ->whereIn('material_id', $class->materials->pluck('id'))
-                    ->where('is_completed', true)
-                    ->count();
-                
-                $completedAssignments = AssignmentSubmission::where('user_id', $user->id)
-                    ->whereIn('assignment_id', $class->assignments->pluck('id'))
-                    ->whereNotNull('score')
-                    ->count();
-                
-                $completedItems = $completedMaterials + $completedAssignments;
+
+                $classMaterialIds = $class->materials->pluck('id')->toArray();
+                $completedMaterialsCount = 0;
+                foreach ($classMaterialIds as $mid) {
+                    if (isset($completedMaterialsMap[$mid])) {
+                        $completedMaterialsCount++;
+                    }
+                }
+
+                $classAssignmentIds = $class->assignments->pluck('id')->toArray();
+                $completedAssignmentsCount = 0;
+                foreach ($classAssignmentIds as $aid) {
+                    if (isset($completedAssignmentsMap[$aid])) {
+                        $completedAssignmentsCount++;
+                    }
+                }
+
+                $completedItems = $completedMaterialsCount + $completedAssignmentsCount;
                 return $totalItems > 0 ? round(($completedItems / $totalItems) * 100) : 0;
             })->sum();
             $avgProgress = round($totalProgress / $enrolledClasses->count());
         }
 
         // Process courses with progress
-        $courses = $enrolledClasses->map(function ($class) use ($user) {
+        $courses = $enrolledClasses->map(function ($class) use ($user, $completedMaterialsMap, $completedAssignmentsMap) {
             $totalMaterials = $class->materials->where('is_published', true)->count();
             $totalAssignments = $class->assignments->where('status', 'published')->count();
             $totalItems = $totalMaterials + $totalAssignments;
-            
-            $completedMaterials = MaterialCompletion::where('user_id', $user->id)
-                ->whereIn('material_id', $class->materials->pluck('id'))
-                ->where('is_completed', true)
-                ->count();
-            
-            $completedAssignments = AssignmentSubmission::where('user_id', $user->id)
-                ->whereIn('assignment_id', $class->assignments->pluck('id'))
-                ->whereNotNull('score')
-                ->count();
-            
-            $completedItems = $completedMaterials + $completedAssignments;
+
+            $classMaterialIds = $class->materials->pluck('id')->toArray();
+            $completedMaterialsCount = 0;
+            foreach ($classMaterialIds as $mid) {
+                if (isset($completedMaterialsMap[$mid])) {
+                    $completedMaterialsCount++;
+                }
+            }
+
+            $classAssignmentIds = $class->assignments->pluck('id')->toArray();
+            $completedAssignmentsCount = 0;
+            foreach ($classAssignmentIds as $aid) {
+                if (isset($completedAssignmentsMap[$aid])) {
+                    $completedAssignmentsCount++;
+                }
+            }
+
+            $completedItems = $completedMaterialsCount + $completedAssignmentsCount;
             $progress = $totalItems > 0 ? round(($completedItems / $totalItems) * 100) : 0;
-            
+
             $status = 'active';
             if ($progress >= 100) {
                 $status = 'completed';
             } elseif ($class->status !== 'active') {
                 $status = 'inactive';
             }
-            
+
             return [
                 'id' => $class->id,
                 'title' => $class->title,

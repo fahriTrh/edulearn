@@ -8,32 +8,32 @@
     <!-- Stats Summary -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6">
         <div class="bg-white rounded-xl shadow-sm p-6 text-center hover:-translate-y-1 transition-transform">
-            <div class="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-700 bg-clip-text text-transparent mb-2">{{ $totalCourses }}</div>
+            <div class="text-4xl font-bold bg-linear-to-r from-indigo-600 to-purple-700 bg-clip-text text-transparent mb-2">{{ $totalCourses }}</div>
             <div class="text-gray-600 text-sm">Total Kursus</div>
         </div>
         <div class="bg-white rounded-xl shadow-sm p-6 text-center hover:-translate-y-1 transition-transform">
-            <div class="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-700 bg-clip-text text-transparent mb-2">{{ $activeCourses }}</div>
+            <div class="text-4xl font-bold bg-linear-to-r from-indigo-600 to-purple-700 bg-clip-text text-transparent mb-2">{{ $activeCourses }}</div>
             <div class="text-gray-600 text-sm">Sedang Berjalan</div>
         </div>
         <div class="bg-white rounded-xl shadow-sm p-6 text-center hover:-translate-y-1 transition-transform">
-            <div class="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-700 bg-clip-text text-transparent mb-2">{{ $completedCourses }}</div>
+            <div class="text-4xl font-bold bg-linear-to-r from-indigo-600 to-purple-700 bg-clip-text text-transparent mb-2">{{ $completedCourses }}</div>
             <div class="text-gray-600 text-sm">Selesai</div>
         </div>
         <div class="bg-white rounded-xl shadow-sm p-6 text-center hover:-translate-y-1 transition-transform">
-            <div class="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-700 bg-clip-text text-transparent mb-2">{{ $avgProgress }}%</div>
+            <div class="text-4xl font-bold bg-linear-to-r from-indigo-600 to-purple-700 bg-clip-text text-transparent mb-2">{{ $avgProgress }}%</div>
             <div class="text-gray-600 text-sm">Rata-rata Progress</div>
         </div>
     </div>
 
     <!-- Filter Section -->
     <div class="bg-white rounded-xl shadow-sm p-4 mb-6 flex flex-wrap gap-2">
-        <button wire:click="filterCourses('all')" class="px-6 py-2 rounded-full font-medium transition-all {{ $filter === 'all' ? 'bg-gradient-to-r from-indigo-600 to-purple-700 text-white' : 'border-2 border-gray-200 text-gray-600 hover:border-indigo-600' }}">
+        <button wire:click="filterCourses('all')" class="px-6 py-2 rounded-full font-medium transition-all {{ $filter === 'all' ? 'bg-linear-to-r from-indigo-600 to-purple-700 text-white' : 'border-2 border-gray-200 text-gray-600 hover:border-indigo-600' }}">
             Semua
         </button>
-        <button wire:click="filterCourses('active')" class="px-6 py-2 rounded-full font-medium transition-all {{ $filter === 'active' ? 'bg-gradient-to-r from-indigo-600 to-purple-700 text-white' : 'border-2 border-gray-200 text-gray-600 hover:border-indigo-600' }}">
+        <button wire:click="filterCourses('active')" class="px-6 py-2 rounded-full font-medium transition-all {{ $filter === 'active' ? 'bg-linear-to-r from-indigo-600 to-purple-700 text-white' : 'border-2 border-gray-200 text-gray-600 hover:border-indigo-600' }}">
             Sedang Berjalan
         </button>
-        <button wire:click="filterCourses('completed')" class="px-6 py-2 rounded-full font-medium transition-all {{ $filter === 'completed' ? 'bg-gradient-to-r from-indigo-600 to-purple-700 text-white' : 'border-2 border-gray-200 text-gray-600 hover:border-indigo-600' }}">
+        <button wire:click="filterCourses('completed')" class="px-6 py-2 rounded-full font-medium transition-all {{ $filter === 'completed' ? 'bg-linear-to-r from-indigo-600 to-purple-700 text-white' : 'border-2 border-gray-200 text-gray-600 hover:border-indigo-600' }}">
             Selesai
         </button>
     </div>
@@ -41,59 +41,79 @@
     <!-- Courses Grid - Google Classroom Style -->
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         @forelse($courses as $course)
-        <div class="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow cursor-pointer group">
-            <!-- Large Header Banner -->
-            <div class="h-24 relative" 
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all group relative flex flex-col h-full">
+            {{-- Header / Cover Image --}}
+            <div class="h-32 relative overflow-hidden" 
                  style="background: {{ $course['cover_image'] ? 'url(' . $course['cover_image'] . ') center/cover' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }};">
-                <div class="absolute inset-0 bg-black/20"></div>
-                <span class="absolute top-2 right-2 px-2 py-0.5 bg-white/90 {{ $course['status'] === 'completed' ? 'text-indigo-600' : 'text-green-600' }} rounded text-xs font-semibold">
-                    {{ $course['status'] === 'completed' ? 'Selesai' : 'Aktif' }}
-                </span>
+                <div class="absolute inset-0 bg-black/10 transition-colors"></div>
+                <div class="absolute top-3 right-3 px-2 py-1 bg-white/90 backdrop-blur rounded-lg shadow-sm border border-gray-100 flex items-center gap-1.5">
+                    @if($course['status'] === 'completed')
+                        <div class="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+                        <span class="text-xs font-bold text-gray-700">Selesai</span>
+                    @else
+                        <div class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></div>
+                        <span class="text-xs font-bold text-gray-700">Aktif</span>
+                    @endif
+                </div>
             </div>
             
-            <!-- Class Info -->
-            <div class="p-4">
-                <h3 class="text-base font-medium text-gray-900 mb-1 line-clamp-2" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">{{ $course['title'] }}</h3>
-                <p class="text-sm text-gray-600 mb-2">{{ $course['code'] }}</p>
-                <p class="flex items-center gap-1 text-xs text-gray-500 mb-2">
-                    <x-heroicon-s-academic-cap class="w-3 h-3" />
-                    {{ $course['instructor'] }}
-                </p>
+            {{-- Body --}}
+            <div class="p-5 flex-1 flex flex-col">
+                <h3 class="text-lg font-bold text-gray-900 mb-1 line-clamp-2 leading-tight" title="{{ $course['title'] }}">
+                    {{ $course['title'] }}
+                </h3>
+                <p class="text-sm text-gray-500 mb-4">{{ $course['code'] }}</p>
                 
-                <!-- Quick Stats -->
-                <div class="flex items-center gap-3 text-xs text-gray-500 mb-3">
-                    <span>{{ $course['materials_count'] }} materi</span>
-                    <span>•</span>
-                    <span>{{ $course['assignments_count'] }} tugas</span>
-                </div>
-                
-                <!-- Progress Bar -->
-                <div class="mb-3">
-                    <div class="flex justify-between text-xs mb-1">
-                        <span class="text-gray-600">Progress</span>
-                        <span class="font-semibold {{ $course['progress'] >= 100 ? 'text-green-600' : 'text-blue-600' }}">{{ $course['progress'] }}%</span>
+                {{-- Instructor Info --}}
+                <div class="flex items-center gap-2 mb-4">
+                    <div class="w-6 h-6 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-[10px] font-bold text-gray-600 shrink-0">
+                        {{ strtoupper(substr($course['instructor'] ?? '?', 0, 1)) }}
                     </div>
-                    <div class="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                        <div class="h-full {{ $course['progress'] >= 100 ? 'bg-green-500' : 'bg-blue-600' }} rounded-full transition-all duration-300" style="width: {{ $course['progress'] }}%"></div>
+                    <div class="text-sm text-gray-500 truncate">
+                        {{ $course['instructor'] ?? 'Unknown' }}
                     </div>
                 </div>
                 
-                <!-- Actions -->
-                <div class="flex gap-2 pt-3 border-t border-gray-100">
+                {{-- Stats --}}
+                <div class="grid grid-cols-2 gap-2 mb-4 text-xs text-gray-500">
+                    <div class="flex items-center gap-1.5 bg-gray-50 p-2 rounded-lg">
+                        <x-heroicon-s-document-text class="w-3.5 h-3.5 text-purple-500" />
+                        <span>{{ $course['materials_count'] }} Materi</span>
+                    </div>
+                    <div class="flex items-center gap-1.5 bg-gray-50 p-2 rounded-lg">
+                        <x-heroicon-s-clipboard-document-list class="w-3.5 h-3.5 text-orange-500" />
+                        <span>{{ $course['assignments_count'] }} Tugas</span>
+                    </div>
+                </div>
+                
+                {{-- Progress Bar --}}
+                <div class="mb-4">
+                    <div class="flex justify-between text-xs mb-1.5">
+                        <span class="font-medium text-gray-600">Progress Belajar</span>
+                        <span class="font-bold {{ $course['progress'] >= 100 ? 'text-green-600' : 'text-blue-600' }}">{{ $course['progress'] }}%</span>
+                    </div>
+                    <div class="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                        <div class="h-full {{ $course['progress'] >= 100 ? 'bg-green-500' : 'bg-blue-600' }} rounded-full transition-all duration-500 ease-out" style="width: {{ $course['progress'] }}%"></div>
+                    </div>
+                </div>
+                
+                <div class="mt-auto pt-4 border-t border-gray-50 flex gap-2">
                     @if($course['progress'] >= 100)
                         <a href="{{ route('mahasiswa.nilai') }}" 
-                           class="flex-1 text-center px-3 py-1.5 bg-green-50 hover:bg-green-100 text-green-700 rounded text-xs font-medium">
-                            Nilai
+                           class="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-green-50 text-green-700 hover:bg-green-100 rounded-lg text-sm font-semibold transition-colors">
+                            <x-heroicon-s-star class="w-4 h-4" />
+                            Lihat Nilai
                         </a>
                     @else
                         <a href="{{ route('mahasiswa.detail-kursus', $course['id']) }}" wire:navigate
-                           class="flex-1 text-center px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded text-xs font-medium">
+                           class="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-blue-600 text-white hover:bg-blue-700 shadow-sm shadow-blue-200 rounded-lg text-sm font-semibold transition-all hover:shadow-md">
                             Lanjutkan
                         </a>
                     @endif
                     <a href="{{ route('mahasiswa.detail-kursus', $course['id']) }}" wire:navigate
-                       class="px-3 py-1.5 text-gray-600 hover:bg-gray-100 rounded text-xs" title="Detail">
-                        Detail
+                       class="flex items-center justify-center gap-1.5 px-3 py-2 bg-gray-50 text-gray-600 hover:bg-gray-100 rounded-lg text-sm font-semibold transition-colors"
+                       title="Detail">
+                        <x-heroicon-s-eye class="w-4 h-4" />
                     </a>
                 </div>
             </div>

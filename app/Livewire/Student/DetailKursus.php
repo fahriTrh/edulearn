@@ -13,7 +13,10 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
+use Livewire\Attributes\Layout;
 use Livewire\WithFileUploads;
+
+#[Layout('mahasiswa.app')]
 
 class DetailKursus extends Component
 {
@@ -22,14 +25,14 @@ class DetailKursus extends Component
     public $classId;
     public $class;
     public $activeTab = 'classwork'; // 'stream', 'classwork', 'people'
-    
+
     // Post properties
     public $post_type = 'discussion';
     public $post_title = '';
     public $post_content = '';
     public $showPostModal = false;
     public $reply_content = [];
-    
+
     // Assignment submission modal
     public $showSubmissionModal = false;
     public $selectedAssignmentId = null;
@@ -64,7 +67,7 @@ class DetailKursus extends Component
     public function markMaterialComplete($materialId)
     {
         $user = Auth::user();
-        
+
         MaterialCompletion::updateOrCreate(
             [
                 'user_id' => $user->id,
@@ -83,12 +86,12 @@ class DetailKursus extends Component
     {
         $this->selectedAssignmentId = $assignmentId;
         $this->selectedAssignment = Assignment::findOrFail($assignmentId);
-        
+
         // Check if already submitted
         $existingSubmission = AssignmentSubmission::where('assignment_id', $assignmentId)
             ->where('user_id', Auth::id())
             ->first();
-        
+
         if ($existingSubmission) {
             $this->submission_text = $existingSubmission->submission_text ?? '';
             $this->submission_link = $existingSubmission->submission_link ?? '';
@@ -96,7 +99,7 @@ class DetailKursus extends Component
             $this->submission_text = '';
             $this->submission_link = '';
         }
-        
+
         $this->submission_file = null;
         $this->showSubmissionModal = true;
     }
@@ -150,7 +153,7 @@ class DetailKursus extends Component
             if ($this->submission_file) {
                 $filename = time() . '_' . uniqid() . '.' . $this->submission_file->getClientOriginalExtension();
                 $destinationPath = public_path('submissions');
-                
+
                 if (!file_exists($destinationPath)) {
                     mkdir($destinationPath, 0777, true);
                 }
@@ -256,12 +259,26 @@ class DetailKursus extends Component
     {
         $user = Auth::user();
 
+        // Batch fetch completion helpers for this single class
+        $completedMaterialIds = MaterialCompletion::where('user_id', $user->id)
+            ->whereIn('material_id', $this->class->materials->pluck('id'))
+            ->where('is_completed', true)
+            ->pluck('material_id')
+            ->toArray();
+
+        // Batch fetch assignment submissions for this single class
+        $submissions = AssignmentSubmission::where('user_id', $user->id)
+            ->whereIn('assignment_id', $this->class->assignments->pluck('id'))
+            ->get()
+            ->keyBy('assignment_id');
+
         // Format materials (only published)
-        $materials = $this->class->materials->where('is_published', true)->map(function ($item) use ($user) {
-            $isCompleted = MaterialCompletion::where('user_id', $user->id)
-                ->where('material_id', $item->id)
-                ->where('is_completed', true)
-                ->exists();
+        $materials = $this->class->materials->where('is_published', true)->map(function ($item) use ($user, $completedMaterialIds) {
+            // Check in_array (O(N) but N is small per class, and in_array is fast enough for <100, can use hash map if bigger)
+            // Or better, flip the array once if we care, but toArray() is list of IDs.
+            // For optimal perf, flip it:
+            // But here let's just use in_array which is fast enough for typical class size.
+            $isCompleted = in_array($item->id, $completedMaterialIds);
 
             if ($item->type === 'link') {
                 return [
@@ -292,17 +309,16 @@ class DetailKursus extends Component
         $assignments = Assignment::where('class_id', $this->classId)
             ->where('status', 'published')
             ->get()
-            ->map(function ($assignment) use ($user) {
-                $submission = AssignmentSubmission::where('assignment_id', $assignment->id)
-                    ->where('user_id', $user->id)
-                    ->first();
+            ->map(function ($assignment) use ($user, $submissions) {
+                // Lookup in keyed collection
+                $submission = $submissions->get($assignment->id);
 
                 // Calculate days left properly (rounded, not float)
                 $deadline = \Carbon\Carbon::parse($assignment->deadline);
                 $now = now();
                 // Calculate days difference: positive = days left, negative = days overdue
                 $daysLeft = (int) floor($now->diffInDays($deadline, false));
-                
+
                 // Format deadline display
                 $deadlineDisplay = '';
                 if ($daysLeft < 0) {
@@ -387,20 +403,22 @@ class DetailKursus extends Component
 
         $title = $this->class->title;
         $sub_title = $this->class->description ?? '';
-        
+
         // Fetch student name directly from database
         $dbUser = User::find(Auth::id());
         $student_name = $dbUser && $dbUser->name ? $dbUser->name : 'Student';
 
-        return view('livewire.student.detail-kursus', [
+        /** @var \Illuminate\View\View|mixed $view */
+        $view = view('livewire.student.detail-kursus', [
             'materials' => $materials,
             'assignments' => $assignments,
             'classmates' => $classmates,
             'posts' => $posts,
-        ])->layout('mahasiswa.app', [
+        ]);
+
+        return $view->layoutData([
             'title' => $title,
             'sub_title' => $sub_title,
         ]);
     }
 }
-

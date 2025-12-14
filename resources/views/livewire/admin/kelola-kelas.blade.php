@@ -16,50 +16,61 @@
     {{-- Classes Grid --}}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         @forelse($classes as $class)
-        <div class="bg-white rounded-xl overflow-hidden shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg flex flex-col h-full">
-            <div class="h-40 bg-gray-200 relative overflow-hidden">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all group relative flex flex-col h-full">
+            {{-- Header / Cover Image --}}
+            <div class="h-32 bg-gray-200 relative overflow-hidden">
                 @if($class->cover_image)
                     <img src="{{ asset($class->cover_image) }}" alt="{{ $class->title }}" class="w-full h-full object-cover">
                 @else
-                    <div class="w-full h-full bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-4xl">
-                        <x-heroicon-s-academic-cap class="w-16 h-16 opacity-50" />
+                    <div class="w-full h-full bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white">
+                        <x-heroicon-s-academic-cap class="w-12 h-12 opacity-50" />
                     </div>
                 @endif
-                <div class="absolute top-4 right-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold text-gray-700">
+                <div class="absolute top-3 right-3 bg-white/90 backdrop-blur px-2 py-1 rounded-lg text-xs font-bold text-gray-700 shadow-sm border border-gray-100">
                     {{ $class->code }}
                 </div>
             </div>
             
-            <div class="p-6 flex-1 flex flex-col">
-                <h3 class="text-lg font-bold text-gray-900 mb-2 line-clamp-2">{{ $class->title }}</h3>
+            {{-- Body --}}
+            <div class="p-5 flex-1 flex flex-col">
+                <h3 class="text-lg font-bold text-gray-900 mb-1 line-clamp-2 leading-tight" title="{{ $class->title }}">
+                    {{ $class->title }}
+                </h3>
                 
+                {{-- Instructor Info --}}
                 <div class="flex items-center gap-2 mb-4">
-                    <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-600">
-                        {{ strtoupper(substr($class->instructor->user->name ?? '?', 0, 2)) }}
+                    <div class="w-6 h-6 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-[10px] font-bold text-gray-600 shrink-0">
+                        {{ strtoupper(substr($class->instructor->user->name ?? '?', 0, 1)) }}
                     </div>
-                    <div class="text-sm text-gray-600 truncate">
-                        {{ $class->instructor->user->name ?? 'Unknown Instructor' }}
+                    <div class="text-sm text-gray-500 truncate">
+                        {{ $class->instructor->user->name ?? 'Unknown' }}
                     </div>
                 </div>
-                
-                <div class="mt-auto pt-4 border-t border-gray-100 flex justify-between items-center">
-                    <div class="text-xs text-gray-500">
-                        {{ $class->created_at->format('d M Y') }}
+
+                {{-- Admin Stats --}}
+                <div class="grid grid-cols-2 gap-2 mb-4 text-xs text-gray-500">
+                    <div class="flex items-center gap-1.5 bg-gray-50 p-2 rounded-lg">
+                        <x-heroicon-s-users class="w-3.5 h-3.5 text-blue-500" />
+                        <span>{{ $class->students_count ?? 0 }} Siswa</span>
                     </div>
-                    
-                    <div class="flex gap-2">
-                        <a href="{{ route('admin.detail-kelas', $class->id) }}" 
-                           class="text-indigo-600 hover:text-indigo-800 font-semibold text-sm flex items-center gap-1 transition-colors">
-                            <x-heroicon-s-eye class="w-4 h-4" />
-                            Detail
-                        </a>
-                        <button wire:click="delete({{ $class->id }})" 
-                                wire:confirm="Apakah Anda yakin ingin menghapus kelas ini? Semua materi dan tugas di dalamnya akan terhapus." 
-                                class="text-red-500 hover:text-red-700 font-semibold text-sm flex items-center gap-1 transition-colors">
-                            <x-heroicon-s-trash class="w-4 h-4" />
-                            Hapus
-                        </button>
+                    <div class="flex items-center gap-1.5 bg-gray-50 p-2 rounded-lg">
+                        <x-heroicon-s-calendar class="w-3.5 h-3.5 text-orange-500" />
+                        <span>{{ $class->created_at->format('d M y') }}</span>
                     </div>
+                </div>
+
+                <div class="mt-auto pt-4 border-t border-gray-50 flex gap-2">
+                    <a href="{{ route('admin.detail-kelas', $class->id) }}" 
+                       class="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-lg text-sm font-semibold transition-colors">
+                        <x-heroicon-s-eye class="w-4 h-4" />
+                        Detail
+                    </a>
+                    <button wire:click="delete({{ $class->id }})" 
+                            wire:confirm="Apakah Anda yakin ingin menghapus kelas ini? Semua materi dan tugas di dalamnya akan terhapus." 
+                            class="flex items-center justify-center gap-1.5 px-3 py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg text-sm font-semibold transition-colors"
+                            title="Hapus Kelas">
+                        <x-heroicon-s-trash class="w-4 h-4" />
+                    </button>
                 </div>
             </div>
         </div>

@@ -22,60 +22,68 @@
     <!-- Classes Grid - Google Classroom Style -->
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         @forelse($classes as $class)
-        <div class="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow cursor-pointer group relative">
-            <!-- Large Header Banner -->
-            <div class="h-24 relative" 
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all group relative flex flex-col h-full">
+            {{-- Header / Cover Image --}}
+            <div class="h-32 relative overflow-hidden" 
                  style="background: {{ $class['coverImage'] ? 'url(' . $class['coverImage'] . ') center/cover' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }};">
-                <div class="absolute inset-0 bg-black/20"></div>
-                <!-- Delete Button -->
+                <div class="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-colors"></div>
+                
+                {{-- Delete Button (Top Right) --}}
                 <button wire:click="delete({{ $class['id'] }})" 
                         wire:confirm="Apakah Anda yakin ingin menghapus kelas ini? Tindakan ini tidak dapat dibatalkan."
-                        class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1.5 bg-red-500 hover:bg-red-600 text-white rounded shadow-lg" 
+                        class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all p-1.5 bg-white/90 text-red-600 hover:text-red-700 rounded-lg shadow-sm" 
                         title="Hapus Kelas">
                     <x-heroicon-s-trash class="w-4 h-4" />
                 </button>
             </div>
             
-            <!-- Class Info -->
-            <div class="p-4">
-                <h3 class="text-base font-medium text-gray-900 mb-1 line-clamp-2" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">{{ $class['name'] }}</h3>
-                <p class="text-sm text-gray-600 mb-2">{{ $class['code'] }}</p>
-                <p class="text-xs text-gray-500 line-clamp-2 mb-3" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">{{ Str::limit($class['desc'], 60) }}</p>
+            {{-- Body --}}
+            <div class="p-5 flex-1 flex flex-col">
+                <h3 class="text-lg font-bold text-gray-900 mb-1 line-clamp-2 leading-tight" title="{{ $class['name'] }}">
+                    {{ $class['name'] }}
+                </h3>
+                <p class="text-sm text-gray-500 mb-4">{{ $class['code'] }}</p>
                 
-                <!-- Quick Stats -->
-                <div class="flex items-center gap-3 text-xs text-gray-500 mb-3">
-                    <span>{{ $class['students'] }} siswa</span>
-                    <span>•</span>
-                    <span>{{ $class['materials'] }} materi</span>
-                </div>
-                
-                <!-- Enrollment Code (Collapsible) -->
-                @if($class['enrollment_password'])
-                <div class="mb-3 p-2 bg-gray-50 rounded text-xs">
-                    <div class="flex items-center justify-between mb-1">
-                        <span class="text-gray-600">Kode:</span>
-                            @if($class['enrollment_enabled'])
-                            <span class="px-1.5 py-0.5 bg-green-100 text-green-600 rounded text-xs">Aktif</span>
-                            @else
-                            <span class="px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">Nonaktif</span>
-                            @endif
+                {{-- Instructor Stats --}}
+                <div class="grid grid-cols-2 gap-2 mb-4 text-xs text-gray-500">
+                    <div class="flex items-center gap-1.5 bg-gray-50 p-2 rounded-lg">
+                        <x-heroicon-s-users class="w-3.5 h-3.5 text-blue-500" />
+                        <span>{{ $class['students'] }} Siswa</span>
                     </div>
-                    <code class="block px-2 py-1 bg-white border border-gray-200 rounded font-mono text-xs text-purple-600">{{ $class['enrollment_password'] }}</code>
+                    <div class="flex items-center gap-1.5 bg-gray-50 p-2 rounded-lg">
+                        <x-heroicon-s-document-text class="w-3.5 h-3.5 text-purple-500" />
+                        <span>{{ $class['materials'] }} Materi</span>
+                    </div>
+                </div>
+
+                {{-- Enrollment Code --}}
+                @if($class['enrollment_password'])
+                <div class="mb-4 p-2 bg-purple-50 rounded-lg border border-purple-100 flex justify-between items-center group/code cursor-help" title="Kode Pendaftaran">
+                    <div class="flex items-center gap-1.5">
+                        <x-heroicon-s-key class="w-3.5 h-3.5 text-purple-500" />
+                        <span class="text-xs font-semibold text-purple-700">{{ $class['enrollment_password'] }}</span>
+                    </div>
+                    @if($class['enrollment_enabled'])
+                        <div class="w-2 h-2 rounded-full bg-green-500" title="Aktif"></div>
+                    @else
+                        <div class="w-2 h-2 rounded-full bg-gray-300" title="Nonaktif"></div>
+                    @endif
                 </div>
                 @endif
                 
-                <!-- Actions -->
-                <div class="flex gap-2 pt-3 border-t border-gray-100">
+                <div class="mt-auto pt-4 border-t border-gray-50 flex gap-2">
                     <a href="{{ route('dosen.detail-kelas', $class['id']) }}" wire:navigate
-                       class="flex-1 text-center px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded text-xs font-medium">
+                       class="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-lg text-sm font-semibold transition-colors">
                         Buka
                     </a>
                     <button wire:click="edit({{ $class['id'] }})" 
-                            class="px-3 py-1.5 text-gray-600 hover:bg-gray-100 rounded text-xs" title="Edit">
+                            class="flex items-center justify-center gap-1.5 px-3 py-2 bg-gray-50 text-gray-600 hover:bg-gray-100 rounded-lg text-sm font-semibold transition-colors"
+                            title="Edit">
                         <x-heroicon-s-cog-6-tooth class="w-4 h-4" />
                     </button>
                     <button wire:click="openPasswordModal({{ $class['id'] }})" 
-                            class="px-3 py-1.5 text-gray-600 hover:bg-gray-100 rounded text-xs" title="Kode Pendaftaran">
+                            class="flex items-center justify-center gap-1.5 px-3 py-2 bg-gray-50 text-gray-600 hover:bg-gray-100 rounded-lg text-sm font-semibold transition-colors"
+                            title="Kode Pendaftaran">
                         <x-heroicon-s-key class="w-4 h-4" />
                     </button>
                 </div>
@@ -89,7 +97,7 @@
     </div>
 
     @if($showModal)
-    <div class="fixed top-0 left-0 w-full h-full bg-black/50 z-[1000] flex items-center justify-center p-4">
+    <div class="fixed top-0 left-0 w-full h-full bg-black/50 z-1000 flex items-center justify-center p-4">
         <div class="bg-white p-8 rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-semibold">{{ $editingId ? 'Edit Kelas' : 'Tambah Kelas Baru' }}</h2>
@@ -151,7 +159,7 @@
                     @error('cover_image') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                 </div>
                 @endif
-                <button type="submit" class="w-full p-3 bg-gradient-to-br from-purple-600 to-purple-800 text-white rounded-lg font-semibold">
+                <button type="submit" class="w-full p-3 bg-linear-to-br from-purple-600 to-purple-800 text-white rounded-lg font-semibold">
                     {{ $editingId ? 'Update' : 'Tambah Kelas' }}
                 </button>
             </form>
@@ -161,7 +169,7 @@
 
     <!-- Password Management Modal -->
     @if($showPasswordModal)
-    <div class="fixed top-0 left-0 w-full h-full bg-black/50 z-[1000] flex items-center justify-center p-4" wire:click="closePasswordModal">
+    <div class="fixed top-0 left-0 w-full h-full bg-black/50 z-1000 flex items-center justify-center p-4" wire:click="closePasswordModal">
         <div class="bg-white p-8 rounded-xl max-w-md w-full" wire:click.stop>
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-semibold">Kelola Kode Pendaftaran</h2>
@@ -189,7 +197,7 @@
                     <p class="text-xs text-gray-500 mt-1 ml-7">Jika dinonaktifkan, mahasiswa tidak bisa mendaftar sendiri</p>
                 </div>
                 <div class="flex gap-3">
-                    <button type="submit" class="flex-1 px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-800 text-white rounded-lg font-semibold hover:opacity-90 transition-opacity">
+                    <button type="submit" class="flex-1 px-6 py-3 bg-linear-to-r from-purple-600 to-purple-800 text-white rounded-lg font-semibold hover:opacity-90 transition-opacity">
                         Simpan
                     </button>
                     <button type="button" wire:click="closePasswordModal" class="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 transition-colors">
