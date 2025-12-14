@@ -40,7 +40,7 @@
                 <a href="/kelola-instruktur" wire:navigate
                    class="flex items-center gap-4 px-6 py-4 border-l-4 transition-all duration-300 {{ Request::is('kelola-instruktur') ? 'bg-white/15 border-white' : 'border-transparent hover:bg-white/10 hover:border-white' }}">
                     <x-heroicon-s-academic-cap class="w-6 h-6" />
-                    <span class="font-medium">Kelola Instruktur</span>
+                    <span class="font-medium">Kelola Dosen</span>
                 </a>
 
                 <a href="/kelola-kelas" wire:navigate

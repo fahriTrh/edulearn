@@ -31,11 +31,22 @@ class DashboardAdmin extends Component
 
         $total_class = ClassModel::count();
 
+        $recent_students = User::where('role', 'student')
+            ->orderBy('created_at', 'desc')
+            ->take(5)
+            ->get();
+
+        $recent_classes = ClassModel::with('instructor.user')
+            ->orderBy('created_at', 'desc')
+            ->take(5)
+            ->get();
+
         return view('livewire.admin.dashboard-admin', [
             'total_mahasiswa' => $total_mahasiswa,
             'total_instructor' => $total_instructor,
-            'total_class' => $total_class
+            'total_class' => $total_class,
+            'recent_students' => $recent_students,
+            'recent_classes' => $recent_classes,
         ]);
     }
 }
-

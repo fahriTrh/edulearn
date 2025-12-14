@@ -211,7 +211,7 @@ class KelolaInstruktur extends Component
 
     public function render()
     {
-        $this->title = 'Kelola Instruktur';
+        $this->title = 'Kelola Dosen';
         $this->admin_name = Auth::user()->name;
         $this->sub_title = 'Manajemen data instruktur';
 

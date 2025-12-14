@@ -14,7 +14,7 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div class="bg-white rounded-xl shadow-sm p-6 text-center hover:-translate-y-1 hover:shadow-md transition-all">
             <div class="text-3xl font-bold text-indigo-600 mb-2">{{ $instructors->count() }}</div>
-            <div class="text-gray-600 text-sm">Total Instruktur</div>
+            <div class="text-gray-600 text-sm">Total Dosen</div>
         </div>
         <div class="bg-white rounded-xl shadow-sm p-6 text-center hover:-translate-y-1 hover:shadow-md transition-all">
             <div class="text-3xl font-bold text-indigo-600 mb-2">{{ $instructors->where('status', 'active')->count() }}</div>
@@ -49,7 +49,7 @@
         </select>
         <button @click="showModal = true; $wire.resetForm()" class="w-full md:w-auto p-3 bg-linear-to-br from-purple-600 to-purple-800 text-white rounded-lg cursor-pointer font-semibold flex items-center justify-center gap-2 transition-all hover:-translate-y-0.5 hover:shadow-lg">
             <x-heroicon-s-plus-circle class="w-5 h-5" />
-            <span>Tambah Instruktur</span>
+            <span>Tambah Dosen</span>
         </button>
     </div>
 
@@ -110,7 +110,7 @@
             </div>
         </div>
         @empty
-        <div class="col-span-3 p-8 text-center text-gray-500">Tidak ada data instruktur</div>
+        <div class="col-span-3 p-8 text-center text-gray-500">Tidak ada data dosen</div>
         @endforelse
     </div>
     
@@ -121,7 +121,7 @@
     <div x-show="showModal" style="display: none" class="fixed top-0 left-0 w-full h-full bg-black/50 z-1000 flex items-center justify-center p-4">
         <div class="bg-white p-8 rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" @click.away="showModal = false">
             <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-semibold">{{ $editingId ? 'Edit Instruktur' : 'Tambah Instruktur Baru' }}</h2>
+                <h2 class="text-2xl font-semibold">{{ $editingId ? 'Edit Dosen' : 'Tambah Dosen Baru' }}</h2>
                 <button @click="showModal = false" class="text-gray-500 hover:text-gray-800">
                     <x-heroicon-s-x-mark class="w-6 h-6" />
                 </button>
@@ -144,7 +144,7 @@
                 </div>
                 <div class="mb-6">
                     <label class="block mb-2 font-semibold">Bio/Deskripsi</label>
-                    <textarea wire:model="description" placeholder="Pengalaman dan latar belakang instruktur..." required class="w-full p-3 border-2 border-gray-200 rounded-lg outline-none focus:border-indigo-500 min-h-[120px] resize-y"></textarea>
+                    <textarea wire:model="description" placeholder="Pengalaman dan latar belakang dosen..." required class="w-full p-3 border-2 border-gray-200 rounded-lg outline-none focus:border-indigo-500 min-h-[120px] resize-y"></textarea>
                     @error('description') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                 </div>
                 @if($editingId)
@@ -159,7 +159,7 @@
                 </div>
                 @endif
                 <button type="submit" class="w-full p-3 bg-linear-to-br from-purple-600 to-purple-800 text-white rounded-lg cursor-pointer font-semibold text-base hover:opacity-90 hover:-translate-y-0.5">
-                    {{ $editingId ? 'Update' : 'Tambah Instruktur' }}
+                    {{ $editingId ? 'Update' : 'Tambah Dosen' }}
                 </button>
             </form>
         </div>
