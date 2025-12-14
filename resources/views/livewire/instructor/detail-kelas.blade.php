@@ -74,21 +74,7 @@
         
         <!-- STREAM TAB -->
         <div x-show="activeTab === 'stream'" x-transition.opacity.duration.200ms>
-            <!-- Hero Banner -->
-            <div class="relative w-full h-48 md:h-60 rounded-xl overflow-hidden mb-6 bg-linear-to-r from-indigo-500 to-purple-600 shadow-md">
-                @if($class->cover_image)
-                    <img src="{{ asset($class->cover_image) }}" class="w-full h-full object-cover opacity-50">
-                @else
-                    <div class="absolute inset-0 bg-pattern opacity-10"></div>
-                @endif
-                <div class="absolute bottom-0 left-0 p-6 text-white text-shadow">
-                    <h1 class="text-3xl md:text-4xl font-bold mb-1">{{ $class->title }}</h1>
-                    <p class="text-lg opacity-90">{{ $class->description }}</p>
-                    <div class="mt-2 text-sm font-mono bg-black/20 inline-block px-3 py-1 rounded-md backdrop-blur-sm">
-                        Kode Pendaftaran: {{ $class->enrollment_password }}
-                    </div>
-                </div>
-            </div>
+
 
             <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
                 <!-- Sidebar (Upcoming) -->

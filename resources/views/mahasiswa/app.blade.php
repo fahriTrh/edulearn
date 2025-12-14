@@ -74,6 +74,14 @@
                         <button class="lg:hidden text-gray-600 hover:text-gray-900" id="mobile-menu-btn">
                             <x-heroicon-s-bars-3 class="w-6 h-6" />
                         </button>
+                        
+                        <!-- Page Title -->
+                        <div>
+                            <h2 class="text-xl md:text-2xl font-bold text-gray-800">{{ $title ?? 'Dashboard Mahasiswa' }}</h2>
+                            @if(isset($sub_title) && $sub_title)
+                                <p class="text-sm text-gray-600 mt-1 hidden md:block">{{ $sub_title }}</p>
+                            @endif
+                        </div>
                     </div>
             
                     <!-- User Section -->
