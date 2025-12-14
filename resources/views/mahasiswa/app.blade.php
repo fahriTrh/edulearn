@@ -35,7 +35,7 @@
                     <span class="font-medium">Dashboard</span>
                 </a>
         
-                <a href="{{ route('mahasiswa.kursus') }}" wire:navigate class="flex items-center gap-4 px-6 py-4 border-l-4 transition-all duration-300 {{ request()->routeIs('mahasiswa.kursus') ? 'bg-white/15 border-white' : 'border-transparent hover:bg-white/10 hover:border-white' }}">
+                <a href="{{ route('mahasiswa.kelas') }}" wire:navigate class="flex items-center gap-4 px-6 py-4 border-l-4 transition-all duration-300 {{ request()->routeIs('mahasiswa.kelas') ? 'bg-white/15 border-white' : 'border-transparent hover:bg-white/10 hover:border-white' }}">
                     <x-heroicon-s-academic-cap class="w-6 h-6" />
                     <span class="font-medium">Kursus Saya</span>
                 </a>

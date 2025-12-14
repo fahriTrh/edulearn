@@ -60,7 +60,7 @@
         <div class="lg:col-span-2 bg-white rounded-xl shadow-sm p-6">
             <div class="flex items-center justify-between mb-6">
                 <h2 class="text-xl font-bold text-gray-900">Kursus Sedang Berjalan</h2>
-                <a href="{{ route('mahasiswa.kursus') }}" wire:navigate class="text-indigo-600 text-sm font-semibold hover:underline">Lihat Semua →</a>
+                <a href="{{ route('mahasiswa.kelas') }}" wire:navigate class="text-indigo-600 text-sm font-semibold hover:underline">Lihat Semua →</a>
             </div>
 
             <div class="space-y-4">
@@ -85,7 +85,7 @@
                 @empty
                 <div class="text-center py-8 text-gray-500">
                     <p class="mb-2">Belum ada kursus aktif</p>
-                    <a href="{{ route('mahasiswa.kursus') }}" wire:navigate class="text-indigo-600 hover:underline">Lihat semua kursus →</a>
+                    <a href="{{ route('mahasiswa.kelas') }}" wire:navigate class="text-indigo-600 hover:underline">Lihat semua kursus →</a>
                 </div>
                 @endforelse
             </div>

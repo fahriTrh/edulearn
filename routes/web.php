@@ -22,55 +22,53 @@ Route::post('/login', [LoginController::class, 'login'])->name('login');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout')->middleware('auth');
 
 
-Route::middleware(['auth', 'admin'])->group(function () {
-    // admin
-    Route::get('/dashboard-admin', DashboardAdmin::class);
-    // kelola mahasiswa
-    Route::get('/kelola-mahasiswa', KelolaMahasiswa::class);
-    // kelola instruktur
-    Route::get('/kelola-instruktur', KelolaInstruktur::class);
-    // kelola kelas
-    // kelola kelas
-    Route::get('/kelola-kelas', \App\Livewire\Admin\KelolaKelas::class)->name('admin.kelas');
-    Route::get('/kelola-kelas/{id}', \App\Livewire\Instructor\DetailKelas::class)->name('admin.detail-kelas');
+
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    // Dashboard
+    Route::get('/dashboard', DashboardAdmin::class)->name('dashboard');
+
+    // Management
+    Route::get('/mahasiswa', KelolaMahasiswa::class)->name('mahasiswa');
+    Route::get('/instruktur', KelolaInstruktur::class)->name('instruktur');
+
+    // Classes
+    Route::get('/kelas', \App\Livewire\Admin\KelolaKelas::class)->name('kelas');
+    Route::get('/kelas/{id}', \App\Livewire\Instructor\DetailKelas::class)->name('detail-kelas');
 });
 
 
-Route::middleware(['auth', 'instructor'])->group(function () {
+Route::middleware(['auth', 'instructor'])->prefix('dosen')->name('dosen.')->group(function () {
     // Dashboard
-    Route::get('/dashboard-dosen', DashboardInstructor::class)
-        ->name('dosen.dashboard');
+    Route::get('/dashboard', DashboardInstructor::class)->name('dashboard');
 
-    // Kelas
-    Route::get('/kelas-saya', KelasSaya::class)
-        ->name('dosen.kelas');
+    // Classes
+    Route::get('/kelas', KelasSaya::class)->name('kelas');
+    Route::get('/kelas/{id}', DetailKelas::class)->name('detail-kelas');
 
-    // Detail kelas & materi
-    Route::get('/kelas-saya/detail-kelas/{id}', DetailKelas::class)
-        ->name('dosen.detail-kelas');
-
-    // Nilai (unified: Review, Daftar Nilai, Final Grade)
-    Route::get('/dosen-nilai', Nilai::class)
-        ->name('dosen.nilai');
-
-    // Kelola Jadwal
-    Route::get('/kelola-jadwal', KelolaJadwal::class)
-        ->name('dosen.jadwal');
+    // Grades & Schedule
+    Route::get('/nilai', Nilai::class)->name('nilai');
+    Route::get('/jadwal', KelolaJadwal::class)->name('jadwal');
 
     // Profile
-    Route::get('/profile', Profile::class)
-        ->name('dosen.profile');
+    Route::get('/profile', Profile::class)->name('profile');
 });
 
 
-Route::middleware(['auth', 'student'])->group(function () {
-    Route::get('/dashboard-mahasiswa', \App\Livewire\Student\DashboardMahasiswa::class)->name('mahasiswa.dashboard');
-    Route::get('/daftar-kelas', \App\Livewire\Student\DaftarKelas::class)->name('mahasiswa.daftar-kelas');
-    Route::get('/kursus', \App\Livewire\Student\KursusSaya::class)->name('mahasiswa.kursus');
-    Route::get('/kursus/detail/{id}', \App\Livewire\Student\DetailKursus::class)->name('mahasiswa.detail-kursus');
-    Route::get('/nilai', \App\Livewire\Student\NilaiMahasiswa::class)->name('mahasiswa.nilai');
+Route::middleware(['auth', 'student'])->prefix('mahasiswa')->name('mahasiswa.')->group(function () {
+    // Dashboard
+    Route::get('/dashboard', \App\Livewire\Student\DashboardMahasiswa::class)->name('dashboard');
+
+    // Classes
+    Route::get('/daftar-kelas', \App\Livewire\Student\DaftarKelas::class)->name('daftar-kelas');
+    Route::get('/kelas', \App\Livewire\Student\KursusSaya::class)->name('kelas');
+    Route::get('/kelas/{id}', \App\Livewire\Student\DetailKursus::class)->name('detail-kursus');
+
+    // Assignments & Grades
+    Route::get('/nilai', \App\Livewire\Student\NilaiMahasiswa::class)->name('nilai');
+    Route::get('/tugas', \App\Livewire\Student\TugasMahasiswa::class)->name('tugas');
+
+    // Certificates
     Route::get('/sertifikat', function () {
         return redirect()->route('mahasiswa.nilai');
-    })->name('mahasiswa.sertifikat');
-    Route::get('/tugas', \App\Livewire\Student\TugasMahasiswa::class)->name('mahasiswa.tugas');
+    })->name('sertifikat');
 });

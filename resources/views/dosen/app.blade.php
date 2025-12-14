@@ -17,7 +17,7 @@
                 <h1 class="text-3xl font-bold">EduLearn</h1>
                 <span class="inline-flex items-center gap-2 mt-2 px-3 py-1 bg-white/20 rounded-full text-xs font-semibold">
                     <x-heroicon-s-academic-cap class="w-4 h-4" />
-                    Instruktur
+                    Dosen
                 </span>
             </div>
         
