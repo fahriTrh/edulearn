@@ -15,35 +15,42 @@
 <body class="bg-gray-50 text-gray-900 antialiased">
     <div class="flex min-h-screen">
         
-        <aside class="w-64 bg-gradient-to-br from-purple-600 to-purple-800 text-white fixed h-screen overflow-y-auto transition-all duration-300 z-30 -translate-x-full lg:translate-x-0" id="sidebar">
+        <aside class="w-64 bg-linear-to-br from-purple-600 to-purple-800 text-white fixed h-screen overflow-y-auto transition-all duration-300 z-30 -translate-x-full lg:translate-x-0" id="sidebar">
             <div class="px-6 py-8 border-b border-white/20">
                 <h1 class="text-3xl font-bold">EduLearn</h1>
-                <span class="inline-block mt-2 px-3 py-1 bg-white/20 rounded-full text-xs font-semibold">
-                    🔐 Admin Panel
+                <span class="inline-flex items-center gap-2 mt-2 px-3 py-1 bg-white/20 rounded-full text-xs font-semibold">
+                    <x-heroicon-s-shield-check class="w-4 h-4" />
+                    Admin Panel
                 </span>
             </div>
         
             <nav class="py-8">
-                <a href="/dashboard-admin" 
+                <a href="/dashboard-admin" wire:navigate
                    class="flex items-center gap-4 px-6 py-4 border-l-4 transition-all duration-300 {{ Request::is('dashboard-admin') ? 'bg-white/15 border-white' : 'border-transparent hover:bg-white/10 hover:border-white' }}">
-                    <span class="text-2xl">📊</span>
+                    <x-heroicon-s-squares-2x2 class="w-6 h-6" />
                     <span class="font-medium">Dashboard</span>
                 </a>
         
-                <a href="/kelola-mahasiswa" 
+                <a href="/kelola-mahasiswa" wire:navigate
                    class="flex items-center gap-4 px-6 py-4 border-l-4 transition-all duration-300 {{ Request::is('kelola-mahasiswa') ? 'bg-white/15 border-white' : 'border-transparent hover:bg-white/10 hover:border-white' }}">
-                    <span class="text-2xl">👥</span>
+                    <x-heroicon-s-users class="w-6 h-6" />
                     <span class="font-medium">Kelola Mahasiswa</span>
                 </a>
         
-                <a href="/kelola-instruktur" 
+                <a href="/kelola-instruktur" wire:navigate
                    class="flex items-center gap-4 px-6 py-4 border-l-4 transition-all duration-300 {{ Request::is('kelola-instruktur') ? 'bg-white/15 border-white' : 'border-transparent hover:bg-white/10 hover:border-white' }}">
-                    <span class="text-2xl">👨‍🏫</span>
+                    <x-heroicon-s-academic-cap class="w-6 h-6" />
                     <span class="font-medium">Kelola Instruktur</span>
+                </a>
+
+                <a href="/kelola-kelas" wire:navigate
+                   class="flex items-center gap-4 px-6 py-4 border-l-4 transition-all duration-300 {{ Request::is('kelola-kelas') ? 'bg-white/15 border-white' : 'border-transparent hover:bg-white/10 hover:border-white' }}">
+                    <x-heroicon-s-book-open class="w-6 h-6" />
+                    <span class="font-medium">Kelola Kelas</span>
                 </a>
         
                 <button onclick="handleLogout()" class="w-full flex items-center gap-4 px-6 py-4 border-l-4 border-transparent hover:bg-white/10 hover:border-white transition-all duration-300">
-                    <span class="text-2xl">🚪</span>
+                    <x-heroicon-s-arrow-right-on-rectangle class="w-6 h-6" />
                     <span class="font-medium">Logout</span>
                 </button>
             </nav>
@@ -57,9 +64,7 @@
                 <div class="flex items-center justify-between px-4 py-4 lg:px-8 flex-wrap gap-4">
                     <div class="flex items-center gap-4 flex-1">
                         <button class="lg:hidden text-gray-600 hover:text-gray-900" id="mobile-menu-btn">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                            </svg>
+                            <x-heroicon-s-bars-3 class="w-6 h-6" />
                         </button>
 
                         <div>
@@ -71,13 +76,13 @@
                     <div class="flex items-center gap-3 lg:gap-4">
                         <div class="relative">
                             <button class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors">
-                                <span>🔔</span>
+                                <x-heroicon-s-bell class="w-5 h-5 text-gray-600" />
                             </button>
                             <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
                         </div>
             
                         <div class="flex items-center gap-3">
-                            <div id="userAvatar" class="w-10 h-10 bg-gradient-to-br from-purple-600 to-purple-800 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                            <div id="userAvatar" class="w-10 h-10 bg-linear-to-br from-purple-600 to-purple-800 rounded-full flex items-center justify-center text-white font-bold text-sm">
                                 AD
                             </div>
                             <div class="hidden md:block">

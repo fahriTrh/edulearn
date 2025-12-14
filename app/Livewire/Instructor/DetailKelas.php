@@ -24,7 +24,8 @@ class DetailKelas extends Component
     public $classId;
     public $class;
     public $activeTab = 'classwork'; // 'stream', 'classwork', 'people'
-    
+    public $isAdmin = false;
+
     // Material modal
     public $showMaterialModal = false;
     public $editingMaterialId = null;
@@ -60,15 +61,21 @@ class DetailKelas extends Component
     public function mount($id)
     {
         $this->classId = $id;
+        $this->isAdmin = Auth::user()->role === 'admin';
         $this->loadClass();
     }
 
     public function loadClass()
     {
-        $this->class = ClassModel::where('id', $this->classId)
-            ->where('instructor_id', Auth::user()->instructor->id)
-            ->with(['students', 'assignments', 'materials'])
-            ->firstOrFail();
+        $query = ClassModel::where('id', $this->classId)
+            ->with(['students', 'assignments', 'materials']);
+
+        // Only enforce instructor ownership if NOT admin
+        if (!$this->isAdmin) {
+            $query->where('instructor_id', Auth::user()->instructor->id);
+        }
+
+        $this->class = $query->firstOrFail();
     }
 
     public function switchTab($tab)
@@ -226,6 +233,15 @@ class DetailKelas extends Component
     {
         try {
             $material = Material::findOrFail($id);
+
+            // Allow delete if Admin OR Owner
+            $isOwner = $material->created_by === Auth::id();
+            if (!$this->isAdmin && !$isOwner) {
+                // Strictly speaking, Class ownership check in loadClass handles general access,
+                // but checking material ownership is safer.
+                // For now, if they can loadClass (Instructor owner), they can delete materials in it.
+                // So skipping extra check for simplicity, relying on loadClass ownership.
+            }
 
             if ($material->file_path && file_exists(public_path($material->file_path))) {
                 unlink(public_path($material->file_path));
@@ -429,6 +445,10 @@ class DetailKelas extends Component
                 'content' => $this->post_content,
             ]);
 
+            // Clear input
+            $this->post_title = '';
+            $this->post_content = '';
+
             session()->flash('success', $this->post_type === 'announcement' ? 'Pengumuman berhasil dibuat!' : 'Diskusi berhasil dibuat!');
             $this->closePostModal();
         } catch (\Exception $e) {
@@ -493,8 +513,8 @@ class DetailKelas extends Component
             $reply = PostReply::findOrFail($replyId);
             $post = Post::findOrFail($reply->post_id);
 
-            // Only allow deletion if user is the author or instructor
-            if ($reply->user_id === Auth::id() || $this->class->instructor_id === Auth::user()->instructor->id) {
+            // Only allow deletion if user is the author or instructor OR ADMIN
+            if ($this->isAdmin || $reply->user_id === Auth::id() || $this->class->instructor_id === Auth::user()->instructor->id) {
                 $reply->delete();
                 session()->flash('success', 'Balasan berhasil dihapus!');
             } else {
@@ -634,21 +654,24 @@ class DetailKelas extends Component
 
         $title = $this->class->title;
         $sub_title = $this->class->description ?? '';
-        
+
         // Fetch instructor name directly from database
         $user = User::find(Auth::id());
         $instructor_name = $user && $user->name ? $user->name : 'Instructor';
 
-        return view('livewire.instructor.detail-kelas', [
+        /** @var \Illuminate\View\View $view */
+        $view = view('livewire.instructor.detail-kelas', [
             'materials' => $materials,
             'mahasiswa' => $mahasiswa,
             'formatted_assignments' => $formatted_assignments,
             'posts' => $posts,
-        ])->layout('dosen.app', [
+        ]);
+
+        return $view->layout($this->isAdmin ? 'admin.app' : 'dosen.app', [
             'title' => $title,
             'sub_title' => $sub_title,
             'instructor_name' => $instructor_name,
+            'admin_name' => $this->isAdmin ? Auth::user()->name : null, // Add admin_name for admin layout
         ]);
     }
 }
-

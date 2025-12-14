@@ -236,9 +236,10 @@ class KelolaInstruktur extends Component
             });
         }
 
-        $instructors = $query->get();
+        $instructors = $query->paginate(10);
 
-        $instructorsJs = $instructors->map(function ($instr) {
+        // Transform collection within the paginator
+        $instructors->getCollection()->transform(function ($instr) {
             return [
                 'id' => $instr->id,
                 'name' => $instr->user->name,
@@ -253,7 +254,7 @@ class KelolaInstruktur extends Component
         });
 
         return view('livewire.admin.kelola-instruktur', [
-            'instructors' => $instructorsJs,
+            'instructors' => $instructors,
         ]);
     }
 }

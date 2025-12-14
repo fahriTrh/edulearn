@@ -19,13 +19,13 @@ class KelolaMahasiswa extends Component
     public $statusFilter = 'all';
     public $showModal = false;
     public $editingId = null;
-    
+
     // Form fields
     public $name = '';
     public $email = '';
     public $nim = '';
     public $status = 'active';
-    
+
     // Layout data
     public $title = '';
     public $admin_name = '';
@@ -151,30 +151,33 @@ class KelolaMahasiswa extends Component
         // Base query for filtering
         $baseQuery = User::where('role', 'student');
 
-        // Calculate stats from full query (before pagination)
+        // Optimize counters using single aggregation query
+        $stats = User::where('role', 'student')
+            ->selectRaw('count(*) as total')
+            ->selectRaw("count(case when status = 'active' then 1 end) as active")
+            ->selectRaw("count(case when status = 'inactive' then 1 end) as inactive")
+            ->selectRaw("count(case when status = 'suspended' then 1 end) as suspended")
+            ->selectRaw("count(case when created_at >= ? then 1 end) as new_this_month", [now()->startOfMonth()])
+            ->first();
+
+        // Apply filters to table query only
         $statsQuery = clone $baseQuery;
         if ($this->statusFilter !== 'all') {
             $statsQuery->where('status', $this->statusFilter);
         }
         if ($this->search) {
-            $statsQuery->where(function($q) {
+            $statsQuery->where(function ($q) {
                 $q->where('name', 'like', '%' . $this->search . '%')
-                  ->orWhere('email', 'like', '%' . $this->search . '%')
-                  ->orWhere('nim', 'like', '%' . $this->search . '%');
+                    ->orWhere('email', 'like', '%' . $this->search . '%')
+                    ->orWhere('nim', 'like', '%' . $this->search . '%');
             });
         }
-        
-        // Get stats from filtered query
-        $totalUsers = $statsQuery->count();
-        $activeUsers = (clone $statsQuery)->where('status', 'active')->count();
-        $inactiveUsers = (clone $statsQuery)->where('status', 'inactive')->count();
-        $suspendedUsers = (clone $statsQuery)->where('status', 'suspended')->count();
-        
-        // Calculate new students this month
-        $newThisMonth = (clone $baseQuery)
-            ->whereMonth('created_at', now()->month)
-            ->whereYear('created_at', now()->year)
-            ->count();
+
+        $totalUsers = $stats->total;
+        $activeUsers = $stats->active;
+        $inactiveUsers = $stats->inactive;
+        $suspendedUsers = $stats->suspended; // Renamed variable to avoid conflict if any
+        $newThisMonth = $stats->new_this_month;
 
         // Paginated query for table
         $query = $baseQuery->orderBy('created_at', 'desc');
@@ -184,10 +187,10 @@ class KelolaMahasiswa extends Component
         }
 
         if ($this->search) {
-            $query->where(function($q) {
+            $query->where(function ($q) {
                 $q->where('name', 'like', '%' . $this->search . '%')
-                  ->orWhere('email', 'like', '%' . $this->search . '%')
-                  ->orWhere('nim', 'like', '%' . $this->search . '%');
+                    ->orWhere('email', 'like', '%' . $this->search . '%')
+                    ->orWhere('nim', 'like', '%' . $this->search . '%');
             });
         }
 
@@ -213,4 +216,3 @@ class KelolaMahasiswa extends Component
         ]);
     }
 }
-

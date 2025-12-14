@@ -47,11 +47,11 @@
             <h2 class="text-xl font-bold text-gray-900">Quick Actions</h2>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <a href="/kelola-mahasiswa" class="p-4 bg-gradient-to-br from-purple-600 to-purple-800 text-white rounded-xl font-semibold flex flex-col items-center gap-2 transition-all hover:-translate-y-1 hover:shadow-lg no-underline">
+            <a href="/kelola-mahasiswa" wire:navigate class="p-4 bg-linear-to-br from-purple-600 to-purple-800 text-white rounded-xl font-semibold flex flex-col items-center gap-2 transition-all hover:-translate-y-1 hover:shadow-lg no-underline">
                 <x-heroicon-s-user-plus class="w-8 h-8" />
                 <div>Tambah Mahasiswa</div>
             </a>
-            <a href="/kelola-instruktur" class="p-4 bg-gradient-to-br from-purple-600 to-purple-800 text-white rounded-xl font-semibold flex flex-col items-center gap-2 transition-all hover:-translate-y-1 hover:shadow-lg no-underline">
+            <a href="/kelola-instruktur" wire:navigate class="p-4 bg-linear-to-br from-purple-600 to-purple-800 text-white rounded-xl font-semibold flex flex-col items-center gap-2 transition-all hover:-translate-y-1 hover:shadow-lg no-underline">
                 <x-heroicon-s-academic-cap class="w-8 h-8" />
                 <div>Tambah Instruktur</div>
             </a>

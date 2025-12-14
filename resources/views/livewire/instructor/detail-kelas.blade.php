@@ -52,6 +52,7 @@
                            readonly>
                 </div>
             </div>
+            @if(!$this->isAdmin)
             <div class="flex gap-2">
                 <button wire:click="openPostModal('announcement')" 
                         class="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium">
@@ -64,6 +65,7 @@
                     Discussion
                 </button>
             </div>
+            @endif
         </div>
 
         <!-- Posts List -->
@@ -136,7 +138,8 @@
                         </div>
                         <button wire:click="deleteReply({{ $reply['id'] }})" 
                                 wire:confirm="Hapus balasan ini?"
-                                class="p-1 text-red-600 hover:bg-red-50 rounded text-xs">
+                                class="p-1 text-red-600 hover:bg-red-50 rounded text-xs"
+                                @if(!$this->isAdmin && $reply['user']['id'] !== auth()->id() && $class->instructor_id !== auth()->user()->instructor->id) style="display:none" @endif>
                             <x-heroicon-s-trash class="w-4 h-4" />
                         </button>
                     </div>
@@ -145,6 +148,7 @@
                 @endif
 
                 <!-- Reply Input -->
+                @if(!$this->isAdmin)
                 <div class="mt-3 ml-12 flex gap-2">
                     <input type="text" 
                            wire:model="reply_content.{{ $post['id'] }}"
@@ -156,6 +160,7 @@
                         Reply
                     </button>
                 </div>
+                @endif
             </div>
             @empty
             <div class="bg-white rounded-lg border border-gray-200 p-6 text-center text-gray-500">
@@ -170,6 +175,7 @@
     @if($activeTab === 'classwork')
     <div class="space-y-4">
         <!-- Action Buttons -->
+        @if(!$this->isAdmin)
         <div class="flex gap-4 mb-4">
             <button wire:click="openMaterialModal" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium">
                 + Create Material
@@ -178,6 +184,7 @@
                 + Create Assignment
             </button>
         </div>
+        @endif
 
         <!-- Materials Section -->
         <div class="bg-white rounded-lg border border-gray-200 p-6">
@@ -185,7 +192,7 @@
             <div class="space-y-2">
                 @forelse($materials as $material)
                 <div class="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg group">
-                    <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center shrink-0">
                         <x-heroicon-s-document class="w-5 h-5 text-blue-600" />
                     </div>
                     <div class="flex-1 min-w-0">
@@ -194,7 +201,8 @@
                     </div>
                     <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button wire:click="editMaterial({{ $material['id'] }})" 
-                                class="p-1.5 text-gray-600 hover:bg-gray-200 rounded" title="Edit">
+                                class="p-1.5 text-gray-600 hover:bg-gray-200 rounded" title="Edit"
+                                @if($this->isAdmin) style="display:none" @endif>
                             <x-heroicon-s-pencil class="w-5 h-5" />
                         </button>
                         <button wire:click="deleteMaterial({{ $material['id'] }})" 
@@ -216,7 +224,7 @@
             <div class="space-y-2">
                 @forelse($formatted_assignments as $assignment)
                 <div class="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg group">
-                    <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center shrink-0">
                         <x-heroicon-s-document-text class="w-5 h-5 text-green-600" />
                     </div>
                     <div class="flex-1 min-w-0">
@@ -239,11 +247,13 @@
     @if($activeTab === 'people')
     <div class="space-y-4">
         <!-- Add Student Button -->
+        @if(!$this->isAdmin)
         <div class="flex justify-end mb-4">
             <button wire:click="openStudentModal" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium">
                 + Add Student
             </button>
         </div>
+        @endif
 
         <!-- Students List -->
         <div class="bg-white rounded-lg border border-gray-200 p-6">
@@ -251,7 +261,7 @@
             <div class="space-y-2">
                 @forelse($mahasiswa as $student)
                 <div class="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg">
-                    <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center text-xs font-medium flex-shrink-0">
+                    <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center text-xs font-medium shrink-0">
                         {{ substr($student->name, 0, 1) }}
                     </div>
                     <div class="flex-1 min-w-0">
@@ -274,7 +284,7 @@
 
     {{-- Material Modal --}}
     @if($showMaterialModal)
-    <div class="fixed top-0 left-0 w-full h-full bg-black/50 z-[1000] flex items-center justify-center p-4">
+    <div class="fixed top-0 left-0 w-full h-full bg-black/50 z-1000 flex items-center justify-center p-4">
         <div class="bg-white p-8 rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <h2 class="text-2xl font-semibold mb-6">{{ $editingMaterialId ? 'Edit Materi' : 'Tambah Materi' }}</h2>
             <form wire:submit="saveMaterial">
@@ -321,7 +331,7 @@
 
     {{-- Assignment Modal --}}
     @if($showAssignmentModal)
-    <div class="fixed top-0 left-0 w-full h-full bg-black/50 z-[1000] flex items-center justify-center p-4">
+    <div class="fixed top-0 left-0 w-full h-full bg-black/50 z-1000 flex items-center justify-center p-4">
         <div class="bg-white p-8 rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <h2 class="text-2xl font-semibold mb-6">Tambah Tugas</h2>
             <form wire:submit="saveAssignment">
@@ -352,7 +362,7 @@
 
     {{-- Student Modal --}}
     @if($showStudentModal)
-    <div class="fixed top-0 left-0 w-full h-full bg-black/50 z-[1000] flex items-center justify-center p-4">
+    <div class="fixed top-0 left-0 w-full h-full bg-black/50 z-1000 flex items-center justify-center p-4">
         <div class="bg-white p-8 rounded-xl max-w-md w-full">
             <h2 class="text-2xl font-semibold mb-6">Tambah Mahasiswa</h2>
             <form wire:submit="tambahMahasiswaKelas">
@@ -371,7 +381,7 @@
 
     {{-- Post Modal --}}
     @if($showPostModal)
-    <div class="fixed top-0 left-0 w-full h-full bg-black/50 z-[1000] flex items-center justify-center p-4" wire:click="closePostModal">
+    <div class="fixed top-0 left-0 w-full h-full bg-black/50 z-1000 flex items-center justify-center p-4" wire:click="closePostModal">
         <div class="bg-white p-8 rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" wire:click.stop>
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-semibold">{{ $post_type === 'announcement' ? 'Create Announcement' : 'Create Discussion' }}</h2>
@@ -396,7 +406,7 @@
                     <button type="button" wire:click="closePostModal" class="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200">
                         Cancel
                     </button>
-                    <button type="submit" class="flex-1 px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-800 text-white rounded-lg font-semibold">
+                    <button type="submit" class="flex-1 px-6 py-3 bg-linear-to-r from-purple-600 to-purple-800 text-white rounded-lg font-semibold">
                         Post
                     </button>
                 </div>

@@ -29,6 +29,10 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/kelola-mahasiswa', KelolaMahasiswa::class);
     // kelola instruktur
     Route::get('/kelola-instruktur', KelolaInstruktur::class);
+    // kelola kelas
+    // kelola kelas
+    Route::get('/kelola-kelas', \App\Livewire\Admin\KelolaKelas::class)->name('admin.kelas');
+    Route::get('/kelola-kelas/{id}', \App\Livewire\Instructor\DetailKelas::class)->name('admin.detail-kelas');
 });
 
 

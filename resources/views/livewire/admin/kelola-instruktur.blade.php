@@ -47,7 +47,7 @@
             <option value="Data Science">Data Science</option>
             <option value="Mobile">Mobile</option>
         </select>
-        <button wire:click="openModal" class="w-full md:w-auto p-3 bg-gradient-to-br from-purple-600 to-purple-800 text-white rounded-lg cursor-pointer font-semibold flex items-center justify-center gap-2 transition-all hover:-translate-y-0.5 hover:shadow-lg">
+        <button wire:click="openModal" class="w-full md:w-auto p-3 bg-linear-to-br from-purple-600 to-purple-800 text-white rounded-lg cursor-pointer font-semibold flex items-center justify-center gap-2 transition-all hover:-translate-y-0.5 hover:shadow-lg">
             <x-heroicon-s-plus-circle class="w-5 h-5" />
             <span>Tambah Instruktur</span>
         </button>
@@ -56,7 +56,7 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         @forelse($instructors as $instructor)
         <div class="bg-white rounded-xl overflow-hidden shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg">
-            <div class="bg-gradient-to-br from-purple-600 to-purple-800 p-6 text-center relative">
+            <div class="bg-linear-to-br from-purple-600 to-purple-800 p-6 text-center relative">
                 <div class="absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-semibold bg-white/90 {{ $instructor['status'] === 'active' ? 'text-green-600' : 'text-red-600' }}">
                     ● {{ $instructor['status'] === 'active' ? 'Aktif' : 'Tidak Aktif' }}
                 </div>
@@ -113,9 +113,13 @@
         <div class="col-span-3 p-8 text-center text-gray-500">Tidak ada data instruktur</div>
         @endforelse
     </div>
+    
+    <div class="mt-8">
+        {{ $instructors->links() }}
+    </div>
 
     @if($showModal)
-    <div class="fixed top-0 left-0 w-full h-full bg-black/50 z-[1000] flex items-center justify-center p-4">
+    <div class="fixed top-0 left-0 w-full h-full bg-black/50 z-1000 flex items-center justify-center p-4">
         <div class="bg-white p-8 rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-semibold">{{ $editingId ? 'Edit Instruktur' : 'Tambah Instruktur Baru' }}</h2>
@@ -155,7 +159,7 @@
                     @error('status') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                 </div>
                 @endif
-                <button type="submit" class="w-full p-3 bg-gradient-to-br from-purple-600 to-purple-800 text-white rounded-lg cursor-pointer font-semibold text-base hover:opacity-90 hover:-translate-y-0.5">
+                <button type="submit" class="w-full p-3 bg-linear-to-br from-purple-600 to-purple-800 text-white rounded-lg cursor-pointer font-semibold text-base hover:opacity-90 hover:-translate-y-0.5">
                     {{ $editingId ? 'Update' : 'Tambah Instruktur' }}
                 </button>
             </form>
