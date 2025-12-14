@@ -470,9 +470,15 @@ class DetailKursus extends Component
 
         // 5. Get Classmates (People)
         $classmates = $this->class->students()
-            ->where('users.id', '!=', $user->id)
             ->select('users.id', 'users.name', 'users.nim', 'users.email')
-            ->get();
+            ->orderBy('users.name', 'asc') // Good practice to order by name
+            ->get()
+            ->map(function ($student) use ($user) {
+                if ($student->id === $user->id) {
+                    $student->name = $student->name . ' (Anda)';
+                }
+                return $student;
+            });
 
         // 6. Get Posts (Stream)
         $posts = Post::where('class_id', $this->classId)

@@ -141,27 +141,33 @@
                     <!-- Posts List -->
                     @forelse($posts as $post)
                         <div class="bg-white border border-gray-200 rounded-lg p-6 shadow-sm group hover:border-indigo-300 transition-colors">
-                            <div class="flex items-start gap-4 mb-4">
-                                <div class="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold shrink-0">
-                                    {{ $post['user']['initial'] }}
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    <div class="flex items-center justify-between">
-                                        <h3 class="font-semibold text-gray-900 truncate">{{ $post['user']['name'] }}</h3>
-                                        <div class="flex items-center text-xs text-gray-500 gap-2">
+                            <!-- Header -->
+                            <div class="flex items-start justify-between mb-2">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 {{ $post['type'] === 'announcement' ? 'bg-indigo-600' : 'bg-emerald-600' }} rounded-full flex items-center justify-center text-white font-bold shrink-0">
+                                        {{ $post['user']['initial'] }}
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <h3 class="font-semibold text-gray-900 truncate">{{ $post['user']['name'] }}</h3>
+                                            <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full {{ $post['type'] === 'announcement' ? 'bg-indigo-100 text-indigo-700' : 'bg-emerald-100 text-emerald-700' }}">
+                                                {{ $post['type'] === 'announcement' ? 'Pengumuman' : 'Diskusi' }}
+                                            </span>
+                                            @if($post['is_pinned'])
+                                                <x-heroicon-s-map-pin class="w-3 h-3 text-gray-400" />
+                                            @endif
+                                        </div>
+                                        <div class="flex items-center text-xs text-gray-500 gap-2 mt-0.5">
                                             <span>{{ $post['created_at_human'] }}</span>
                                             @if(isset($post['is_edited']) && $post['is_edited'])
                                                 <span class="text-gray-400 italic">(diedit)</span>
-                                            @endif
-                                            @if($post['is_pinned'])
-                                                <x-heroicon-s-map-pin class="w-3 h-3 text-gray-400" />
                                             @endif
                                             
                                             <!-- Post Actions Dropdown -->
                                             @if($post['user']['id'] === Auth::id())
                                                 <div x-data="{ open: false }" class="relative ml-2">
                                                     <button @click="open = !open" @click.away="open = false" class="p-1 hover:bg-gray-100 rounded-full transition-colors text-gray-400 hover:text-gray-600">
-                                                        <x-heroicon-m-ellipsis-vertical class="w-5 h-5" />
+                                                        <x-heroicon-m-ellipsis-vertical class="w-4 h-4" />
                                                     </button>
                                                     <div x-show="open" x-cloak class="absolute right-0 mt-1 w-32 bg-white rounded-md shadow-lg py-1 border border-gray-100 z-10" role="menu">
                                                         <button 
@@ -182,7 +188,6 @@
                                             @endif
                                         </div>
                                     </div>
-                                    <p class="text-xs text-gray-500">{{ $post['type'] === 'announcement' ? 'Pengumuman' : 'Diskusi' }}</p>
                                 </div>
                             </div>
                             
@@ -393,7 +398,10 @@
                     </div>
                     <div>
                         <div class="font-medium text-gray-800">{{ $class->instructor->user->name ?? 'N/A' }}</div>
-                         <div class="text-sm text-gray-500">{{ $class->instructor->user->email ?? '' }}</div>
+                        <div class="text-sm text-gray-500 flex items-center gap-1">
+                            <x-heroicon-s-envelope class="w-4 h-4" />
+                            {{ $class->instructor->user->email ?? '' }}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -401,7 +409,7 @@
             <!-- Classmates -->
              <div>
                 <div class="flex items-center justify-between border-b border-indigo-200 pb-3 mb-4">
-                     <h2 class="text-2xl font-semibold text-indigo-600">Teman Sekelas</h2>
+                     <h2 class="text-2xl font-semibold text-indigo-600">Peserta</h2>
                      <span class="text-sm text-gray-500">{{ $classmates->count() }} siswa</span>
                 </div>
                 
