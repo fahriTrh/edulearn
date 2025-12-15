@@ -1,32 +1,40 @@
-<div class="min-h-screen bg-white -mx-4 lg:-mx-8 -mt-4 lg:-mt-8" x-data='{ 
-    activeTab: "stream", 
-    postModal: false, 
-    materialModal: false,
-    assignmentModal: false,
-    studentModal: false,
-    replyModal: false,
-    materialDetailModal: false,
-    assignmentDetailModal: false,
-    assignments: @json($assignmentsData),
-    selectedAssignment: null,
-    
-    init() {
-        Livewire.on("close-post-modal", () => { this.postModal = false });
-        Livewire.on("close-material-modal", () => { this.materialModal = false });
-        Livewire.on("close-assignment-modal", () => { this.assignmentModal = false });
-        Livewire.on("close-student-modal", () => { this.studentModal = false });
-        Livewire.on("close-reply-modal", () => { this.replyModal = false });
-        // Detail modals
-        Livewire.on("open-material-detail", () => { this.materialDetailModal = true });
-        Livewire.on("open-assignment-detail", () => { this.assignmentDetailModal = true });
-
-        Livewire.on("open-post-modal", () => { this.postModal = true });
+<div class="min-h-screen bg-white -mx-4 lg:-mx-8 -mt-4 lg:-mt-8" 
+    x-data='{ 
+        activeTab: "stream", 
+        postModal: false, 
+        materialModal: false,
+        assignmentModal: false,
+        studentModal: false,
+        replyModal: false,
+        materialDetailModal: false,
+        assignmentDetailModal: false,
+        gradingModal: false,
+        gradingSubmissionId: null,
+        gradeInput: "",
+        assignments: @json($assignmentsData),
+        selectedAssignment: null,
         
-        // Listen for open events if triggered from backend, though mostly client-side now
-        Livewire.on("open-material-modal", () => { this.materialModal = true });
-        Livewire.on("open-assignment-modal", () => { this.assignmentModal = true });
-    }
-}'>
+        updateAssignments(data) {
+            this.assignments = data;
+            if (this.selectedAssignment) {
+                // Refresh currently selected assignment if open
+                const fresh = this.assignments.find(a => a.id === this.selectedAssignment.id);
+                if (fresh) this.selectedAssignment = fresh;
+            }
+            this.gradingModal = false;
+        }
+    }'
+    @close-post-modal.window="postModal = false"
+    @close-material-modal.window="materialModal = false"
+    @close-assignment-modal.window="assignmentModal = false"
+    @close-student-modal.window="studentModal = false"
+    @close-reply-modal.window="replyModal = false"
+    @open-material-detail.window="materialDetailModal = true"
+    @open-assignment-detail.window="assignmentDetailModal = true"
+    @open-post-modal.window="postModal = true"
+    @open-assignment-modal.window="assignmentModal = true"
+    @assignments-updated.window="updateAssignments($event.detail[0])"
+>
     <!-- Global Notifications -->
     @if (session()->has('success'))
         <div class="fixed top-4 right-4 z-50 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg shadow-lg" x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)">
@@ -697,7 +705,10 @@
                                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                                 <template x-if="submission.status !== 'missing'">
                                                     <div>
-                                                        <button class="text-indigo-600 hover:text-indigo-900 p-2 hover:bg-indigo-50 rounded-lg transition-colors" title="Beri Nilai">
+                                                        <button 
+                                                            @click="gradingSubmissionId = submission.submission_id; gradeInput = submission.grade || ''; gradingModal = true"
+                                                            class="text-indigo-600 hover:text-indigo-900 p-2 hover:bg-indigo-50 rounded-lg transition-colors" 
+                                                            title="Beri Nilai">
                                                             <x-heroicon-s-pencil class="w-4 h-4" />
                                                         </button>
                                                         <template x-if="submission.file_path">
@@ -910,4 +921,37 @@
                 </div>
             </div>
         </div>
+    </div>
+    
+    <!-- Grading Modal -->
+    <div 
+        x-show="gradingModal" 
+        x-cloak
+        class="fixed inset-0 z-50 overflow-y-auto" 
+        aria-labelledby="modal-title" 
+        role="dialog" 
+        aria-modal="true"
+    >
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div x-show="gradingModal" x-transition.opacity class="fixed inset-0 bg-black/35 transition-opacity" @click="gradingModal = false"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div 
+                x-show="gradingModal" 
+                x-transition.scale 
+                class="relative z-50 inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-sm w-full"
+            >
+                <div class="bg-white p-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Input Nilai</h3>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Nilai (0-100)</label>
+                        <input type="number" x-model="gradeInput" min="0" max="100" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div class="flex justify-end gap-3">
+                        <button @click="gradingModal = false" class="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md">Batal</button>
+                        <button @click="$wire.updateNilaiTugas(gradingSubmissionId, gradeInput)" class="px-4 py-2 text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700">Simpan</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

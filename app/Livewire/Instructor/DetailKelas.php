@@ -450,7 +450,8 @@ class DetailKelas extends Component
             $submission->save();
 
             $this->loadClass();
-            session()->flash('success', 'Grade saved!');
+            $this->dispatch('assignments-updated', $this->getAssignmentsDataProperty());
+            session()->flash('success', 'Nilai berhasil disimpan!');
         } catch (\Exception $e) {
             session()->flash('error', 'Gagal menyimpan nilai.');
         }

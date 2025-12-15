@@ -26,12 +26,6 @@
                     <p class="text-sm text-gray-600 font-medium">Platform E-Learning Modern</p>
                 </div>
         
-                <!-- Header -->
-                <div class="text-center mb-8">
-                    <h2 class="text-2xl font-bold text-gray-800 mb-2">Selamat Datang! 👋</h2>
-                    <p class="text-sm text-gray-600">Silakan login untuk melanjutkan</p>
-                </div>
-        
                 <!-- Error Messages -->
                 @if ($errors->any())
                     <div class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-lg">
