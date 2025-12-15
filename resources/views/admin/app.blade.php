@@ -48,6 +48,12 @@
                     <x-heroicon-s-book-open class="w-6 h-6" />
                     <span class="font-medium">Kelola Kelas</span>
                 </a>
+
+                <a href="{{ route('admin.laporan') }}" wire:navigate 
+                   class="flex items-center gap-4 px-6 py-4 border-l-4 transition-all duration-300 {{ Request::routeIs('admin.laporan') ? 'bg-white/15 border-white' : 'border-transparent hover:bg-white/10 hover:border-white' }}">
+                    <x-heroicon-s-document-chart-bar class="w-6 h-6" />
+                    <span class="font-medium">Laporan</span>
+                </a>
         
                 <button onclick="handleLogout()" class="w-full flex items-center gap-4 px-6 py-4 border-l-4 border-transparent hover:bg-white/10 hover:border-white transition-all duration-300">
                     <x-heroicon-s-arrow-right-on-rectangle class="w-6 h-6" />

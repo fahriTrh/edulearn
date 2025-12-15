@@ -34,6 +34,21 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Classes
     Route::get('/kelas', \App\Livewire\Admin\KelolaKelas::class)->name('kelas');
     Route::get('/kelas/{id}', \App\Livewire\Instructor\DetailKelas::class)->name('detail-kelas');
+
+    // Reports
+    Route::get('/laporan', \App\Livewire\Admin\KelolaLaporan::class)->name('laporan');
+
+    Route::controller(\App\Http\Controllers\ReportController::class)->prefix('laporan')->name('laporan.')->group(function () {
+        // Export CSV
+        Route::get('/mahasiswa', 'exportMahasiswa')->name('mahasiswa');
+        Route::get('/instruktur', 'exportInstruktur')->name('instruktur');
+        Route::get('/kelas', 'exportKelas')->name('kelas');
+
+        // Print PDF
+        Route::get('/mahasiswa/print', 'printMahasiswa')->name('mahasiswa.print');
+        Route::get('/instruktur/print', 'printInstruktur')->name('instruktur.print');
+        Route::get('/kelas/print', 'printKelas')->name('kelas.print');
+    });
 });
 
 
