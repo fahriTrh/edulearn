@@ -12,6 +12,7 @@ use App\Models\PostReply;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Livewire\WithFileUploads;
@@ -118,9 +119,16 @@ class DetailKursus extends Component
             ->first();
 
         if ($submission) {
-            // Optional: Delete file if exists on disk
-            if ($submission->file_path && file_exists(public_path($submission->file_path))) {
-                @unlink(public_path($submission->file_path));
+            // Optional: Delete file if exists on disk (handles both public/ and storage/app/public/)
+            if ($submission->file_path) {
+                $publicPath = public_path($submission->file_path);
+                $storagePath = storage_path('app/public/' . ltrim(str_replace('storage/', '', $submission->file_path), '/'));
+
+                if (file_exists($publicPath)) {
+                    @unlink($publicPath);
+                } elseif (file_exists($storagePath)) {
+                    @unlink($storagePath);
+                }
             }
 
             $submission->delete();
@@ -150,7 +158,7 @@ class DetailKursus extends Component
 
         // Validate submission type
         if ($assignment->submission_type === 'file' && !$this->submission_file && !$this->submission_link) {
-            $this->addError('submission_file', 'File atau link wajib diisi untuk tipe submission file.');
+            $this->addError('submission_file', 'File atau link wajib diisi untuk tipe submission file. Jika baru memilih file, tunggu hingga selesai diunggah lalu coba kirim lagi.');
             return;
         }
 
@@ -171,17 +179,37 @@ class DetailKursus extends Component
 
             // Handle file upload
             if ($this->submission_file) {
-                $filename = time() . '_' . uniqid() . '.' . $this->submission_file->getClientOriginalExtension();
-                $destinationPath = public_path('submissions');
-
-                if (!file_exists($destinationPath)) {
-                    mkdir($destinationPath, 0777, true);
+                // Check if valid file object
+                if (!$this->submission_file->isValid()) {
+                    throw new \Exception('File upload gagal atau korup.');
                 }
 
-                $this->submission_file->move($destinationPath, $filename);
-                $filePath = 'submissions/' . $filename;
-                $fileName = $this->submission_file->getClientOriginalName();
+                $originalName = $this->submission_file->getClientOriginalName();
+                $filename = time() . '_' . Str::slug(pathinfo($originalName, PATHINFO_FILENAME)) . '.' . $this->submission_file->getClientOriginalExtension();
+
+                // Store to the 'public' disk under 'submissions'
+                $path = $this->submission_file->storeAs('submissions', $filename, 'public');
+
+                // Set public-accessible path (uses the storage symlink: public/storage/...)
+                $filePath = 'storage/submissions/' . $filename;
+                $fileName = $originalName;
                 $fileSize = round($this->submission_file->getSize() / 1024); // KB
+
+                // If an existing submission had a file, delete it to avoid orphaned files
+                $existingSubmission = AssignmentSubmission::where('assignment_id', $assignment->id)
+                    ->where('user_id', $user->id)
+                    ->first();
+
+                if ($existingSubmission && $existingSubmission->file_path) {
+                    $publicExisting = public_path($existingSubmission->file_path);
+                    $storageExisting = storage_path('app/public/' . ltrim(str_replace('storage/', '', $existingSubmission->file_path), '/'));
+
+                    if (file_exists($publicExisting)) {
+                        @unlink($publicExisting);
+                    } elseif (file_exists($storageExisting)) {
+                        @unlink($storageExisting);
+                    }
+                }
             }
 
             // Check if late

@@ -1,12 +1,12 @@
 <div>
     <!-- Page Header -->
     <div class="mb-8">
-        <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-2">Nilai & Sertifikat</h1>
+        <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-2">Nilai</h1>
         <p class="text-gray-600 text-lg">Pantau pencapaian dan progres belajar Anda di setiap kursus</p>
     </div>
 
     <!-- Summary Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         <div class="bg-white p-6 md:p-8 rounded-xl shadow-sm border-l-4 border-purple-600">
             <div class="text-gray-600 text-sm mb-2">Rata-rata Nilai</div>
             <div class="text-4xl md:text-5xl font-bold bg-linear-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent mb-2">
@@ -18,16 +18,7 @@
             </div>
         </div>
 
-        <div class="bg-white p-6 md:p-8 rounded-xl shadow-sm border-l-4 border-purple-600">
-            <div class="text-gray-600 text-sm mb-2">Sertifikat</div>
-            <div class="text-4xl md:text-5xl font-bold bg-linear-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent mb-2">
-                {{ $totalCertificates }}
-            </div>
-            <div class="flex items-center gap-1 text-green-500 text-sm">
-                <x-heroicon-s-trophy class="w-4 h-4" />
-                Total sertifikat
-            </div>
-        </div>
+
 
         <div class="bg-white p-6 md:p-8 rounded-xl shadow-sm border-l-4 border-purple-600">
             <div class="text-gray-600 text-sm mb-2">Kursus Aktif</div>
@@ -84,12 +75,6 @@
                             <td class="px-4 py-4 border-b border-gray-200">
                                 @if($course['status'] === 'completed')
                                     <span class="inline-block px-4 py-2 rounded-full text-sm font-semibold bg-green-100 text-green-600">Lulus</span>
-                                    @if($course['has_certificate'])
-                                        <span class="inline-flex items-center gap-1 px-2 py-1 bg-yellow-400 rounded-lg text-xs font-semibold ml-2">
-                                            <x-heroicon-s-trophy class="w-3 h-3" />
-                                            Sertifikat
-                                        </span>
-                                    @endif
                                 @else
                                     <span class="inline-block px-4 py-2 rounded-full text-sm font-semibold bg-orange-100 text-orange-600">Berlangsung</span>
                                 @endif
@@ -101,12 +86,6 @@
                                         <button class="px-4 py-2 border-2 border-purple-600 text-purple-600 rounded-lg font-semibold hover:bg-purple-600 hover:text-white transition-colors">
                                             Detail
                                         </button>
-                                        @if($course['has_certificate'])
-                                            <button class="flex items-center gap-2 px-4 py-2 bg-linear-to-r from-purple-600 to-purple-800 text-white rounded-lg font-semibold hover:opacity-90 transition-opacity">
-                                                <x-heroicon-s-trophy class="w-5 h-5" />
-                                                Sertifikat
-                                            </button>
-                                        @endif
                                     </div>
                                 @else
                                     <span class="text-gray-400 text-sm">Belum ada nilai</span>
@@ -145,12 +124,6 @@
                     <div class="mb-3">
                         @if($course['status'] === 'completed')
                             <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-600">Lulus</span>
-                            @if($course['has_certificate'])
-                                <span class="inline-flex items-center gap-1 px-2 py-1 bg-yellow-400 rounded-lg text-xs font-semibold ml-2">
-                                    <x-heroicon-s-trophy class="w-3 h-3" />
-                                    Sertifikat
-                                </span>
-                            @endif
                         @else
                             <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-orange-100 text-orange-600">Berlangsung</span>
                         @endif
@@ -169,12 +142,6 @@
                             <button class="flex-1 px-4 py-2 border-2 border-purple-600 text-purple-600 rounded-lg font-semibold hover:bg-purple-600 hover:text-white transition-colors">
                                 Detail
                             </button>
-                            @if($course['has_certificate'])
-                                <button class="flex items-center justify-center gap-2 flex-1 px-4 py-2 bg-linear-to-r from-purple-600 to-purple-800 text-white rounded-lg font-semibold hover:opacity-90 transition-opacity">
-                                    <x-heroicon-s-trophy class="w-5 h-5" />
-                                    Sertifikat
-                                </button>
-                            @endif
                         </div>
                     @endif
                 </div>

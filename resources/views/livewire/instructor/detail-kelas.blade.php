@@ -737,6 +737,22 @@
                                 <span class="text-lg font-bold text-indigo-700"><span x-text="selectedAssignment.weight_percentage"></span>%</span>
                             </div>
                         </div>
+
+                        <!-- Inline Grading Panel (appears inside the Assignment Detail modal) -->
+                        <div x-show="gradingModal" x-cloak class="absolute inset-0 bg-black/35 z-50 flex items-center justify-center" @click="gradingModal = false">
+                            <div class="bg-white rounded-xl max-w-sm w-full p-6" @click.stop>
+                                <h3 class="text-lg font-medium text-gray-900 mb-4">Input Nilai</h3>
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Nilai (0-100)</label>
+                                    <input type="number" x-model="gradeInput" min="0" max="100" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
+                                </div>
+                                <div class="flex justify-end gap-3">
+                                    <button @click="gradingModal = false" class="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md">Batal</button>
+                                    <button @click="$wire.updateNilaiTugas(gradingSubmissionId, gradeInput)" class="px-4 py-2 text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700">Simpan</button>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
                 </template>
@@ -923,35 +939,5 @@
         </div>
     </div>
     
-    <!-- Grading Modal -->
-    <div 
-        x-show="gradingModal" 
-        x-cloak
-        class="fixed inset-0 z-50 overflow-y-auto" 
-        aria-labelledby="modal-title" 
-        role="dialog" 
-        aria-modal="true"
-    >
-        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div x-show="gradingModal" x-transition.opacity class="fixed inset-0 bg-black/35 transition-opacity" @click="gradingModal = false"></div>
-            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-            <div 
-                x-show="gradingModal" 
-                x-transition.scale 
-                class="relative z-50 inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-sm w-full"
-            >
-                <div class="bg-white p-6">
-                    <h3 class="text-lg font-medium text-gray-900 mb-4">Input Nilai</h3>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Nilai (0-100)</label>
-                        <input type="number" x-model="gradeInput" min="0" max="100" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
-                    </div>
-                    <div class="flex justify-end gap-3">
-                        <button @click="gradingModal = false" class="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md">Batal</button>
-                        <button @click="$wire.updateNilaiTugas(gradingSubmissionId, gradeInput)" class="px-4 py-2 text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700">Simpan</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+
 </div>

@@ -166,8 +166,8 @@
 
     <!-- Grading Modal -->
     @if($showGradingModal)
-    <div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" wire:click="closeGradingModal">
-        <div class="bg-white rounded-2xl max-w-lg w-full p-6" wire:click.stop>
+    <div class="fixed inset-0 bg-black/50 z-[70] flex items-center justify-center p-4" wire:click="closeGradingModal">
+        <div class="relative z-[80] bg-white rounded-2xl max-w-lg w-full p-6" wire:click.stop>
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-bold text-gray-900">Beri Nilai</h2>
                 <button wire:click="closeGradingModal" class="text-gray-400 hover:text-gray-600">

@@ -555,7 +555,7 @@
                         <span x-text="selectedAssignment?.deadline_date + ' ' + selectedAssignment?.deadline_time"></span>
                     </div>
 
-                    <form wire:submit.prevent="submitAssignment" class="space-y-4">
+                    <form wire:submit.prevent="submitAssignment" class="space-y-4" x-data="{isUploading:false, progress: 0, fileName: '', fileSize: ''}" x-on:livewire-upload-start="isUploading = true" x-on:livewire-upload-progress="progress = $event.detail.progress" x-on:livewire-upload-finish="isUploading = false; progress = 0" x-on:livewire-upload-error="isUploading = false; progress = 0">
                         <!-- Text Submission -->
                         <div x-show="selectedAssignment?.submission_type === 'text'">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Jawaban Teks</label>
@@ -566,10 +566,29 @@
                         <!-- File Submission -->
                         <div x-show="selectedAssignment?.submission_type === 'file'">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Upload File</label>
-                            <input type="file" wire:model="submission_file" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                            <input type="file" wire:model="submission_file" @change="let f = $event.target.files[0]; if(f){ fileName = f.name; fileSize = Math.round(f.size/1024) + ' KB'; } else { fileName = ''; fileSize = ''; }" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
                             <p class="mt-1 text-xs text-gray-500">Max 10MB. Format: PDF, DOCX, ZIP, JPG, PNG.</p>
                             @error('submission_file') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
-                            
+
+                            <!-- Selected file name and size (shown when a file is chosen) -->
+                            <div x-show="fileName" x-cloak class="mt-2 text-sm text-gray-700">
+                                <span class="font-medium">File dipilih:</span>
+                                <span class="ml-2 text-gray-900" x-text="fileName"></span>
+                                <span class="ml-2 text-gray-500" x-text="'(' + fileSize + ')'" ></span>
+                            </div>
+
+                            <!-- Upload progress (shows only when an actual file upload is in progress) -->
+                            <div x-show="isUploading" x-cloak class="mt-3 w-full">
+                                <div class="flex items-center gap-2 text-sm text-gray-600 mb-2">
+                                    <svg class="animate-spin h-4 w-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                                    <span>Mengunggah file... <span class="font-semibold" x-text="progress + '%'">0%</span></span>
+                                </div>
+
+                                <div class="w-full h-2 bg-gray-200 rounded overflow-hidden">
+                                    <div class="h-full bg-indigo-600 transition-all" :style="'width: ' + progress + '%'" role="progressbar" :aria-valuenow="progress" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+
                             <!-- Existing File Warning/Display -->
                             <div x-show="selectedAssignment?.submission?.file_path" class="mt-2 text-sm text-gray-600 flex items-center gap-2 bg-gray-50 p-2 rounded">
                                 <x-heroicon-s-paper-clip class="w-4 h-4 text-gray-400"/>
@@ -605,7 +624,7 @@
                                 </button>
                             @else
                                 <!-- Submit Button -->
-                                <button type="button" wire:click="submitAssignment" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-not-allowed" class="w-full inline-flex justify-center items-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:col-start-2 sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed h-10">
+                                <button type="button" wire:click="submitAssignment" wire:loading.attr="disabled" wire:loading.class="opacity-50 cursor-not-allowed" :disabled="isUploading" class="w-full inline-flex justify-center items-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:col-start-2 sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed h-10">
                                     <span wire:loading.remove wire:target="submitAssignment">Kirim Tugas</span>
                                     <span wire:loading.class.remove="hidden" wire:target="submitAssignment" class="hidden flex items-center gap-2">
                                         <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

@@ -82,6 +82,9 @@ Route::middleware(['auth', 'student'])->prefix('mahasiswa')->name('mahasiswa.')-
     Route::get('/nilai', \App\Livewire\Student\NilaiMahasiswa::class)->name('nilai');
     Route::get('/tugas', \App\Livewire\Student\TugasMahasiswa::class)->name('tugas');
 
+    // Assignment submission endpoint (student)
+    Route::post('/assignments/{assignment}/submit', [\App\Http\Controllers\AssignmentSubmissionController::class, 'store'])->name('assignments.submit');
+
     // Certificates
     Route::get('/sertifikat', function () {
         return redirect()->route('mahasiswa.nilai');

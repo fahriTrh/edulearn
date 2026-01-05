@@ -110,7 +110,7 @@
                     <span>Bobot: 30%</span>
                 </div>
                 <div class="flex gap-2">
-                    <button onclick="openUploadModal('Project Website E-Commerce')" class="flex-1 sm:flex-initial px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-800 text-white rounded-lg font-semibold hover:opacity-90 transition-opacity">
+                    <button onclick="openUploadModal(1, 'Project Website E-Commerce')" class="flex-1 sm:flex-initial px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-800 text-white rounded-lg font-semibold hover:opacity-90 transition-opacity">
                         Upload Tugas
                     </button>
                     <button class="flex-1 sm:flex-initial px-4 py-2 bg-gray-100 text-purple-600 rounded-lg font-semibold hover:bg-gray-200 transition-colors">
@@ -155,7 +155,7 @@
                     <span>Bobot: 25%</span>
                 </div>
                 <div class="flex gap-2">
-                    <button onclick="openUploadModal('Analisis Algoritma')" class="flex-1 sm:flex-initial px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-800 text-white rounded-lg font-semibold hover:opacity-90 transition-opacity">
+                    <button onclick="openUploadModal(2, 'Analisis Algoritma')" class="flex-1 sm:flex-initial px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-800 text-white rounded-lg font-semibold hover:opacity-90 transition-opacity">
                         Upload Tugas
                     </button>
                     <button class="flex-1 sm:flex-initial px-4 py-2 bg-gray-100 text-purple-600 rounded-lg font-semibold hover:bg-gray-200 transition-colors">
@@ -276,10 +276,11 @@
         
         <div class="mb-6">
             <label class="block text-gray-700 font-semibold mb-2">Catatan (Opsional)</label>
-            <textarea class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-600 focus:outline-none resize-none" rows="4" placeholder="Tambahkan catatan untuk dosen..."></textarea>
+            <textarea id="uploadNote" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-600 focus:outline-none resize-none" rows="4" placeholder="Tambahkan catatan untuk dosen..."></textarea>
+            <input type="hidden" id="uploadAssignmentId" value="">
         </div>
         
-        <button class="w-full px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-800 text-white rounded-xl font-semibold hover:opacity-90 transition-opacity">
+        <button id="sendUploadBtn" onclick="sendUpload()" class="w-full px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-800 text-white rounded-xl font-semibold hover:opacity-90 transition-opacity">
             Kirim Tugas
         </button>
     </div>
@@ -306,10 +307,15 @@
         });
     }
 
-    function openUploadModal(title) {
+    function openUploadModal(assignmentId, title) {
         const modal = document.getElementById('uploadModal');
         modal.classList.remove('hidden');
         modal.classList.add('flex');
+        // set assignment id and update modal title if needed
+        document.getElementById('uploadAssignmentId').value = assignmentId;
+        // Optionally update title in modal
+        const h2 = modal.querySelector('h2');
+        if (h2 && title) h2.textContent = 'Upload Tugas — ' + title;
     }
 
     function closeUploadModal() {
@@ -324,6 +330,65 @@
             showNotification(`File terpilih: ${fileName}`, 'success');
         }
     });
+
+    function sendUpload() {
+        const fileInput = document.getElementById('fileInput');
+        const note = document.getElementById('uploadNote').value || '';
+        const assignmentId = document.getElementById('uploadAssignmentId').value;
+        const btn = document.getElementById('sendUploadBtn');
+
+        if (!assignmentId) {
+            showNotification('Tidak ada assignment yang dipilih.', 'error');
+            return;
+        }
+
+        if (!fileInput.files.length && note.trim() === '') {
+            showNotification('Harap pilih file atau isi catatan sebelum mengirim.', 'error');
+            return;
+        }
+
+        const fd = new FormData();
+        if (fileInput.files.length) fd.append('file', fileInput.files[0]);
+        fd.append('note', note);
+
+        btn.disabled = true;
+        btn.textContent = 'Mengunggah...';
+
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', `/mahasiswa/assignments/${assignmentId}/submit`, true);
+        xhr.setRequestHeader('X-CSRF-TOKEN', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+
+        xhr.upload.addEventListener('progress', function(e) {
+            if (e.lengthComputable) {
+                const percent = Math.round((e.loaded / e.total) * 100);
+                // show a simple in-modal progress (re-use notification for now)
+                console.log('progress', percent);
+            }
+        });
+
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4) {
+                btn.disabled = false;
+                btn.textContent = 'Kirim Tugas';
+
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    showNotification('Tugas berhasil dikirim!', 'success');
+                    closeUploadModal();
+                    // Reset file input and note
+                    fileInput.value = '';
+                    document.getElementById('uploadNote').value = '';
+                    // Refresh the page to show updated status
+                    setTimeout(() => location.reload(), 500);
+                } else {
+                    let msg = 'Gagal mengirim tugas.';
+                    try { msg = JSON.parse(xhr.responseText).message || msg } catch(e){}
+                    showNotification(msg, 'error');
+                }
+            }
+        };
+
+        xhr.send(fd);
+    }
 
     // Close modal when clicking outside
     document.getElementById('uploadModal').addEventListener('click', function(e) {

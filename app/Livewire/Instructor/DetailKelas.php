@@ -883,10 +883,11 @@ class DetailKelas extends Component
                     'name' => $student->name,
                     'email' => $student->email,
                     'avatar_initial' => substr($student->name, 0, 1),
-                    'status' => $submission ? ($submission->grade ? 'graded' : 'submitted') : 'missing',
+                    // Use 'score' (DB column) to determine grading status and expose it as 'grade' for the frontend
+                    'status' => $submission ? ($submission->score !== null ? 'graded' : 'submitted') : 'missing',
                     'submitted_at' => $submission ? $submission->created_at->format('Y-m-d H:i:s') : null,
                     'submitted_at_human' => $submission ? $submission->created_at->locale('id')->diffForHumans() : null,
-                    'grade' => $submission ? $submission->grade : null,
+                    'grade' => $submission ? $submission->score : null,
                     'file_path' => $submission ? $submission->file_path : null,
                     'submission_id' => $submission ? $submission->id : null,
                 ];
